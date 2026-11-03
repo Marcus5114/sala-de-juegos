@@ -1,6 +1,6 @@
 // Guarda el juego en caché para que funcione sin conexión.
 // Si cambiás algún archivo, subí el número de versión.
-const CACHE = 'spider-v11';
+const CACHE = 'spider-v12';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {

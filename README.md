@@ -7,5 +7,5 @@
 5. Menú ⋮ > "Instalar app" (o "Agregar a la pantalla principal").
 6. Abrila una vez con internet. Desde ahí funciona en modo avión.
 
-Para actualizar el juego: subí el index.html nuevo y cambiá "spider-v11" por "spider-v12" en sw.js.
+Para actualizar el juego: subí el index.html nuevo y cambiá "spider-v12" por "spider-v13" en sw.js.
 La app toma la versión nueva la próxima vez que la abras con conexión.
