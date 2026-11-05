@@ -22,7 +22,7 @@ games/<id>/index.html cada juego en su carpeta
 
 Settings → Pages → Branch: `main`, carpeta `/ (root)`.
 La sala queda en `https://marcus5114.github.io/solitario-spider-pwa/`.
-Cada vez que cambies un archivo, subí la versión en `sw.js` para que los celulares tomen lo nuevo.
+Para publicar una versión nueva, sumá una entrada al comienzo de `CHANGELOG` en `index.html` (número, fecha y cambios) y la misma versión en `CACHE` de `sw.js`. El número aparece al pie del menú y las novedades se abren al tocarlo.
 
 ## Juegos
 
