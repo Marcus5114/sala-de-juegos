@@ -27,4 +27,4 @@ Cada vez que cambies un archivo, subí la versión en `sw.js` para que los celul
 ## Juegos
 
 - **Spider Solitario** (`games/spider/`, Cartas): 1, 2 o 4 palos; solo reparte manos con solución verificada.
-- **Atasco** (`games/atasco/`, Puzzle): 40 niveles en 4 dificultades (Fácil, Media, Difícil, Experto) en una grilla de 6×6; cada nivel tiene su mínimo de movimientos verificado.
+- **Atasco** (`games/atasco/`, Puzzle): 1200 niveles, 300 por dificultad (Fácil 2–7, Media 8–14, Difícil 15–22, Experto 23–39 movimientos). Cada nivel nuevo sale al azar de su dificultad y no se repite hasta resolverlos todos. Todos los mínimos están verificados.
