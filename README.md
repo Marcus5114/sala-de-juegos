@@ -1,11 +1,29 @@
-# Spider Solitario
+# Sala de Juegos
 
-1. Creá un repositorio público en GitHub (por ejemplo "spider").
-2. Subí estos 5 archivos a la raíz: index.html, manifest.json, sw.js, icon-192.png, icon-512.png
-3. En el repo: Settings > Pages > Branch: main / (root) > Save.
-4. Esperá un minuto y abrí en Chrome del celular:  https://TU-USUARIO.github.io/spider/
-5. Menú ⋮ > "Instalar app" (o "Agregar a la pantalla principal").
-6. Abrila una vez con internet. Desde ahí funciona en modo avión.
+Colección de juegos de puzzle y arcade instalable en el celular (PWA). Funciona sin conexión.
 
-Para actualizar el juego: subí el index.html nuevo y cambiá "spider-v12" por "spider-v13" en sw.js.
-La app toma la versión nueva la próxima vez que la abras con conexión.
+## Estructura
+
+```
+index.html            menú de juegos (mosaico, destacados)
+manifest.json         datos de la app instalable
+sw.js                 caché sin conexión
+icon-192.png / 512    ícono de la sala
+games/<id>/index.html cada juego en su carpeta
+```
+
+## Sumar un juego
+
+1. Crear `games/<id>/index.html`. Para volver al menú, enlazar a `../../index.html`.
+2. En `index.html`, agregar una entrada al arreglo `GAMES`: `id`, `name`, `genre` (Puzzle o Arcade), `href`, `logo` (SVG) y, si guarda partida, `saveKey` (la clave de localStorage que indica una partida en curso).
+3. En `sw.js`, sumar los archivos del juego a `FILES` y subir el número de versión de `CACHE`.
+
+## Publicar
+
+Settings → Pages → Branch: `main`, carpeta `/ (root)`.
+La sala queda en `https://marcus5114.github.io/solitario-spider-pwa/`.
+Cada vez que cambies un archivo, subí la versión en `sw.js` para que los celulares tomen lo nuevo.
+
+## Juegos
+
+- **Spider Solitario** (`games/spider/`): 1, 2 o 4 palos; solo reparte manos con solución verificada.

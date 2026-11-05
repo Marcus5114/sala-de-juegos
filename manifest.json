@@ -1,15 +1,37 @@
 {
-  "name": "Spider Solitario",
-  "short_name": "Spider",
+  "name": "Sala de Juegos",
+  "short_name": "Juegos",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#1f6b3a",
-  "theme_color": "#1f6b3a",
+  "background_color": "#18181a",
+  "theme_color": "#18181a",
   "lang": "es",
   "icons": [
-    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Spider Solitario",
+      "url": "games/spider/",
+      "icons": [
+        {
+          "src": "games/spider/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }
