@@ -1,0 +1,46 @@
+# Publica la Sala de Juegos en GitHub Pages en cada push a main (o a mano desde Actions).
+# Requiere: Settings → Pages → Build and deployment → Source: GitHub Actions.
+name: Publicar sala
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# si llega un push nuevo mientras se publica, gana el más reciente
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar los archivos del sitio
+        run: |
+          mkdir _site
+          cp -r index.html manifest.json sw.js icon-192.png icon-512.png games _site/
+          touch _site/.nojekyll
+          echo "Versión: $(grep -o "sala-v[0-9.]*" sw.js)"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 1200000
