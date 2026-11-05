@@ -27,4 +27,4 @@ Cada vez que cambies un archivo, subí la versión en `sw.js` para que los celul
 ## Juegos
 
 - **Spider Solitario** (`games/spider/`, Cartas): 1, 2 o 4 palos; solo reparte manos con solución verificada.
-- **Atasco** (`games/atasco/`, Puzzle): demo de 13 niveles en una playa de 6×6; cada nivel tiene su mínimo de movimientos verificado.
+- **Atasco** (`games/atasco/`, Puzzle): 40 niveles en 4 dificultades (Fácil, Media, Difícil, Experto) en una grilla de 6×6; cada nivel tiene su mínimo de movimientos verificado.
