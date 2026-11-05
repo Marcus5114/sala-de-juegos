@@ -1,8 +1,9 @@
 // Sala de Juegos: funciona sin conexión.
 // Al cambiar cualquier archivo, subí la versión para que los celulares tomen lo nuevo.
-const CACHE='sala-v1';
+const CACHE='sala-v2';
 const FILES=['./','index.html','manifest.json','icon-192.png','icon-512.png',
-  'games/spider/','games/spider/index.html','games/spider/icon-192.png'];
+  'games/spider/index.html','games/spider/icon-192.png',
+  'games/atasco/index.html','games/atasco/icon-192.png'];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()));
 });

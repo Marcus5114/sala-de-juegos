@@ -24,8 +24,18 @@
   ],
   "shortcuts": [
     {
+      "name": "Atasco",
+      "url": "games/atasco/index.html",
+      "icons": [
+        {
+          "src": "games/atasco/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "Spider Solitario",
-      "url": "games/spider/",
+      "url": "games/spider/index.html",
       "icons": [
         {
           "src": "games/spider/icon-192.png",
