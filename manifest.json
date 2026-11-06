@@ -24,6 +24,16 @@
   ],
   "shortcuts": [
     {
+      "name": "Cinco Letras",
+      "url": "games/cinco/index.html",
+      "icons": [
+        {
+          "src": "games/cinco/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "Atasco",
       "url": "games/atasco/index.html",
       "icons": [

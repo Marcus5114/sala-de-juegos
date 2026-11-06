@@ -27,4 +27,5 @@ Para publicar una versión nueva, sumá una entrada al comienzo de `CHANGELOG` e
 ## Juegos
 
 - **Spider Solitario** (`games/spider/`, Cartas): 1, 2 o 4 palos; solo reparte manos con solución verificada.
-- **Atasco** (`games/atasco/`, Puzzle): 1200 niveles, 300 por dificultad (Fácil 2–7, Media 8–14, Difícil 15–22, Experto 23–39 movimientos). Cada nivel nuevo sale al azar de su dificultad y no se repite hasta resolverlos todos. Todos los mínimos están verificados.
+- **Atasco** (`games/atasco/`, Puzzle): 1600 niveles, 400 por dificultad (Fácil 2–7, Media 8–14, Difícil 15–22, Experto 23–39 movimientos), 100 de cada una con obstáculos fijos. Modo con puntaje (estrellas según el mínimo) y modo Libre. Todos los mínimos están verificados.
+- **Cinco Letras** (`games/cinco/`, Palabras): adivinar una palabra de 5, 7 o 9 letras en 6 intentos. Palabra diaria y modo libre. Las listas de 7 y 9 letras (`v7.txt`, `v9.txt`) se descargan al elegir ese largo. Palabras válidas tomadas de an-array-of-spanish-words (MIT).
