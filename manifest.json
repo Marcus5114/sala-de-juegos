@@ -24,6 +24,46 @@
   ],
   "shortcuts": [
     {
+      "name": "Bloques",
+      "url": "games/bloques/index.html",
+      "icons": [
+        {
+          "src": "games/bloques/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Rueda de Palabras",
+      "url": "games/rueda/index.html",
+      "icons": [
+        {
+          "src": "games/rueda/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "2048",
+      "url": "games/2048/index.html",
+      "icons": [
+        {
+          "src": "games/2048/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Buscaminas",
+      "url": "games/minas/index.html",
+      "icons": [
+        {
+          "src": "games/minas/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "Cinco Letras",
       "url": "games/cinco/index.html",
       "icons": [
