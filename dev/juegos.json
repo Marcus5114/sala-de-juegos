@@ -1,0 +1,18 @@
+{
+  "_ayuda": "Registro de juegos de la sala. armar.py construye cada juego, el manifest (atajos) y la lista de archivos sin conexión a partir de esta lista. El orden es el de los atajos (Android muestra los primeros).",
+  "juegos": [
+    {"id":"engranajes","nombre":"Engranajes","fuente":"engranajes.src.html","color":"#2b2f36"},
+    {"id":"mapa","nombre":"Cartógrafo","fuente":"mapa.src.html","color":"#bfe3f2"},
+    {"id":"puentes","nombre":"Puentes","fuente":"puentes.src.html","color":"#1f78ad"},
+    {"id":"piramide","nombre":"Pirámide","fuente":"piramide.src.html","color":"#9fd0ee"},
+    {"id":"encastre","nombre":"Encastre","fuente":"encastre.src.html","color":"#3d2716"},
+    {"id":"desenredo","nombre":"Desenredo","fuente":"desenredo.src.html","color":"#1f2a44"},
+    {"id":"bloques","nombre":"Bloques","fuente":"bloques.html","color":"#15171c"},
+    {"id":"rueda","nombre":"Rueda de Palabras","fuente":"rueda.src.html","color":"#3f7d4f","datos":"rueda"},
+    {"id":"2048","nombre":"2048","fuente":"2048.html","color":"#bbada0"},
+    {"id":"minas","nombre":"Buscaminas","fuente":"minas.html","color":"#767b83"},
+    {"id":"cinco","nombre":"Cinco Letras","fuente":"cinco.html","color":"#232327","archivos":{"v7.txt":"datos/cinco/v7.txt","v9.txt":"datos/cinco/v9.txt"},"sinCache":["v7.txt","v9.txt"]},
+    {"id":"atasco","nombre":"Atasco","fuente":"atasco.html","color":"#3b3d42"},
+    {"id":"spider","nombre":"Spider Solitario","fuente":"spider.html","color":"#1f6b3a","css":":root{height:100%}\nbody{padding-left:max(6px,env(safe-area-inset-left,0px));padding-right:max(6px,env(safe-area-inset-right,0px))}\n"}
+  ]
+}

@@ -1,0 +1,209 @@
+<title>Encastre</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
+<style>
+/*KIT_CSS*/
+/* Layout: barra, dificultad, puntaje, tablero 8×8 cuadrado, bandeja con 3 piezas, botonera (Deshacer/Cambiar 70 % · Nueva 30 %) */
+.stage{display:grid;place-items:center;touch-action:none}
+.board{--c:40px;display:grid;grid-template-columns:repeat(8,var(--c));gap:3px;padding:6px;border-radius:14px;background:var(--bd);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.cell{width:var(--c);height:var(--c);border-radius:calc(var(--c)*.16);background:var(--empty);box-sizing:border-box}
+.cell.f{background:var(--k);box-shadow:var(--blk)}
+.cell.pv{background:var(--k);opacity:.45;box-shadow:var(--blk)}
+.cell.pvbad{background:var(--bad);opacity:.35}
+.cell.ln{filter:brightness(1.35)}
+.tray{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;height:var(--th,110px);touch-action:none}
+.slot{display:grid;place-items:center;border-radius:12px;background:var(--chip);cursor:grab}
+.pc{display:grid;gap:2px;cursor:grab;touch-action:none}
+.pc .cell{--c:var(--m,18px)}
+.pc.dim{opacity:.35}
+.float{position:fixed;left:0;top:0;pointer-events:none;z-index:40;display:grid;gap:3px;will-change:transform}
+.float .cell{box-shadow:var(--blk),0 6px 14px rgba(0,0,0,.25)}
+.score{font-size:1.5rem}
+#act{flex:7 1 0}#restart{flex:3 1 0}
+/* temas: tablero y forma de los bloques */
+.t-madera{--bd:#3d2716;--empty:#5a3c25;--blk:inset 0 0 0 1px rgba(60,30,10,.35),inset 0 3px 0 rgba(255,255,255,.18),inset 0 -3px 0 rgba(0,0,0,.25)}
+.t-madera .cell.f,.t-madera .cell.pv,.t-madera .float .cell{background-image:repeating-linear-gradient(100deg,rgba(255,255,255,.08) 0 2px,transparent 2px 7px)}
+.t-caramelo{--bd:#f6d2e0;--empty:#fbe7ef;--blk:inset 0 -4px 0 rgba(0,0,0,.18),inset 0 4px 0 rgba(255,255,255,.45)}
+.t-caramelo .cell{border-radius:calc(var(--c)*.32)}
+.t-gema{--bd:#1d1b2e;--empty:#2b2842;--blk:inset 0 0 0 2px rgba(255,255,255,.25),inset 6px 6px 0 rgba(255,255,255,.18),inset -6px -6px 0 rgba(0,0,0,.25)}
+.t-gema .cell.f,.t-gema .cell.pv,.t-gema .float .cell{clip-path:polygon(18% 0,82% 0,100% 18%,100% 82%,82% 100%,18% 100%,0 82%,0 18%)}
+.t-neon{--bd:#0b0c14;--empty:#14162a;--blk:none}
+.t-neon .cell.f,.t-neon .cell.pv,.t-neon .float .cell.f{background:rgba(255,255,255,.06)!important;box-shadow:inset 0 0 0 2px var(--k),inset 0 0 8px var(--k),0 0 8px var(--k)}
+.t-ladrillo{--bd:#8d8a84;--empty:#b9b5ad;--blk:inset 0 0 0 1px rgba(0,0,0,.3),inset 0 -3px 0 rgba(0,0,0,.25)}
+.t-ladrillo .cell.f,.t-ladrillo .cell.pv,.t-ladrillo .float .cell{background-image:linear-gradient(rgba(0,0,0,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.22) 1px,transparent 1px);background-size:100% 50%,50% 50%;background-position:0 0,calc(var(--c)*.25) 0}
+@media (prefers-reduced-motion:reduce){.float{transition:none}}
+</style>
+
+<div class="app">
+<!--KIT_BAR-->
+  <div class="hud">
+    <div class="sc"><small>puntos</small><b id="score">0</b></div>
+    <div class="sc"><small>racha</small><b id="combo">0</b></div>
+    <div class="sc"><small>récord</small><b id="best">0</b></div>
+  </div>
+  <div class="stage t-madera" id="stage"><div class="board" id="board" aria-label="Tablero de 8 por 8"></div></div>
+  <div class="tray t-madera" id="tray"><div class="slot" data-s="0"></div><div class="slot" data-s="1"></div><div class="slot" data-s="2"></div></div>
+  <nav class="bottom">
+    <button class="bb" id="act"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span id="actTxt">Deshacer</span></button>
+    <button class="bb" id="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>Nueva</button>
+  </nav>
+</div>
+<!--KIT_SHEETS-->
+
+<script>
+/*KIT_JS*/
+store=mkStore('encastre');
+$('helpBody').innerHTML=`<p>Arrastrá las piezas de abajo al tablero. Cuando completás una <b>fila o una columna</b>, se vacía y sumás puntos. Varias a la vez suman mucho más, y si limpiás líneas en jugadas seguidas armás una <b>racha</b> que multiplica.</p>
+<p>Las piezas no se giran. Cuando usás las tres, llegan otras tres.</p>
+<p><b>Libre:</b> nunca se termina: podés deshacer y, si te trabás, cambiar las piezas. <b>Desafío:</b> la partida termina cuando ninguna pieza entra; se guarda tu récord.</p>
+<p><b>Dificultad:</b> cambia el tipo de piezas. Fácil tiene piezas chicas y siempre llega al menos una que entra; Experto trae piezas grandes y raras, y no hay ayuda al repartir.</p><p class="kbd">Con teclado: <b>1</b>, <b>2</b> y <b>3</b> eligen una pieza, las flechas la mueven y <b>Enter</b> o <b>Espacio</b> la apoyan; <b>Esc</b> la suelta, <b>Z</b> deshace y <b>N</b> empieza otra partida.</p>`;
+const N=8;
+// piezas como celdas [fila,col]
+const P={dot:[[0,0]],d2h:[[0,0],[0,1]],d2v:[[0,0],[1,0]],d3h:[[0,0],[0,1],[0,2]],d3v:[[0,0],[1,0],[2,0]],sq2:[[0,0],[0,1],[1,0],[1,1]],
+  l3a:[[0,0],[1,0],[1,1]],l3b:[[0,1],[1,0],[1,1]],l3c:[[0,0],[0,1],[1,0]],l3d:[[0,0],[0,1],[1,1]],
+  d4h:[[0,0],[0,1],[0,2],[0,3]],d4v:[[0,0],[1,0],[2,0],[3,0]],t4:[[0,0],[0,1],[0,2],[1,1]],t4b:[[1,0],[1,1],[1,2],[0,1]],s4:[[0,1],[0,2],[1,0],[1,1]],z4:[[0,0],[0,1],[1,1],[1,2]],
+  l4a:[[0,0],[1,0],[2,0],[2,1]],l4b:[[0,0],[0,1],[0,2],[1,0]],j4a:[[0,1],[1,1],[2,1],[2,0]],j4b:[[0,0],[1,0],[1,1],[1,2]],
+  d5h:[[0,0],[0,1],[0,2],[0,3],[0,4]],d5v:[[0,0],[1,0],[2,0],[3,0],[4,0]],sq3:[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]],
+  r23:[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]],r32:[[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]],L5a:[[0,0],[1,0],[2,0],[2,1],[2,2]],L5b:[[0,0],[0,1],[0,2],[1,2],[2,2]],
+  plus:[[0,1],[1,0],[1,1],[1,2],[2,1]],U5:[[0,0],[0,2],[1,0],[1,1],[1,2]],diag2:[[0,0],[1,1]],diag3:[[0,0],[1,1],[2,2]]};
+const EDIFFS=[
+  {name:'Fácil',fair:true,pool:'dot d2h d2v d3h d3v sq2 l3a l3b l3c l3d t4 t4b d4h d4v'.split(' ')},
+  {name:'Media',fair:true,pool:'dot d2h d2v d3h d3v sq2 l3a l3b l3c l3d d4h d4v t4 t4b s4 z4 l4a l4b j4a j4b sq3 d5h d5v'.split(' ')},
+  {name:'Difícil',fair:false,pool:'d2h d2v d3h d3v sq2 l3a l3b l3c l3d d4h d4v t4 t4b s4 z4 l4a l4b j4a j4b sq3 d5h d5v r23 r32 L5a L5b'.split(' ')},
+  {name:'Experto',fair:false,pool:'d3h d3v sq2 l3a l3b d4h d4v t4 s4 z4 l4a j4a sq3 d5h d5v r23 r32 L5a L5b plus U5 diag2 diag3'.split(' ')}
+];
+const COLS=['#e8483f','#f29b30','#f2cd38','#57c25a','#2fa8cc','#4a6ee0','#9a5ed6','#e85d9f'];
+const THEMES={madera:{name:'Madera',cls:'t-madera',cols:['#e0a868','#c8844a','#f0c88a','#b06a3a','#d89a58','#f4d4a2','#a8743e','#e8b878']},
+  caramelo:{name:'Caramelos',cls:'t-caramelo',cols:['#ff6f91','#ffb347','#ffe066','#7bd389','#5cc8f0','#8a9bff','#c58cf0','#ff8fd0']},
+  gema:{name:'Gemas',cls:'t-gema',cols:['#e0115f','#ff8c1a','#f5d300','#1fbf5f','#18b4e0','#3a5bff','#9b30ff','#ff4fb8']},
+  neon:{name:'Neón',cls:'t-neon',cols:['#ff3b6b','#ff9f1c','#f9f871','#3bff8a','#2de2e6','#4d7cff','#b14dff','#ff5edb']},
+  ladrillo:{name:'Ladrillos',cls:'t-ladrillo',cols:['#b5473a','#c66a3c','#c9a050','#6d8a4f','#4f7d8a','#5a6aa0','#7d5a8a','#a5506e']}};
+themeKey='madera';
+// S: {b:[64 colores o -1],tray:[{k,c}|null x3],score,combo,undo,over,moves}
+const r0=Math.random;
+function fits(b,cells,r,c){return cells.every(([dr,dc])=>{const R=r+dr,C=c+dc;return R>=0&&C>=0&&R<N&&C<N&&b[R*N+C]<0;});}
+function anyFit(b,k){const cells=P[k];for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(fits(b,cells,r,c))return true;return false;}
+function deal(){
+  const D=EDIFFS[diff];
+  for(let t=0;t<40;t++){const tray=[0,1,2].map(()=>({k:D.pool[Math.floor(r0()*D.pool.length)],c:Math.floor(r0()*COLS.length)}));
+    if(!D.fair||tray.some(p=>anyFit(S.b,p.k))||t===39){S.tray=tray;return;}}
+}
+function newGame(){kbOff();S={b:Array(N*N).fill(-1),tray:[null,null,null],score:0,combo:0,undo:[],over:false,moves:0};deal();save();render();}
+
+/* ---------- dibujo ---------- */
+let C=40;
+function measure(){const st=$('stage'),W=st.clientWidth,H=st.clientHeight;C=Math.floor(Math.min((W-12-7*3)/8,(H-12-7*3)/8,58));$('board').style.setProperty('--c',C+'px');
+  const th=Math.max(90,Math.min(140,C*2.6));$('tray').style.setProperty('--th',th+'px');}
+let cellEls=[];
+function buildBoard(){$('board').innerHTML='';cellEls=[];for(let i=0;i<N*N;i++){const d=document.createElement('div');d.className='cell';$('board').appendChild(d);cellEls.push(d);}}
+function render(){
+  measure();const t=THEMES[themeKey];
+  S.b.forEach((v,i)=>{const el=cellEls[i];const cls='cell'+(v>=0?' f':'');if(el.className!==cls)el.className=cls;el.style.setProperty('--k',v>=0?t.cols[v]:'')});
+  const m=Math.max(12,Math.min(22,Math.floor(C*.45)));
+  document.querySelectorAll('.slot').forEach((sl,s)=>{const p=S.tray[s];if(!p){sl.innerHTML='';return;}const cells=P[p.k],w=Math.max(...cells.map(x=>x[1]))+1,h=Math.max(...cells.map(x=>x[0]))+1;
+    const set=new Set(cells.map(([r,c])=>r+','+c));let html=`<div class="pc${S.over||(!anyFit(S.b,p.k))?' dim':''}" data-s="${s}" style="grid-template-columns:repeat(${w},${m}px);--m:${m}px">`;
+    for(let r=0;r<h;r++)for(let c=0;c<w;c++)html+=set.has(r+','+c)?`<div class="cell f" style="--k:${t.cols[p.c]}"></div>`:`<div style="width:${m}px;height:${m}px"></div>`;sl.innerHTML=html+'</div>';});
+  $('score').textContent=S.score;$('combo').textContent=S.combo?'×'+(S.combo+1):'0';$('best').textContent=store.get('best.'+SK(),0);
+  const a=$('act');if(mode==='libre'){const stuck=!S.tray.some(p=>p&&anyFit(S.b,p.k));
+    $('actTxt').textContent=stuck?'Cambiar piezas':'Deshacer';a.classList.toggle('primary',stuck);a.disabled=!stuck&&!S.undo.length;}
+  else{$('actTxt').textContent='Jugar otra vez';a.classList.add('primary');a.disabled=false;}
+  a.hidden=mode==='desafio'&&!S.over;
+  if(kb)kbShow();
+}
+
+/* ---------- arrastrar piezas ---------- */
+let drag=null;
+$('tray').addEventListener('pointerdown',e=>{kbOff();
+  // se agarra tocando la pieza o cualquier parte de su casillero
+  const sl=e.target.closest('.slot');if(!sl||S.over)return;const s=+sl.dataset.s,p=S.tray[s];if(!p)return;const pc=sl.querySelector('.pc');
+  const cells=P[p.k],w=Math.max(...cells.map(x=>x[1]))+1,h=Math.max(...cells.map(x=>x[0]))+1,t=THEMES[themeKey];
+  const fl=document.createElement('div');fl.className='float';fl.style.gridTemplateColumns=`repeat(${w},${C}px)`;fl.style.setProperty('--c',C+'px');
+  const set=new Set(cells.map(([r,c])=>r+','+c));for(let r=0;r<h;r++)for(let c=0;c<w;c++){const d=document.createElement('div');if(set.has(r+','+c)){d.className='cell f';d.style.setProperty('--k',t.cols[p.c]);}else d.style.cssText=`width:${C}px;height:${C}px`;fl.appendChild(d);}
+  $('stage').appendChild(fl);// hereda el tema del tablero
+  drag={s,p,cells,w,h,fl,at:null};pc.style.opacity=.25;$('tray').setPointerCapture(e.pointerId);moveFloat(e.clientX,e.clientY);
+});
+function moveFloat(x,y){
+  // la pieza flota arriba del dedo para que se vea dónde cae
+  const W=drag.w*(C+3)-3,H=drag.h*(C+3)-3,left=x-W/2,top=y-H-C*1.1;drag.fl.style.transform=`translate(${left}px,${top}px)`;
+  const br=$('board').getBoundingClientRect(),c=Math.round((left-br.left-6)/(C+3)),r=Math.round((top-br.top-6)/(C+3));
+  const ok=fits(S.b,drag.cells,r,c),inBoard=r>-drag.h&&c>-drag.w&&r<N&&c<N;drag.at=ok?[r,c]:null;preview(ok?[r,c]:null);
+}
+function preview(at,d=drag,bad=false){
+  cellEls.forEach(el=>{el.classList.remove('pv','ln','pvbad');});
+  if(!at)return;const t=THEMES[themeKey],b=S.b.slice();
+  if(bad){d.cells.forEach(([dr,dc])=>{const R=at[0]+dr,C=at[1]+dc;if(R>=0&&C>=0&&R<N&&C<N)cellEls[R*N+C].classList.add('pvbad');});return;}
+  d.cells.forEach(([dr,dc])=>{const i=(at[0]+dr)*N+at[1]+dc;cellEls[i].classList.add('pv');cellEls[i].style.setProperty('--k',t.cols[d.p.c]);b[i]=d.p.c;});
+  for(const i of linesOf(b))cellEls[i].classList.add('ln');
+}
+const rowFull=(b,r)=>{for(let c=0;c<N;c++)if(b[r*N+c]<0)return false;return true;},colFull=(b,c)=>{for(let r=0;r<N;r++)if(b[r*N+c]<0)return false;return true;};
+function linesOf(b){const out=new Set();for(let r=0;r<N;r++)if(rowFull(b,r))for(let c=0;c<N;c++)out.add(r*N+c);
+  for(let c=0;c<N;c++)if(colFull(b,c))for(let r=0;r<N;r++)out.add(r*N+c);return out;}
+$('tray').addEventListener('pointermove',e=>{if(drag)moveFloat(e.clientX,e.clientY);});
+function drop(){if(!drag)return;const d=drag;drag=null;d.fl.remove();preview(null);
+  if(!d.at){render();return;}place(d.s,d.at);}
+$('tray').addEventListener('pointerup',drop);$('tray').addEventListener('pointercancel',()=>{if(drag){drag.fl.remove();drag=null;preview(null);render();}});
+
+function place(s,[r,c]){
+  kbOff();const p=S.tray[s];if(mode==='libre'){S.undo.push(JSON.stringify({b:S.b,tray:S.tray,score:S.score,combo:S.combo}));if(S.undo.length>30)S.undo.shift();}
+  P[p.k].forEach(([dr,dc])=>{S.b[(r+dr)*N+c+dc]=p.c;});S.tray[s]=null;S.moves++;
+  const ln=linesOf(S.b),rows=new Set(),cols=new Set();ln.forEach(i=>{rows.add(Math.floor(i/N));cols.add(i%N);});
+  let L=0;for(let k=0;k<N;k++){if(rowFull(S.b,k))L++;if(colFull(S.b,k))L++;}
+  let pts=P[p.k].length;
+  if(L){S.combo++;pts+=10*L*(L+1)/2*S.combo;
+    if(!reduceMotion)ln.forEach(i=>cellEls[i].animate([{transform:'scale(1)',opacity:1},{transform:'scale(1.15)',opacity:1,offset:.3},{transform:'scale(.2)',opacity:0}],{duration:380,easing:EASE,delay:((Math.floor(i/N)+i%N)%8)*18}));
+    Sfx.play(L>1||S.combo>1?'win':'clear');
+    ln.forEach(i=>S.b[i]=-1);toast(L>1?`¡${L} líneas! +${pts}`:S.combo>1?`Racha ×${S.combo} +${pts}`:`+${pts}`,1100);}
+  else{S.combo=0;Sfx.play('place');P[p.k].forEach(([dr,dc])=>Anim.pop(cellEls[(r+dr)*N+c+dc]));}
+  S.score+=pts;vibe(L?[20,30,20]:10);
+  if(S.tray.every(x=>!x))deal();
+  const k='best.'+SK(),prev=store.get(k,0);if(S.score>prev){store.set(k,S.score);if(prev>0&&!S.rec){S.rec=true;toast('¡Nuevo récord!',1400);Anim.pop($('best'));}}
+  if(!S.tray.some(x=>x&&anyFit(S.b,x.k))){if(mode==='desafio'){S.over=true;Sfx.play('bad');setTimeout(gameOver,reduceMotion?100:500);}else toast('No entra ninguna: cambiá las piezas',2200);}
+  render();save();
+}
+function gameOver(){const best=store.get('best.'+SK(),0);$('endTitle').textContent='No entra ninguna pieza';$('endBig').textContent=S.score;
+  const rec=S.score>=best&&S.score>0;$('endNote').textContent=rec?'¡Nuevo récord!':`Récord: ${best}`;if(rec)Anim.celebrate($('stage'));$('endNext').textContent='Jugar otra vez';$('endSee').textContent='Ver el tablero';open('end');
+  const g=store.get('games',{});g[SK()]=(g[SK()]||0)+1;store.set('games',g);}
+
+/* ---------- teclado: elegir pieza, moverla y apoyarla ---------- */
+let kb=null;// {s,p,cells,w,h,r,c}
+function kbShow(){if(!kb)return;const ok=fits(S.b,kb.cells,kb.r,kb.c);preview([kb.r,kb.c],kb,!ok);
+  document.querySelectorAll('.slot').forEach((sl,i)=>sl.style.outline=i===kb.s?'3px solid var(--fg)':'');}
+function kbOff(){if(!kb)return;kb=null;preview(null);document.querySelectorAll('.slot').forEach(sl=>sl.style.outline='');}
+function kbPick(s){if(S.over)return;const p=S.tray[s];if(!p){toast('Ese lugar está vacío',900);return;}
+  const cells=P[p.k],w=Math.max(...cells.map(x=>x[1]))+1,h=Math.max(...cells.map(x=>x[0]))+1;let r=kb?kb.r:Math.floor((N-h)/2),c=kb?kb.c:Math.floor((N-w)/2);
+  kb={s,p,cells,w,h,r:clamp(r,0,N-h),c:clamp(c,0,N-w)};Sfx.play('tap');kbShow();}
+Input.keys({1:()=>kbPick(0),2:()=>kbPick(1),3:()=>kbPick(2),Escape:kbOff,z:()=>{if(mode==='libre'&&!$('act').disabled)$('act').click();},n:()=>$('restart').click(),
+  Enter:()=>{if(kb){if(fits(S.b,kb.cells,kb.r,kb.c))place(kb.s,[kb.r,kb.c]);else{Sfx.play('bad');Anim.shake($('board'));}}else if(S.over)$('act').click();},
+  ' ':()=>{if(kb){if(fits(S.b,kb.cells,kb.r,kb.c))place(kb.s,[kb.r,kb.c]);else{Sfx.play('bad');Anim.shake($('board'));}}}},{repeat:false});
+Input.dirKeys(d=>{if(!kb){const s=S.tray.findIndex(Boolean);if(s>=0)kbPick(s);return;}const [dr,dc]={up:[-1,0],down:[1,0],left:[0,-1],right:[0,1]}[d];
+  kb.r=clamp(kb.r+dr,0,N-kb.h);kb.c=clamp(kb.c+dc,0,N-kb.w);kbShow();});
+
+/* ---------- botones ---------- */
+$('act').onclick=()=>{
+  if(mode==='desafio'){if(S.over)newGame();return;}
+  const stuck=!S.tray.some(p=>p&&anyFit(S.b,p.k));
+  if(stuck){Sfx.play('tap');deal();if(!S.tray.some(p=>anyFit(S.b,p.k)))S.tray=[{k:'dot',c:0},{k:'dot',c:3},{k:'dot',c:5}];render();save();return;}
+  const u=S.undo.pop();if(!u)return;Object.assign(S,JSON.parse(u));kbOff();Sfx.play('undo');render();save();};
+$('restart').onclick=()=>{if(S.moves&&!S.over)askConfirm('¿Partida nueva?','Se pierde el tablero actual.','Nueva',newGame);else newGame();};
+$('endSee').onclick=close;$('endNext').onclick=()=>{close();newGame();};
+
+/* ---------- temas, progreso, guardado ---------- */
+KIT.onPane=p=>{if(p==='colors')renderThemes();if(p==='recs')renderRecs();};
+function applyTheme(){const c=THEMES[themeKey].cls;$('stage').className='stage '+c;$('tray').className='tray '+c;if(S)render();}
+function renderThemes(){$('palList').innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="pal" data-pal="${k}" aria-pressed="${k===themeKey}"><div class="pv ${t.cls}" style="background:var(--bd);display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:5px;box-sizing:border-box">
+  ${[0,1,2,-1,3,4,5,6,-1,7,0,2].map(i=>`<div class="cell${i>=0?' f':''}" style="--c:100%;width:auto;height:auto;--k:${i>=0?t.cols[i]:''}"></div>`).join('')}</div>${t.name}</button>`).join('')+
+  `<div class="sndrow"><b>Sonido</b><button class="sw" id="sndBtn" role="switch" aria-checked="${Sfx.on}">${Sfx.on?'Sí':'No'}</button></div>`;
+  $('sndBtn').onclick=()=>{Sfx.on=!Sfx.on;Sfx.play('ok');renderThemes();};}
+$('palList').addEventListener('click',e=>{const b=e.target.closest('[data-pal]');if(!b)return;themeKey=b.dataset.pal;store.set('theme',themeKey);applyTheme();renderThemes();});
+function renderRecs(){const g=store.get('games',{});$('recList').innerHTML=EDIFFS.map((d,k)=>`<div><b>${d.name}</b><small>Récord Desafío: ${store.get('best.desafio.'+k,0)}</small><small>Récord Libre: ${store.get('best.libre.'+k,0)}</small><small>${g['desafio.'+k]||0} partidas de Desafío</small></div>`).join('');}
+function save(){if(!S)return;store.set('state.'+SK(),S);
+  let busy=false;for(const m of ['libre','desafio'])for(let d=0;d<4;d++){const s=store.get('state.'+m+'.'+d,null);if(s&&s.moves&&!s.over)busy=true;}
+  try{busy?localStorage.setItem('encastre.enCurso','1'):localStorage.removeItem('encastre.enCurso');}catch(e){}}
+function load(){const s=store.get('state.'+SK(),null);if(s&&s.b&&s.b.length===N*N&&s.tray){S=s;render();}else newGame();paintTabs();}
+paintTabs=kitTabs(EDIFFS.map(d=>d.name),()=>mode,()=>diff,m=>{save();mode=m;store.set('mode',m);load();},d=>{save();diff=d;store.set('diff',d);load();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});addEventListener('pagehide',()=>save());
+let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>{if(S)render();},80);});
+themeKey=THEMES[store.get('theme','madera')]?store.get('theme','madera'):'madera';mode=store.get('mode','libre')==='desafio'?'desafio':'libre';diff=Math.min(3,Math.max(0,+store.get('diff',0)||0));
+buildBoard();applyTheme();load();
+if(!store.get('seen',false)){store.set('seen',true);open('help');}
+</script>

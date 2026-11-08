@@ -1,0 +1,29 @@
+{
+  "name": "sala-de-juegos-dev",
+  "private": true,
+  "description": "Herramientas para armar y probar la Sala de Juegos. Nada se carga desde internet: lo que un juego usa se pega dentro del juego al armar.",
+  "scripts": {
+    "armar": "python3 herramientas/armar.py",
+    "probar": "node pruebas/todas.js",
+    "nuevo": "python3 herramientas/nuevo_juego.py"
+  },
+  "devDependencies": {
+    "html-minifier-terser": "7.2.0",
+    "playwright": "1.63.0",
+    "nspell": "2.1.5",
+    "dictionary-es": "3.2.0",
+    "dictionary-es-ar": "1.2.0",
+    "an-array-of-spanish-words": "2.0.0",
+    "most-common-words-by-language": "3.0.14",
+    "gsap": "3.15.1",
+    "matter-js": "0.20.0",
+    "planck": "1.5.1",
+    "pixi.js": "8.22.0",
+    "howler": "2.2.4",
+    "zzfx": "1.4.0",
+    "simplex-noise": "4.0.3",
+    "canvas-confetti": "1.9.4",
+    "pathfinding": "0.4.18",
+    "seedrandom": "3.0.5"
+  }
+}

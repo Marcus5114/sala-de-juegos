@@ -1,0 +1,57 @@
+<title>Laboratorio del kit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*KIT_CSS*/
+/* Página de prueba del kit: un juego mínimo con kitStart y una zona para cada tipo de entrada. No se publica en la sala. */
+.stage{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px}
+.zone{position:relative;border-radius:14px;background:var(--chip);overflow:hidden;touch-action:none;display:grid;place-items:center;font:700 .8rem var(--font);color:var(--muted)}
+.zone small{position:absolute;left:8px;top:6px}
+#chip{position:absolute;left:20px;top:40px;width:54px;height:54px;border-radius:12px;background:var(--acc)}
+.dot{position:absolute;width:30px;height:30px;margin:-15px;border-radius:50%;background:var(--panel);border:3px solid var(--fg)}
+.dot.on{background:var(--ok)}
+#mark{position:absolute;width:26px;height:26px;margin:-13px;border-radius:6px;background:var(--bad);left:50%;top:50%}
+#tapBig{width:70%;height:60%;border-radius:14px;border:0;background:var(--fg);color:var(--bg);font:800 1.4rem var(--font)}
+.t-a{--acc:#2f6fd0}.t-b{--acc:#e8483f}
+</style>
+<div class="app">
+<!--KIT_BAR-->
+  <div class="hud"><div class="sc"><small>nivel</small><b id="lvl">1</b></div><div class="sc"><small>faltan</small><b id="left">0</b></div><div class="sc" id="timeBox"><small>tiempo</small><b id="time">0:00</b></div><button class="sc" id="hintBtn"><small>pista</small><b>💡</b></button></div>
+  <div class="stage" id="stage">
+    <div class="zone" id="zDrag"><small>arrastrar</small><div id="chip"></div></div>
+    <div class="zone" id="zTrace"><small>trazar</small></div>
+    <div class="zone" id="zSwipe"><small>deslizar · flechas</small><div id="mark"></div><span id="swOut">—</span></div>
+    <div class="zone" id="zPress"><small>tocar · mantener</small><button id="tapBig">0</button></div>
+  </div>
+  <nav class="bottom">
+    <button class="bb" id="act"><span id="actTxt">Deshacer</span></button>
+    <button class="bb" id="restart">Reiniciar</button>
+  </nav>
+</div>
+<!--KIT_SHEETS-->
+<script>
+/*KIT_JS*/
+// registro de eventos para las pruebas
+const LOG=[];const log=(...a)=>LOG.push(a);
+// juego mínimo: tocar el botón grande tantas veces como el nivel + 2
+kitStart({id:'kitdemo',diffs:[{name:'Uno',par:5},{name:'Dos',par:5}],themes:{a:{name:'Azul'},b:{name:'Rojo'}},theme:'a',
+  help:'<p>Página de prueba del kit.</p>',
+  create:(d,l)=>({need:l+2+d,taps:0}),reset:S=>{S.taps=0;},build:()=>draw(),draw:()=>draw(),busy:S=>S.taps>0,
+  undo:u=>{S.taps=u;},hint:()=>{log('hint');toast('pista');},applyTheme:k=>{$('stage').className='stage t-'+k;},
+  preview:(k,t)=>`<div class="pv t-${k}" style="background:var(--acc)"></div>`,info:d=>'prueba',end:()=>({title:'¡Listo!',big:'✓',note:'ok'}),
+  keys:{x:()=>log('key-x')}});
+function draw(){$('tapBig').textContent=S.taps;$('left').textContent=S.need-S.taps;paintCommon();}
+Input.press($('tapBig'),{tap:()=>{if(S.won)return;pushUndo(S.taps);S.taps++;Anim.pop($('tapBig'));Sfx.play('tap');draw();save();if(S.taps>=S.need)win();},long:()=>log('long')});
+// arrastrar
+Input.drag($('zDrag'),{start:pt=>{const c=$('chip');const r=c.getBoundingClientRect(),z=$('zDrag').getBoundingClientRect();
+    if(pt.cx<r.left||pt.cx>r.right||pt.cy<r.top||pt.cy>r.bottom)return false;return {ox:pt.x-(r.left-z.left),oy:pt.y-(r.top-z.top),n:0};},
+  move:(c,pt)=>{c.n++;$('chip').style.left=(pt.x-c.ox)+'px';$('chip').style.top=(pt.y-c.oy)+'px';},end:(c,pt,info)=>log('drag-end',info.moved,c.n)});
+// trazar sobre 5 puntos
+const DOTS=[[.2,.3],[.5,.2],[.8,.3],[.65,.75],[.35,.75]];
+$('zTrace').insertAdjacentHTML('beforeend',DOTS.map(([x,y],i)=>`<div class="dot" data-i="${i}" style="left:${x*100}%;top:${y*100}%"></div>`).join(''));
+Input.trace($('zTrace'),{hit:pt=>{const z=$('zTrace');let id=null;DOTS.forEach(([x,y],i)=>{if(Math.hypot(pt.x-x*z.clientWidth,pt.y-y*z.clientHeight)<20)id=i;});return id;},
+  enter:(id,path)=>{document.querySelectorAll('.dot').forEach(d=>d.classList.toggle('on',path.includes(+d.dataset.i)));},end:path=>log('trace',path.join(''))});
+// deslizar y flechas mueven la marca
+const mv={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};let mx=0,my=0;
+const step=d=>{mx=clamp(mx+mv[d][0],-3,3);my=clamp(my+mv[d][1],-3,3);$('mark').style.transform=`translate(${mx*14}px,${my*14}px)`;$('swOut').textContent=d;log('dir',d);};
+Input.swipe($('zSwipe'),step);Input.dirKeys(step);
+</script>

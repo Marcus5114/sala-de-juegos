@@ -1,0 +1,141 @@
+<title>Puentes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
+<style>
+/*KIT_CSS*/
+/* Layout: barra, dificultad, marcador, tablero de islas que ocupa el resto, botonera (Deshacer 70 % · Reiniciar 30 %) */
+.stage{border-radius:16px;overflow:hidden;background:var(--sea);touch-action:none}
+.stage svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.isl text{font-weight:800;text-anchor:middle;dominant-baseline:central;font-family:var(--font)}
+.solved .isl{animation:bob .6s var(--d) ease-out}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.isl{transform-box:fill-box}
+.t-clasico{--sea:#fbfbfc}
+.t-mar{--sea:linear-gradient(160deg,#2a8bc0,#145f8f)}
+.t-mar::before{content:'';position:absolute;inset:0;background:repeating-radial-gradient(circle at 30% 40%,transparent 0 14px,rgba(255,255,255,.05) 15px 17px);pointer-events:none}
+.t-noche{--sea:linear-gradient(#0e1530,#1d2850)}
+.t-espacio{--sea:radial-gradient(ellipse at 70% 20%,#2b1f5a,#0b0a1c 70%)}
+.t-espacio::before{content:'';position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.6) .8px,transparent 1.3px) 0 0/41px 37px,radial-gradient(circle,rgba(255,255,255,.4) .7px,transparent 1.2px) 17px 11px/59px 53px;pointer-events:none}
+.t-montana{--sea:linear-gradient(#cfe0d2,#9fbfa4)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .t-clasico{--sea:#1c1d21}}
+:root[data-theme="dark"] .t-clasico{--sea:#1c1d21}
+@media (prefers-reduced-motion:reduce){.solved .isl{animation:none}}
+</style>
+
+<div class="app">
+<!--KIT_BAR-->
+  <div class="hud">
+    <div class="sc"><small>nivel</small><b id="lvl">1</b></div>
+    <div class="sc"><small>islas listas</small><b id="done">0</b></div>
+    <div class="sc" id="timeBox"><small>tiempo</small><b id="time">0:00</b></div>
+    <button class="sc" id="hintBtn" aria-label="Pista"><small>pista</small><b>💡</b></button>
+  </div>
+  <div class="stage t-clasico" id="stage" aria-label="Islas: arrastrá de una isla hacia otra para tender un puente"><svg id="svg"></svg></div>
+  <nav class="bottom">
+    <button class="bb" id="act"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span id="actTxt">Deshacer</span></button>
+    <button class="bb" id="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>Reiniciar</button>
+  </nav>
+</div>
+<!--KIT_SHEETS-->
+
+<script>
+/*KIT_JS*/
+/*GEN*/
+/*END_GEN*/
+/* temas: el fondo, las islas y los puentes cambian de forma */
+const THEMES={
+  clasico:{name:'Clásico',cls:'t-clasico',isl:(x,y,R)=>`<circle cx="${x}" cy="${y}" r="${R}" fill="var(--panel)" stroke="var(--fg)" stroke-width="${R*.14}"/>`,num:'var(--fg)',ok:'var(--ok)',
+    br:(a,b,w)=>`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="var(--fg)" stroke-width="${w}" stroke-linecap="round"/>`},
+  mar:{name:'Islas',cls:'t-mar',isl:(x,y,R)=>`<circle cx="${x}" cy="${y+R*.12}" r="${R*1.05}" fill="rgba(255,255,255,.25)"/><circle cx="${x}" cy="${y}" r="${R}" fill="#f2dca6" stroke="#c9a96a" stroke-width="${R*.12}"/><path d="M${x+R*.35} ${y-R*.95}q${R*.25} ${-R*.35} ${R*.6} ${-R*.2}M${x+R*.35} ${y-R*.95}q${-R*.1} ${-R*.45} ${R*.25} ${-R*.6}" stroke="#2e8b57" stroke-width="${R*.16}" fill="none" stroke-linecap="round"/>`,num:'#4a3510',ok:'#1f7a45',
+    br:(a,b,w)=>`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#8a5a2b" stroke-width="${w*1.9}"/><line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#c48a4e" stroke-width="${w*1.6}" stroke-dasharray="${w*.9} ${w*.5}"/>`},
+  noche:{name:'Ciudad',cls:'t-noche',isl:(x,y,R)=>`<rect x="${x-R}" y="${y-R}" width="${2*R}" height="${2*R}" rx="${R*.25}" fill="#26315c" stroke="#5f6fa8" stroke-width="${R*.1}"/>`,num:'#ffd56b',ok:'#7fffb0',
+    br:(a,b,w)=>`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#ffc94d" stroke-width="${w}" stroke-linecap="round" style="filter:drop-shadow(0 0 3px rgba(255,201,77,.8))"/>`},
+  espacio:{name:'Espacio',cls:'t-espacio',isl:(x,y,R,i)=>{const c=['#e07a5f','#81b29a','#f2cc8f','#9d8df1','#6ec6ff'][i%5];return `<circle cx="${x}" cy="${y}" r="${R}" fill="${c}"/><circle cx="${x-R*.3}" cy="${y-R*.3}" r="${R*.7}" fill="rgba(255,255,255,.18)"/><ellipse cx="${x}" cy="${y}" rx="${R*1.45}" ry="${R*.38}" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="${R*.09}" transform="rotate(-20 ${x} ${y})"/>`;},num:'#14102c',ok:'#14102c',
+    br:(a,b,w)=>`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#7ff3ff" stroke-width="${w*.8}" stroke-linecap="round" style="filter:drop-shadow(0 0 4px #39d7ff)"/>`},
+  montana:{name:'Montaña',cls:'t-montana',isl:(x,y,R)=>`<path d="M${x-R} ${y+R*.7}L${x-R*.55} ${y-R*.6}L${x-R*.1} ${y-R*.9}L${x+R*.6} ${y-R*.65}L${x+R} ${y+R*.2}L${x+R*.55} ${y+R*.9}L${x-R*.5} ${y+R*.95}Z" fill="#8d9096" stroke="#5f6268" stroke-width="${R*.1}" stroke-linejoin="round"/>`,num:'#fff',ok:'#c9ffd6',
+    br:(a,b,w)=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1,ox=-dy/L*w*.7,oy=dx/L*w*.7;return `<line x1="${a[0]+ox}" y1="${a[1]+oy}" x2="${b[0]+ox}" y2="${b[1]+oy}" stroke="#6b4423" stroke-width="${w*.45}"/><line x1="${a[0]-ox}" y1="${a[1]-oy}" x2="${b[0]-ox}" y2="${b[1]-oy}" stroke="#6b4423" stroke-width="${w*.45}"/><line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#a87b4f" stroke-width="${w*1.4}" stroke-dasharray="${w*.35} ${w*.6}"/>`;}}
+};
+// S (del kit): {lvl,w,h,I (islas),N (números),E (puentes posibles),sol,v (puentes puestos),undo,secs,won}
+
+/* ---------- geometría ---------- */
+let c=40,ox=0,oy=0,X=[],cur=-1;
+function measure(){const st=$('stage'),W=st.clientWidth,H=st.clientHeight;c=Math.floor(Math.min((W-16)/S.w,(H-16)/S.h,90));ox=(W-c*S.w)/2+c/2;oy=(H-c*S.h)/2+c/2;}
+const P=i=>[ox+S.I[i][0]*c,oy+S.I[i][1]*c];
+function crossIdx(){if(X._E===S.E)return X;X=S.E.map(()=>[]);X._E=S.E;for(let i=0;i<S.E.length;i++)for(let j=i+1;j<S.E.length;j++)if(bCross(S.I,S.E[i],S.E[j])){X[i].push(j);X[j].push(i);}return X;}
+function sums(){const s=S.I.map(()=>0);S.E.forEach(([a,b],k)=>{s[a]+=S.v[k];s[b]+=S.v[k];});return s;}
+function connected(){const adj=S.I.map(()=>[]);S.E.forEach(([a,b],k)=>{if(S.v[k]){adj[a].push(b);adj[b].push(a);}});const seen=new Set([0]),st=[0];while(st.length){const x=st.pop();for(const y of adj[x])if(!seen.has(y)){seen.add(y);st.push(y);}}return seen.size===S.I.length;}
+
+/* ---------- dibujo ---------- */
+let guide=null;
+function draw(){
+  measure();const t=THEMES[themeKey],R=c*.36,w=Math.max(2.5,c*.075),s=sums();let h='';
+  S.E.forEach(([a,b],k)=>{const n=S.v[k];if(!n)return;const A=P(a),B=P(b);const hz=A[1]===B[1],r=R*.98;
+    const A2=hz?[A[0]+(B[0]>A[0]?r:-r),A[1]]:[A[0],A[1]+(B[1]>A[1]?r:-r)],B2=hz?[B[0]-(B[0]>A[0]?r:-r),B[1]]:[B[0],B[1]-(B[1]>A[1]?r:-r)];
+    if(n===1)h+=`<g data-b="${k}">${t.br(A2,B2,w)}</g>`;
+    else{const o=w*1.3,d=hz?[0,o]:[o,0];h+=`<g data-b="${k}">${t.br([A2[0]-d[0],A2[1]-d[1]],[B2[0]-d[0],B2[1]-d[1]],w)}${t.br([A2[0]+d[0],A2[1]+d[1]],[B2[0]+d[0],B2[1]+d[1]],w)}</g>`;}});
+  if(guide){const A=P(guide.i);h+=`<line x1="${A[0]}" y1="${A[1]}" x2="${guide.x}" y2="${guide.y}" stroke="var(--acc)" stroke-width="${w}" stroke-dasharray="${w*2} ${w*1.5}" stroke-linecap="round" opacity=".8"/>`;}
+  S.I.forEach((p,i)=>{const [x,y]=P(i),st=s[i]===S.N[i]?'ok':s[i]>S.N[i]?'bad':'';
+    h+=`<g class="isl" style="--d:${(i*.02).toFixed(2)}s">${t.isl(x,y,R,i)}${st==='bad'?`<circle cx="${x}" cy="${y}" r="${R*1.18}" fill="none" stroke="var(--bad)" stroke-width="${R*.14}"/>`:''}${st==='ok'?`<circle cx="${x}" cy="${y}" r="${R*1.18}" fill="none" stroke="${t.ok}" stroke-width="${R*.1}" opacity=".9"/>`:''}
+      ${i===cur?`<circle cx="${x}" cy="${y}" r="${R*1.42}" fill="none" stroke="var(--acc)" stroke-width="${R*.12}" stroke-dasharray="${R*.3} ${R*.2}"/>`:''}
+      <text x="${x}" y="${y}" font-size="${R*1.05}" fill="${st==='bad'?'var(--bad)':t.num}" opacity="${st==='ok'?.55:1}">${S.N[i]}</text></g>`;});
+  $('svg').innerHTML=h;
+  $('done').textContent=s.filter((x,i)=>x===S.N[i]).length+'/'+S.I.length;
+  $('stage').classList.toggle('solved',S.won);paintCommon();
+}
+
+/* ---------- tender puentes ---------- */
+function cycle(k){
+  const nv=(S.v[k]+1)%3;
+  if(nv>0&&crossIdx()[k].some(j=>S.v[j]>0)){toast('Se cruzaría con otro puente');Sfx.play('bad');vibe(40);return;}
+  pushUndo([k,S.v[k]]);S.v[k]=nv;Sfx.play(nv?'place':'undo');draw();save();check();
+}
+function neighborEdge(i,dx,dy){// puente posible desde la isla i en esa dirección
+  let best=-1,bd=1e9;S.E.forEach(([a,b],k)=>{if(a!==i&&b!==i)return;const j=a===i?b:a,vx=S.I[j][0]-S.I[i][0],vy=S.I[j][1]-S.I[i][1];
+    if(Math.sign(vx)===dx&&Math.sign(vy)===dy&&(dx?vy===0:vx===0)){const d=Math.abs(vx)+Math.abs(vy);if(d<bd){bd=d;best=k;}}});return best;}
+function nearIsland(x,y,lim){let bi=-1,bd=lim;S.I.forEach((_,i)=>{const [a,b]=P(i),d=Math.hypot(a-x,b-y);if(d<bd){bd=d;bi=i;}});return bi;}
+// arrastrar desde una isla; tocar un puente lo cambia
+Input.drag($('stage'),{threshold:3,
+  start(pt){if(!S||S.won||S.timeup)return false;const bi=nearIsland(pt.x,pt.y,c*.55);if(bi>=0){cur=-1;return {i:bi,sx:pt.x,sy:pt.y};}
+    let bk=-1,bb=c*.3;S.E.forEach(([a,b],k)=>{if(!S.v[k])return;const A=P(a),B=P(b);const t=clamp(((pt.x-A[0])*(B[0]-A[0])+(pt.y-A[1])*(B[1]-A[1]))/(((B[0]-A[0])**2+(B[1]-A[1])**2)||1),0,1);
+      const d=Math.hypot(A[0]+t*(B[0]-A[0])-pt.x,A[1]+t*(B[1]-A[1])-pt.y);if(d<bb){bb=d;bk=k;}});
+    if(bk>=0)cycle(bk);return false;},
+  move(d,pt){const dx=pt.x-d.sx,dy=pt.y-d.sy;if(Math.hypot(dx,dy)<c*.3){if(guide){guide=null;draw();}return;}
+    const A=P(d.i);guide=Math.abs(dx)>Math.abs(dy)?{i:d.i,x:A[0]+dx,y:A[1]}:{i:d.i,x:A[0],y:A[1]+dy};draw();},
+  end(d,pt,{cancelled}){guide=null;const dx=pt.x-d.sx,dy=pt.y-d.sy;if(cancelled||Math.hypot(dx,dy)<c*.35){draw();return;}
+    const k=Math.abs(dx)>Math.abs(dy)?neighborEdge(d.i,Math.sign(dx),0):neighborEdge(d.i,0,Math.sign(dy));
+    if(k<0){toast('No hay isla en esa dirección');draw();return;}cycle(k);}});
+// teclado: las flechas mueven el cursor entre islas; con Mayúscula tienden el puente en esa dirección
+function keyDir(dx,dy,e){if(!S||S.won)return;if(cur<0){cur=0;draw();return;}const k=dx?neighborEdge(cur,dx,0):neighborEdge(cur,0,dy);if(k<0)return;
+  if(e&&e.shiftKey){cycle(k);return;}const [a,b]=S.E[k];cur=a===cur?b:a;draw();}
+
+function check(){
+  const s=sums();if(!s.every((x,i)=>x===S.N[i]))return;
+  if(!connected()){toast('Todas las islas tienen que quedar conectadas',2400);return;}
+  cur=-1;win();
+}
+function hint(){
+  // primero corregir un puente que sobra, después agregar uno que falta
+  let k=S.v.findIndex((v,i)=>v>S.sol[i]);if(k<0)k=S.v.findIndex((v,i)=>v<S.sol[i]);if(k<0)return;
+  pushUndo([k,S.v[k]]);const more=S.v[k]<S.sol[k];S.v[k]=S.sol[k];draw();save();check();toast(more?'Este puente va':'Este puente sobraba');
+}
+kitStart({
+  id:'puentes',diffs:BDIFFS,themes:THEMES,theme:'clasico',
+  help:`<p>Cada isla dice <b>cuántos puentes</b> tienen que salir de ella. Uní las islas para que todas cumplan su número.</p>
+<p>Arrastrá el dedo desde una isla hacia otra para tender un puente; repetí para hacerlo doble y una vez más para quitarlo. También podés tocar un puente.</p>
+<p>Reglas: los puentes van solo en <b>horizontal o vertical</b>, como mucho <b>dos</b> entre las mismas islas, <b>no se cruzan</b>, y al final <b>todas las islas quedan conectadas</b>.</p>
+<p><b>Dificultad:</b> más islas, más puentes dobles y más caminos posibles que hay que descartar. Cada nivel tiene una sola solución.</p>
+<p><b>Libre:</b> sin reloj y con pistas. <b>Desafío:</b> con cronómetro y de 1 a 3 estrellas.</p>`,
+  keysHelp:'Las flechas mueven el cursor entre islas y <b>Mayúscula + flecha</b> tiende un puente',
+  create(d,lvl){const L=genBridges(d,lvl);X=[];cur=-1;return {w:L.w,h:L.h,I:L.I,N:L.N,E:L.E,sol:L.sol,v:L.E.map(()=>0)};},
+  reset(S){S.v=S.E.map(()=>0);cur=-1;},
+  valid:s=>s.E&&s.v&&s.v.length===s.E.length,
+  build:draw,draw,busy:s=>s.v&&s.v.some(Boolean),
+  undo(u){S.v[u[0]]=u[1];},hint,
+  applyTheme(k){$('stage').className='stage '+THEMES[k].cls+(S&&S.won?' solved':'');},
+  preview:(k,t)=>{const A=[24,29],B=[96,29],R=13;return `<svg class="pv ${t.cls}" viewBox="0 0 120 58" style="background:var(--sea)">${t.br([A[0]+R,A[1]],[B[0]-R,B[1]],3.4)}${t.isl(A[0],A[1],R,0)}${t.isl(B[0],B[1],R,3)}
+    <text x="${A[0]}" y="${A[1]}" font-size="14" font-weight="800" text-anchor="middle" dominant-baseline="central" fill="${t.num}">2</text><text x="${B[0]}" y="${B[1]}" font-size="14" font-weight="800" text-anchor="middle" dominant-baseline="central" fill="${t.num}">1</text></svg>`;},
+  info:d=>`${BDIFFS[d].islands[0]}–${BDIFFS[d].islands[1]} islas`,
+  end:S=>({title:'¡Todas conectadas!',big:'🌉',note:`${S.I.length} islas unidas.`}),
+  keys:{ArrowLeft:e=>keyDir(-1,0,e),ArrowRight:e=>keyDir(1,0,e),ArrowUp:e=>keyDir(0,-1,e),ArrowDown:e=>keyDir(0,1,e)}
+});
+</script>

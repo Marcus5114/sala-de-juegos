@@ -1,12 +1,20 @@
 // Sala de Juegos: funciona sin conexión.
 // Al cambiar cualquier archivo, subí la versión para que los celulares tomen lo nuevo.
-const CACHE='sala-v3.1.0';
+const CACHE='sala-v3.4.0';
 const FILES=['./','index.html','manifest.json','icon-192.png','icon-512.png',
-  'games/spider/index.html','games/spider/icon-192.png',
-  'games/atasco/index.html','games/atasco/icon-192.png',
+  'games/engranajes/index.html','games/engranajes/icon-192.png',
+  'games/mapa/index.html','games/mapa/icon-192.png',
+  'games/puentes/index.html','games/puentes/icon-192.png',
+  'games/piramide/index.html','games/piramide/icon-192.png',
+  'games/encastre/index.html','games/encastre/icon-192.png',
+  'games/desenredo/index.html','games/desenredo/icon-192.png',
+  'games/bloques/index.html','games/bloques/icon-192.png',
+  'games/rueda/index.html','games/rueda/icon-192.png',
+  'games/2048/index.html','games/2048/icon-192.png',
+  'games/minas/index.html','games/minas/icon-192.png',
   'games/cinco/index.html','games/cinco/icon-192.png',
-  'games/2048/index.html','games/2048/icon-192.png','games/minas/index.html','games/minas/icon-192.png',
-  'games/bloques/index.html','games/bloques/icon-192.png','games/rueda/index.html','games/rueda/icon-192.png'];
+  'games/atasco/index.html','games/atasco/icon-192.png',
+  'games/spider/index.html','games/spider/icon-192.png'];
 self.addEventListener('install',e=>{
   // cache:'reload' evita guardar copias viejas que el navegador tenga en su caché HTTP
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:'reload'})))).then(()=>self.skipWaiting()));

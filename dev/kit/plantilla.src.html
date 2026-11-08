@@ -1,0 +1,101 @@
+<title>__NOMBRE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
+<style>
+/*KIT_CSS*/
+/* PLANTILLA DE JUEGO DE LA SALA (kitStart).
+   Es un juego completo y chico ("apagá todas las luces") para copiar y reemplazar:
+   tablero → reglas → temas. Todo lo común (modos, dificultades, niveles, guardado, reloj, deshacer,
+   pistas, estrellas, progreso, temas, sonido, teclado básico) lo hace el kit.
+   Layout: barra, dificultad, marcador, tablero que ocupa el resto, botonera (Deshacer 70 % · Reiniciar 30 %) */
+.stage{display:grid;place-items:center;border-radius:16px;background:var(--board);touch-action:none}
+.grid{--c:52px;display:grid;gap:6px;padding:10px;border-radius:14px}
+.cell{width:var(--c);height:var(--c);border-radius:calc(var(--c)*.22);border:0;padding:0;background:var(--off);cursor:pointer;transition:background .15s}
+.cell.on{background:var(--on);box-shadow:0 0 calc(var(--c)*.35) var(--glow)}
+.cell.kb{outline:3px solid var(--fg);outline-offset:2px}
+/* temas: cada uno redefine las mismas variables. Contraste mínimo 3:1 entre encendida y apagada. */
+.t-lampara{--board:#20232b;--off:#383c48;--on:#f6c445;--glow:rgba(246,196,69,.55)}
+.t-hoja{--board:#e8f1e4;--off:#c6d8bf;--on:#24733c;--glow:rgba(36,115,60,.35)}
+@media (prefers-reduced-motion:reduce){.cell{transition:none}}
+</style>
+
+<div class="app">
+<!--KIT_BAR-->
+  <div class="hud">
+    <div class="sc"><small>nivel</small><b id="lvl">1</b></div>
+    <div class="sc"><small>encendidas</small><b id="left">0</b></div>
+    <div class="sc" id="timeBox"><small>tiempo</small><b id="time">0:00</b></div>
+    <button class="sc" id="hintBtn" aria-label="Pista"><small>pista</small><b>💡</b></button>
+  </div>
+  <div class="stage t-lampara" id="stage"><div class="grid" id="grid" aria-label="Tablero"></div></div>
+  <nav class="bottom">
+    <button class="bb" id="act"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span id="actTxt">Deshacer</span></button>
+    <button class="bb" id="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>Reiniciar</button>
+  </nav>
+</div>
+<!--KIT_SHEETS-->
+
+<script>
+/*KIT_JS*/
+/* ---------- 1. Datos del juego ---------- */
+const DIFFS=[{name:'Fácil',n:3,taps:3,par:20},{name:'Media',n:4,taps:5,par:45},{name:'Difícil',n:5,taps:8,par:90},{name:'Experto',n:6,taps:12,par:150}];
+const THEMES={lampara:{name:'Lámparas',cls:'t-lampara'},hoja:{name:'Hojas',cls:'t-hoja'}};
+
+/* ---------- 2. Generador: siempre con solución ----------
+   Se parte del tablero apagado y se tocan casillas al azar con semilla (mismo nivel = mismo tablero).
+   Tocar dos veces una casilla la deja igual, así que la solución son esas mismas casillas. */
+function neighbors(n,i){const r=Math.floor(i/n),c=i%n,o=[i];if(r)o.push(i-n);if(r<n-1)o.push(i+n);if(c)o.push(i-1);if(c<n-1)o.push(i+1);return o;}
+function genLevel(d,lvl){const D=DIFFS[d],n=D.n,rnd=rngOf(9001+d*7919+lvl*104729);
+  const cells=shuffle([...Array(n*n).keys()],rnd).slice(0,D.taps),on=Array(n*n).fill(0);
+  const t=Array(n*n).fill(0);cells.forEach(i=>t[i]^=1);
+  if(cells.length&&t.every(v=>!v))t[0]=1;// (imposible con casillas distintas, pero por las dudas nunca arranca resuelto)
+  t.forEach((v,i)=>{if(v)neighbors(n,i).forEach(k=>on[k]^=1);});
+  if(on.every(v=>!v)){t[0]^=1;neighbors(n,0).forEach(k=>on[k]^=1);}
+  return {n,on,sol:t.flatMap((v,i)=>v?[i]:[])};}
+
+/* ---------- 3. Tablero ---------- */
+let els=[],cur=-1;
+function build(){
+  const n=S.n,st=$('stage'),c=Math.floor(Math.min((st.clientWidth-20-6*(n-1))/n,(st.clientHeight-20-6*(n-1))/n,84));
+  $('grid').style.setProperty('--c',c+'px');$('grid').style.gridTemplateColumns=`repeat(${n},var(--c))`;
+  $('grid').innerHTML=S.on.map((_,i)=>`<button class="cell" data-i="${i}" aria-label="Casilla ${i+1}"></button>`).join('');
+  els=[...$('grid').children];draw();
+}
+function draw(){
+  els.forEach((el,i)=>{el.classList.toggle('on',!!S.on[i]);el.classList.toggle('kb',i===cur);});
+  $('left').textContent=S.on.filter(Boolean).length;
+  paintCommon();// nivel, reloj, pista y botón Deshacer/Siguiente: lo pinta el kit
+}
+
+/* ---------- 4. Jugar ---------- */
+function tap(i){if(!S||S.won||S.timeup)return;
+  neighbors(S.n,i).forEach(k=>S.on[k]^=1);
+  pushUndo(i);// deshacer = volver a tocar la misma casilla
+  Sfx.play('tap');Anim.pop(els[i]);draw();save();
+  if(S.on.every(v=>!v))win();// el kit festeja, guarda progreso y estrellas, y muestra el cartel
+}
+Input.press($('grid'),{tap:e=>{const b=e.target.closest('[data-i]');if(b)tap(+b.dataset.i);}});
+function hint(){// la solución que falta = las casillas de la solución tocadas un número par de veces, y viceversa
+  const t=Array(S.n*S.n).fill(0);S.sol.forEach(i=>t[i]^=1);S.undo.forEach(i=>t[i]^=1);
+  const i=t.findIndex(Boolean);if(i<0)return;els[i].classList.add('is-hint');setTimeout(()=>els[i]&&els[i].classList.remove('is-hint'),1600);toast('Probá tocando esta');}
+function moveCur(dx,dy){const n=S.n;if(cur<0){cur=0;draw();return;}const r=clamp(Math.floor(cur/n)+dy,0,n-1),c=clamp(cur%n+dx,0,n-1);cur=r*n+c;draw();}
+
+/* ---------- 5. Arranque: el kit hace el resto ---------- */
+kitStart({
+  id:'__ID__',diffs:DIFFS,themes:THEMES,theme:'lampara',
+  help:`<p>Tocar una casilla la cambia a ella y a sus vecinas de arriba, abajo y los costados. <b>Apagá todas</b> para pasar de nivel.</p>
+<p><b>Libre:</b> sin reloj y con pistas. <b>Desafío:</b> contra reloj; ganás de 1 a 3 estrellas según el tiempo.</p>`,
+  keysHelp:'las flechas eligen una casilla y <b>Espacio</b> la toca',
+  create(d,lvl){const L=genLevel(d,lvl);cur=-1;return {n:L.n,on:L.on,start:L.on.slice(),sol:L.sol};},
+  reset(S){S.on=S.start.slice();cur=-1;},
+  valid:s=>s.on&&s.start&&s.on.length===s.n*s.n,
+  build,draw,busy:s=>s.undo&&s.undo.length>0,
+  undo(i){neighbors(S.n,i).forEach(k=>S.on[k]^=1);},
+  hint,
+  applyTheme(k){$('stage').className='stage '+THEMES[k].cls;},
+  preview:(k,t)=>`<div class="pv ${t.cls}" style="background:var(--board);display:flex;gap:6px;align-items:center;justify-content:center">${[1,0,1,1].map(v=>`<i style="width:22px;height:22px;border-radius:5px;background:var(${v?'--on':'--off'})"></i>`).join('')}</div>`,
+  info:d=>`${DIFFS[d].n}×${DIFFS[d].n}`,
+  end:S=>({title:'¡A oscuras!',big:'💡',note:`${S.undo.length} toques.`}),
+  keys:{' ':()=>{if(cur>=0)tap(cur);},ArrowLeft:()=>moveCur(-1,0),ArrowRight:()=>moveCur(1,0),ArrowUp:()=>moveCur(0,-1),ArrowDown:()=>moveCur(0,1)}
+});
+</script>

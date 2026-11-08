@@ -1,0 +1,6 @@
+# herramientas de desarrollo instaladas con npm (dev/package.json)
+node_modules/
+# capturas que generan las pruebas
+dev/pruebas/capturas/
+__pycache__/
+*.src

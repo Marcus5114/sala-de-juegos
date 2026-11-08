@@ -1,0 +1,151 @@
+<title>Cartógrafo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
+<style>
+/*KIT_CSS*/
+/* Layout: barra, dificultad, marcador, mapa que ocupa el resto, colores para elegir, botonera (Deshacer 70 % · Reiniciar 30 %) */
+.stage{border-radius:16px;overflow:hidden;background:var(--sea);touch-action:manipulation}
+.stage svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cols{display:flex;gap:8px;justify-content:center}
+.cols button{flex:1;max-width:76px;height:48px;border-radius:12px;border:2px solid var(--chip);cursor:pointer;display:grid;place-items:center;font:800 1.2rem var(--font);color:rgba(0,0,0,.55);padding:0}
+.cols button[aria-pressed="true"]{border-color:var(--fg);box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--fg)}
+.cols button.er{background:var(--panel);color:var(--fg)}
+.cols button.er svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.rg{transition:fill .18s}
+.solved .rg{animation:shine .7s ease-out}
+@keyframes shine{50%{filter:brightness(1.18)}}
+@media (prefers-reduced-motion:reduce){.rg{transition:none}.solved .rg{animation:none}}
+</style>
+
+<div class="app">
+<!--KIT_BAR-->
+  <div class="hud">
+    <div class="sc"><small>nivel</small><b id="lvl">1</b></div>
+    <div class="sc"><small>sin pintar</small><b id="left">0</b></div>
+    <div class="sc" id="timeBox"><small>tiempo</small><b id="time">0:00</b></div>
+    <button class="sc" id="hintBtn" aria-label="Pista"><small>pista</small><b>💡</b></button>
+  </div>
+  <div class="stage" id="stage" aria-label="Mapa: elegí un color abajo y tocá una región"><svg id="svg"></svg></div>
+  <div class="cols" id="cols" role="radiogroup" aria-label="Colores"></div>
+  <nav class="bottom">
+    <button class="bb" id="act"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span id="actTxt">Deshacer</span></button>
+    <button class="bb" id="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>Reiniciar</button>
+  </nav>
+</div>
+<!--KIT_SHEETS-->
+
+<script>
+/*KIT_JS*/
+/*GEN*/
+/*END_GEN*/
+const GLYPH=['●','▲','■','◆'];
+const THEMES={
+  atlas:{name:'Atlas',sea:'#bfe3f2',seaDeco:'rgba(255,255,255,.55)',land:'#f7f3e8',cols:['#f2a65a','#7cc47f','#e77f9a','#8b8fdc'],line:'#5b6470',coast:'#3f6f8a',lw:.32,cw:.6,glyph:'rgba(0,0,0,.45)'},
+  antiguo:{name:'Mapa antiguo',sea:'#e9dcbc',seaDeco:'rgba(120,85,40,.25)',land:'#f6ecd2',cols:['#c58b4a','#8ea36a','#b86f5c','#7f95ad'],line:'#6b4a26',coast:'#5a3b18',lw:.3,cw:.7,glyph:'rgba(60,35,10,.55)',rose:true},
+  vitral:{name:'Vitral',sea:'#14161c',seaDeco:'rgba(255,255,255,.05)',land:'#3a3f4a',cols:['#e0443e','#22a7a0','#f2b53a','#4a74c9'],line:'#0b0c0f',coast:'#0b0c0f',lw:.75,cw:1.1,glyph:'rgba(255,255,255,.75)',glass:true},
+  pixel:{name:'Píxel',sea:'#1d2b53',seaDeco:'rgba(255,255,255,.08)',land:'#c2c3c7',cols:['#ff004d','#00e436','#29adff','#ffec27'],line:'#000',coast:'#000',lw:.5,cw:.5,glyph:'rgba(0,0,0,.6)',crisp:true},
+  crayon:{name:'Crayones',sea:'#fdfaf2',seaDeco:'rgba(80,120,200,.18)',land:'#ffffff',cols:['#ff8a3d','#4cbf6b','#f25ca2','#4f8df5'],line:'#3a3a3a',coast:'#3a3a3a',lw:.35,cw:.55,glyph:'rgba(0,0,0,.45)',hatch:true}
+};
+let pen=0;
+// S (del kit): {lvl,M (mapa),c (colores puestos, null = sin pintar),undo,secs,won}
+
+/* ---------- geometría del mapa (se calcula una vez por nivel) ---------- */
+let G=null;// {paths:[d por región], inner, coast, label:[[x,y]]}
+function prep(){
+  const {W,H,reg,n}=S.M;const at=(x,y)=>x<0||y<0||x>=W||y>=H?-1:reg[y*W+x];
+  // relleno de cada región: tramos horizontales
+  const paths=Array.from({length:n},()=>'');
+  for(let y=0;y<H;y++){let x=0;while(x<W){const v=at(x,y);let e=x;while(e<W&&at(e,y)===v)e++;if(v>=0)paths[v]+=`M${x} ${y}h${e-x}v1h${x-e}z`;x=e;}}
+  // bordes: segmentos entre celdas distintas, unidos cuando siguen en línea
+  let inner='',coast='';const pairs=[];
+  for(let y=0;y<=H;y++){let x=0;while(x<W){const a=at(x,y-1),b=at(x,y);if(a===b){x++;continue;}let e=x;while(e<W&&at(e,y-1)===a&&at(e,y)===b)e++;
+    const d=`M${x} ${y}H${e}`;if(a<0||b<0)coast+=d;else{inner+=d;pairs.push([Math.min(a,b),Math.max(a,b),d]);}x=e;}}
+  for(let x=0;x<=W;x++){let y=0;while(y<H){const a=at(x-1,y),b=at(x,y);if(a===b){y++;continue;}let e=y;while(e<H&&at(x-1,e)===a&&at(x,e)===b)e++;
+    const d=`M${x} ${y}V${e}`;if(a<0||b<0)coast+=d;else{inner+=d;pairs.push([Math.min(a,b),Math.max(a,b),d]);}y=e;}}
+  // punto de etiqueta: la celda más lejos del borde de su región
+  const dist=new Int16Array(W*H).fill(0),q=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++){const v=at(x,y);if(v<0)continue;
+    if([[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dy])=>at(x+dx,y+dy)!==v)){dist[y*W+x]=1;q.push(y*W+x);}}
+  for(let h=0;h<q.length;h++){const c=q[h],x=c%W,y=(c-x)/W;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=W||ny>=H)continue;const k=ny*W+nx;if(at(nx,ny)===at(x,y)&&!dist[k]){dist[k]=dist[c]+1;q.push(k);}}}
+  const label=Array.from({length:n},()=>[0,0,-1]);for(let c=0;c<W*H;c++){const v=reg[c];if(v>=0&&dist[c]>label[v][2])label[v]=[c%W+.5,Math.floor(c/W)+.5,dist[c]];}
+  G={paths,inner,coast,pairs,label};
+}
+
+/* ---------- dibujo ----------
+   build() arma lo que no cambia (mar, regiones, bordes); draw() solo cambia colores, conflictos y símbolos. */
+let s=8,ox=0,oy=0,rgEls=[];
+function measure(){const st=$('stage'),W=st.clientWidth,H=st.clientHeight;s=Math.min((W-12)/S.M.W,(H-12)/S.M.H);ox=(W-s*S.M.W)/2;oy=(H-s*S.M.H)/2;}
+function build(){
+  if(!G||G._M!==S.M){prep();G._M=S.M;}
+  measure();const t=THEMES[themeKey],{n,W,H}=S.M;let h='';
+  h+=`<defs><pattern id="waves" width="28" height="14" patternUnits="userSpaceOnUse"><path d="M0 9q7-6 14 0t14 0" fill="none" stroke="${t.seaDeco}" stroke-width="1.4"/></pattern>
+    <pattern id="hatch" width="1.3" height="1.3" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><line x1="0" y1="0" x2="0" y2="1.3" stroke="rgba(255,255,255,.4)" stroke-width=".45"/></pattern></defs>`;
+  h+=`<rect width="100%" height="100%" fill="url(#waves)"/>`;
+  if(t.rose){const cx=ox+s*W*.86,cy=oy+s*H*.9,R=s*4;h+=`<g opacity=".55" stroke="${t.line}" fill="none" stroke-width="1"><circle cx="${cx}" cy="${cy}" r="${R}"/><path d="M${cx} ${cy-R*1.4}L${cx+R*.25} ${cy}L${cx} ${cy+R*1.4}L${cx-R*.25} ${cy}ZM${cx-R*1.4} ${cy}L${cx} ${cy+R*.25}L${cx+R*1.4} ${cy}L${cx} ${cy-R*.25}Z" fill="${t.line}" fill-opacity=".25"/></g>`;}
+  h+=`<g transform="translate(${ox} ${oy}) scale(${s})" shape-rendering="${t.crisp?'crispEdges':'auto'}"><g id="rgs">`;
+  for(let i=0;i<n;i++)h+=`<path class="rg" data-r="${i}" d="${G.paths[i]}" stroke-width=".08"/>`;
+  h+=`</g><g id="ovl" pointer-events="none"></g><path d="${G.inner}" stroke="${t.line}" stroke-width="${t.lw}" fill="none" stroke-linecap="round" pointer-events="none"/>
+    <path id="conf" stroke="var(--bad)" stroke-width="${Math.max(.55,t.lw*1.3)}" fill="none" stroke-linecap="round" pointer-events="none"/>
+    <path d="${G.coast}" stroke="${t.coast}" stroke-width="${t.cw}" fill="none" stroke-linecap="round" pointer-events="none"/></g><g id="marks" pointer-events="none"></g>`;
+  $('svg').innerHTML=h;rgEls=[...$('rgs').children];draw();
+}
+function draw(){
+  const t=THEMES[themeKey],{n}=S.M;let ov='',mk='';
+  for(let i=0;i<n;i++){const c=S.c[i],f=c==null?t.land:t.cols[c],el=rgEls[i];if(el._f!==f){el.setAttribute('fill',f);el.setAttribute('stroke',f);el._f=f;}
+    if(c!=null&&t.hatch)ov+=`<path d="${G.paths[i]}" fill="url(#hatch)"/>`;if(c!=null&&t.glass)ov+=`<path d="${G.paths[i]}" fill="rgba(255,255,255,.12)"/>`;}
+  $('ovl').innerHTML=ov;
+  let conf='';for(const [a,b,d] of G.pairs){if(S.c[a]!=null&&S.c[a]===S.c[b]&&S.M.adj[a].includes(b))conf+=d;}$('conf').setAttribute('d',conf||'M0 0');
+  const fs=Math.max(9,Math.min(16,s*2.2));
+  for(let i=0;i<n;i++){const [lx,ly]=G.label[i],x=ox+lx*s,y=oy+ly*s,c=S.c[i];
+    if(S.M.given[i]!=null)mk+=`<g><circle cx="${x}" cy="${y-fs*.15}" r="${fs*.42}" fill="${t.line}"/><circle cx="${x-fs*.12}" cy="${y-fs*.27}" r="${fs*.12}" fill="rgba(255,255,255,.7)"/><line x1="${x}" y1="${y+fs*.2}" x2="${x}" y2="${y+fs*.65}" stroke="${t.line}" stroke-width="${fs*.12}" stroke-linecap="round"/></g>`;
+    else if(c!=null)mk+=`<text x="${x}" y="${y}" font-size="${fs}" text-anchor="middle" dominant-baseline="central" fill="${t.glyph}">${GLYPH[c]}</text>`;}
+  $('marks').innerHTML=mk;
+  $('left').textContent=S.c.filter(x=>x==null).length;
+  $('stage').classList.toggle('solved',S.won);paintCols();paintCommon();
+}
+function paintCols(){const t=THEMES[themeKey];if(pen>=S.M.k)pen=0;
+  $('cols').innerHTML=Array.from({length:S.M.k},(_,i)=>`<button role="radio" data-c="${i}" aria-pressed="${pen===i}" aria-label="Color ${i+1}" style="background:${t.cols[i]}">${GLYPH[i]}</button>`).join('')+
+    `<button class="er" role="radio" data-c="-1" aria-pressed="${pen===-1}" aria-label="Borrar"><svg viewBox="0 0 24 24"><path d="m7 21-4-4L14 6l7 7-8 8z"/><path d="M7 21h14M10 10l7 7"/></svg></button>`;}
+$('cols').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;pen=+b.dataset.c;Sfx.play('tap');paintCols();});
+
+/* ---------- pintar ---------- */
+$('svg').addEventListener('click',e=>{
+  if(!S||S.won||S.timeup)return;const r=$('stage').getBoundingClientRect(),x=Math.floor((e.clientX-r.left-ox)/s),y=Math.floor((e.clientY-r.top-oy)/s);
+  if(x<0||y<0||x>=S.M.W||y>=S.M.H)return;const i=S.M.reg[y*S.M.W+x];if(i<0)return;
+  if(S.M.given[i]!=null){toast('Esta región ya viene pintada');Sfx.play('bad');return;}
+  const nv=pen<0?null:(S.c[i]===pen?null:pen);setColor(i,nv);
+});
+function setColor(i,v){if(S.c[i]===v)return;pushUndo([i,S.c[i]]);S.c[i]=v;
+  const clash=v!=null&&S.M.adj[i].some(j=>S.c[j]===v);Sfx.play(v==null?'undo':clash?'bad':'place');if(clash)vibe(30);
+  draw();save();check();}
+function valid(){for(let i=0;i<S.M.n;i++){if(S.c[i]==null)return false;for(const j of S.M.adj[i])if(S.c[j]===S.c[i])return false;}return true;}
+function check(){if(valid())win();}
+function hint(){
+  // completar lo que pintó el jugador; si no se puede, señalar una región que hay que cambiar
+  const M=S.M,cur=S.c.map(v=>v==null?null:v),res=mCount(M.adj,M.k,cur,1);
+  if(res.count){const free=[];for(let i=0;i<M.n;i++)if(S.c[i]==null)free.push(i);if(!free.length)return;
+    free.sort((a,b)=>M.adj[b].filter(j=>S.c[j]!=null).length-M.adj[a].filter(j=>S.c[j]!=null).length);const i=free[0];setColor(i,res.first[i]);toast('Esta región puede ir así');return;}
+  for(let i=0;i<M.n;i++){if(S.c[i]==null||M.given[i]!=null)continue;const c2=S.c.slice();c2[i]=null;if(mCount(M.adj,M.k,c2,1).count){setColor(i,null);toast('Esa región no podía ir con ese color');return;}}
+  toast('Probá despintar algunas regiones');
+}
+kitStart({
+  id:'mapa',diffs:MDIFFS,themes:THEMES,theme:'atlas',
+  help:`<p>Pintá todas las regiones del mapa sin que <b>dos regiones vecinas</b> tengan el mismo color. Tocarse solo en una esquina no cuenta.</p>
+<p>Elegí un color abajo y tocá las regiones. Las que tienen un alfiler ya vienen pintadas y no se cambian. Si dos vecinas quedan iguales, su borde se marca en rojo.</p>
+<p><b>Fácil y Media:</b> 4 colores; cualquier forma de pintar que respete las vecinas sirve. <b>Difícil y Experto:</b> solo 3 colores y una única forma de hacerlo, así que hay que deducir región por región.</p>
+<p>Cada color tiene además un símbolo, para distinguirlos aunque se vean parecidos.</p>
+<p><b>Libre:</b> sin reloj y con pistas. <b>Desafío:</b> con cronómetro y de 1 a 3 estrellas.</p>`,
+  keysHelp:'Los números <b>1</b> a <b>4</b> eligen el color y <b>0</b> la goma',
+  create(d,lvl){const M=genMap(d,lvl);return {M,c:M.given.slice()};},
+  reset(S){S.c=S.M.given.slice();},
+  valid:s=>s.M&&s.c&&s.c.length===s.M.n,
+  build,draw,busy:s=>s.undo&&s.undo.length>0,
+  undo(u){S.c[u[0]]=u[1];},hint,
+  applyTheme(k){$('stage').style.setProperty('--sea',THEMES[k].sea);if(S&&G)build();},
+  preview:(k,t)=>`<svg class="pv" viewBox="0 0 120 58" style="background:${t.sea}">
+  <path d="M14 16h36v26H14z" fill="${t.cols[0]}"/><path d="M50 10h30v18H50z" fill="${t.cols[1]}"/><path d="M50 28h30v22H50z" fill="${t.cols[2]}"/><path d="M80 14h26v30H80z" fill="${t.cols[3]}"/>
+  <path d="M50 10V50M50 28H80M80 14V44" stroke="${t.line}" stroke-width="${t.lw*5}" fill="none"/><path d="M14 16h36v-6h30v4h26v30H80v6H14z" fill="none" stroke="${t.coast}" stroke-width="${t.cw*4}"/></svg>`,
+  info:d=>`${MDIFFS[d].regions[0]}–${MDIFFS[d].regions[1]} regiones · ${MDIFFS[d].k} colores`,
+  end:S=>({title:'¡Mapa terminado!',big:'🗺️',note:`${S.M.n} regiones con ${S.M.k} colores.`}),
+  keys:{1:()=>{pen=0;paintCols();},2:()=>{pen=1;paintCols();},3:()=>{if(S.M.k>2){pen=2;paintCols();}},4:()=>{if(S.M.k>3){pen=3;paintCols();}},0:()=>{pen=-1;paintCols();}}
+});
+</script>

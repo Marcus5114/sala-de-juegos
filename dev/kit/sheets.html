@@ -1,0 +1,26 @@
+<div class="toast" id="toast" role="status"></div>
+<div class="sheet" id="sheet" hidden>
+  <div class="backdrop" data-close></div>
+  <div class="panel" role="dialog" aria-modal="true">
+    <section data-pane="help" class="help" hidden>
+      <div class="ph"><h2>Cómo se juega</h2><button class="ib" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div id="helpBody" style="display:flex;flex-direction:column;gap:12px"></div>
+    </section>
+    <section data-pane="colors" hidden>
+      <div class="ph"><h2>Temas</h2><button class="ib" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="pals" id="palList"></div>
+    </section>
+    <section data-pane="recs" hidden>
+      <div class="ph"><h2>Progreso</h2><button class="ib" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="recs" id="recList"></div>
+    </section>
+    <section data-pane="end" hidden>
+      <div class="big"><h2 id="endTitle"></h2><div class="pts" id="endBig"></div><p id="endNote"></p></div>
+      <div class="btns"><button class="btn" id="endSee">Ver el tablero</button><button class="btn primary" id="endNext">Siguiente nivel</button></div>
+    </section>
+    <section data-pane="confirm" hidden>
+      <div class="big"><h2 id="cfTitle">¿Reiniciar el nivel?</h2><p id="cfNote">Se borra lo que hiciste en este nivel.</p></div>
+      <div class="btns"><button class="btn" data-close>Seguir jugando</button><button class="btn primary" id="confirmOk">Reiniciar</button></div>
+    </section>
+  </div>
+</div>

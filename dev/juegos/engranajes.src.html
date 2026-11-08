@@ -1,0 +1,186 @@
+<title>Engranajes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
+<style>
+/*KIT_CSS*/
+/* Layout: barra, dificultad, marcador con lo que pide la salida, tablero de ejes, engranajes para elegir, botonera (Deshacer 70 % · Reiniciar 30 %) */
+.stage{border-radius:16px;overflow:hidden;background:var(--bgk);touch-action:manipulation}
+.stage>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.gears{position:absolute;inset:0;pointer-events:none}
+.gr{position:absolute;will-change:transform}
+.gr{transform:rotate(var(--a0,0deg))}
+.gr.spin{animation:spin var(--p) linear infinite;animation-direction:var(--dir)}
+@keyframes spin{from{transform:rotate(var(--a0,0deg))}to{transform:rotate(calc(var(--a0,0deg) + 360deg))}}
+/* flecha que gira alrededor de la salida: muestra el sentido y la velocidad pedidos */
+.goal{position:absolute;pointer-events:none;animation:spin var(--p) linear infinite;animation-direction:var(--dir);will-change:transform}
+.goal svg{display:block;width:100%;height:100%;overflow:visible}
+.gr.jam{animation:shake .25s linear infinite}
+@keyframes shake{25%{transform:rotate(3deg)}75%{transform:rotate(-3deg)}}
+.gr svg{display:block;width:100%;height:100%;overflow:visible}
+.inv{display:flex;gap:8px;justify-content:center}
+.inv button{flex:1;max-width:96px;height:54px;border-radius:12px;border:2px solid var(--chip);background:var(--panel);color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font:800 .95rem var(--font);padding:0 6px}
+.inv button svg{width:30px;height:30px;flex:none}
+.inv button[aria-pressed="true"]{border-color:var(--fg);box-shadow:0 0 0 2px var(--fg) inset}
+.inv button:disabled{opacity:.35}
+.inv button small{font-size:.62rem;color:var(--muted);display:block;font-weight:700}
+.need b{white-space:nowrap}
+.need b i{font-style:normal;font-size:.68rem;font-weight:700;color:var(--muted)}
+.t-taller{--bgk:#2b2f36;--pg:rgba(255,255,255,.08)}
+.t-reloj{--bgk:radial-gradient(ellipse at 50% 40%,#5a3a20,#2c1a0c)}
+.t-juguete{--bgk:#fff4e0;--pg:rgba(0,0,0,.06)}
+.t-vapor{--bgk:linear-gradient(160deg,#5a3a2a,#2e1d14)}
+.t-plano{--bgk:#1f4e8c}
+@media (prefers-reduced-motion:reduce){.gr.spin,.goal{animation-duration:calc(var(--p)*4)}.gr.jam{animation:none}}
+</style>
+
+<div class="app">
+<!--KIT_BAR-->
+  <div class="hud">
+    <div class="sc"><small>nivel</small><b id="lvl">1</b></div>
+    <div class="sc need"><small>motor</small><b id="motorRpm"></b></div>
+    <div class="sc need"><small>salida</small><b id="need"></b></div>
+    <div class="sc" id="timeBox"><small>tiempo</small><b id="time">0:00</b></div>
+    <button class="sc" id="hintBtn" aria-label="Pista"><small>pista</small><b>💡</b></button>
+  </div>
+  <div class="stage t-taller" id="stage" aria-label="Tablero de ejes: elegí un engranaje abajo y tocá un eje"><svg id="svg"></svg><div class="gears" id="gears"></div><svg id="top" style="pointer-events:none"></svg></div>
+  <div class="inv" id="inv"></div>
+  <nav class="bottom">
+    <button class="bb" id="act"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span id="actTxt">Deshacer</span></button>
+    <button class="bb" id="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>Reiniciar</button>
+  </nav>
+</div>
+<!--KIT_SHEETS-->
+
+<script>
+/*KIT_JS*/
+/*GEN*/
+/*END_GEN*/
+/* temas: tablero y aspecto de cada engranaje */
+const THEMES={
+  taller:{name:'Taller',cls:'t-taller',fill:()=>'#aab1bb',stroke:'#5f6772',hub:'#3a3f47',holes:'#2b2f36',peg:'#8a929c',flag:'#ffcf4d',label:'#fff',motor:'#e0483e'},
+  reloj:{name:'Relojería',cls:'t-reloj',fill:()=>'#d6a646',stroke:'#8a6420',hub:'#5a3d10',holes:'#3a2412',peg:'#c9a26a',flag:'#f6e7c1',label:'#f6e7c1',motor:'#b8452e',spokes:true},
+  juguete:{name:'Juguete',cls:'t-juguete',fill:s=>({S:'#e8483f',M:'#2f7fe0',L:'#f2c230'})[s],stroke:'rgba(0,0,0,.25)',hub:'#fff',holes:'#fff4e0',peg:'#b9a98a',flag:'#2e9e5b',label:'#333',motor:'#7a4fd0'},
+  vapor:{name:'Vapor',cls:'t-vapor',fill:()=>'#c87533',stroke:'#6e3a14',hub:'#2e1d14',holes:'#2e1d14',peg:'#b08060',flag:'#ffd27a',label:'#ffe8c8',motor:'#3fa8a0',rivets:true},
+  plano:{name:'Plano',cls:'t-plano',fill:()=>'rgba(255,255,255,.08)',stroke:'#fff',hub:'#1f4e8c',holes:'#1f4e8c',peg:'#cfe2ff',flag:'#ffd56b',label:'#fff',motor:'#ffd56b',outline:true}
+};
+const GL={S:'Chico',M:'Mediano',L:'Grande'};
+let pen='M',curPeg=-1;
+// S: {lvl,L (nivel),g (tamaño puesto en cada eje o null),undo,secs,won}
+/* ---------- dibujo de un engranaje ---------- */
+function gearSVG(s,u,t,motor){
+  const {t:N,r}=GSIZES[s],R=r*u,ro=R+.17*u,rr=R-.2*u,h=ro+2;let d='';
+  for(let i=0;i<N;i++){const a=i*2*Math.PI/N,w1=Math.PI/N*.5,w2=Math.PI/N*.27;
+    const pt=(rad,ang)=>`${(rad*Math.cos(ang)).toFixed(2)} ${(rad*Math.sin(ang)).toFixed(2)}`;
+    d+=(i?'L':'M')+pt(rr,a-w1)+'L'+pt(ro,a-w2)+'L'+pt(ro,a+w2)+'L'+pt(rr,a+w1)+'L'+pt(rr,a+Math.PI/N);}
+  d+='Z';const fill=motor?t.motor:t.fill(s);let inner='';
+  if(t.spokes){const k=s==='S'?4:5;for(let i=0;i<k;i++){const a=i*2*Math.PI/k+.3;inner+=`<circle cx="${(rr*.55*Math.cos(a)).toFixed(1)}" cy="${(rr*.55*Math.sin(a)).toFixed(1)}" r="${(rr*.22).toFixed(1)}" fill="${t.holes}"/>`;}}
+  else if(!t.outline&&s!=='S'){const k=s==='M'?4:6;for(let i=0;i<k;i++){const a=i*2*Math.PI/k;inner+=`<circle cx="${(rr*.6*Math.cos(a)).toFixed(1)}" cy="${(rr*.6*Math.sin(a)).toFixed(1)}" r="${(rr*.14).toFixed(1)}" fill="${t.holes}"/>`;}}
+  if(t.rivets){for(let i=0;i<6;i++){const a=i*Math.PI/3;inner+=`<circle cx="${(rr*.82*Math.cos(a)).toFixed(1)}" cy="${(rr*.82*Math.sin(a)).toFixed(1)}" r="${(u*.06).toFixed(1)}" fill="#f0c090"/>`;}}
+  // una marca en el borde: deja ver bien el sentido y la velocidad del giro
+  inner+=`<circle cx="0" cy="${(-rr*.78).toFixed(1)}" r="${(u*.09).toFixed(1)}" fill="${t.outline?'#fff':'rgba(255,255,255,.7)'}"/>`;
+  return {h,svg:`<svg viewBox="${-h} ${-h} ${2*h} ${2*h}"><path d="${d}" fill="${fill}" stroke="${t.stroke}" stroke-width="${t.outline?1.6:1}" stroke-linejoin="round"/>${inner}<circle r="${(u*.28).toFixed(1)}" fill="${t.hub}" stroke="${t.stroke}" stroke-width="1"/>${motor?`<path d="M${-u*.12} ${-u*.16}L${u*.14} 0L${-u*.12} ${u*.16}Z" fill="${t.motor==='#ffd56b'?'#1f4e8c':'#fff'}"/>`:''}</svg>`};
+}
+/* ---------- tablero ---------- */
+let u=30,ox=0,oy=0;
+function measure(){const st=$('stage'),W=st.clientWidth,H=st.clientHeight;u=Math.min((W-8)/GW,(H-8)/GH);ox=(W-u*GW)/2;oy=(H-u*GH)/2;}
+const px=(x,y)=>[ox+x*u,oy+y*u];
+function placed(){const L=S.L;return [{...L.motor},...L.pegs.map((p,i)=>S.g[i]?{x:p.x,y:p.y,s:S.g[i],peg:i}:null).filter(Boolean)];}
+function draw(){
+  measure();const t=THEMES[themeKey],L=S.L;let bg='',top='';
+  // fondo: grilla de agujeros
+  bg+=`<defs><pattern id="pg" width="${u}" height="${u}" patternUnits="userSpaceOnUse" x="${ox}" y="${oy}"><circle cx="${u/2}" cy="${u/2}" r="${Math.max(1,u*.06)}" fill="${t.outline?'rgba(255,255,255,.18)':'rgba(255,255,255,.07)'}"/></pattern></defs><rect width="100%" height="100%" fill="url(#pg)"/>`;
+  if(t.outline)bg+=`<rect x="${ox}" y="${oy}" width="${u*GW}" height="${u*GH}" fill="none" stroke="rgba(255,255,255,.35)" stroke-dasharray="4 4"/>`;
+  L.pegs.forEach((p,i)=>{const [x,y]=px(p.x,p.y);bg+=`<circle cx="${x}" cy="${y}" r="${u*.22}" fill="${t.peg}" stroke="rgba(0,0,0,.35)" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="${u*.08}" fill="rgba(0,0,0,.45)"/>`;});
+  const G=placed(),sim=gSim(G),ph=phases(G,sim);
+  $('gears').innerHTML=G.map((g,k)=>{const {h,svg}=gearSVG(g.s,u,t,k===0),[x,y]=px(g.x,g.y),st=sim.st[k],jam=sim.jam.has(k);
+    const per=(60/(MOTOR_RPM*(st?st.w:1))).toFixed(3);
+    return `<div class="gr${jam?' jam':st?' spin':''}" style="left:${x-h}px;top:${y-h}px;width:${2*h}px;height:${2*h}px;--a0:${ph[k].toFixed(2)}deg;--p:${per}s;--dir:${st&&st.dir<0?'reverse':'normal'}${jam?';filter:drop-shadow(0 0 6px #ff3b30)':''}">${svg}</div>`;}).join('');
+  // salida: bandera y lo que pide
+  const op=L.pegs[L.out],[fx,fy]=px(op.x,op.y),need=L.need;
+  const ko=G.findIndex(g=>g.peg===L.out),ost0=ko>=0&&sim.st[ko]&&!sim.jam.has(ko)?{...sim.st[ko],ok:sim.st[ko].dir===need.dir&&Math.abs(sim.st[ko].w-need.w)<1e-9}:null;
+  top+=`<g><circle cx="${fx}" cy="${fy}" r="${u*.42}" fill="none" stroke="${t.flag}" stroke-width="${u*.09}" stroke-dasharray="${u*.18} ${u*.12}"/>
+    <line x1="${fx}" y1="${fy}" x2="${fx}" y2="${fy-u*1.1}" stroke="${t.flag}" stroke-width="${u*.08}"/><path d="M${fx} ${fy-u*1.1}h${u*.7}l-${u*.18} ${u*.2}l${u*.18} ${u*.2}h-${u*.7}z" fill="${t.flag}"/></g>`;
+  // la flecha gira alrededor de la salida en el sentido y a la velocidad pedidos
+  const ar=u*1.05,hd=ar+u*.3;
+  $('gears').insertAdjacentHTML('beforeend',`<div class="goal" style="left:${fx-hd}px;top:${fy-hd}px;width:${2*hd}px;height:${2*hd}px;--p:${(60/rpm(need.w)).toFixed(3)}s;--dir:${need.dir<0?'reverse':'normal'}">
+    <svg viewBox="${-hd} ${-hd} ${2*hd} ${2*hd}"><g transform="scale(${need.dir<0?-1:1} 1)"><path d="M${ar} 0A${ar} ${ar} 0 1 1 ${(ar*Math.cos(-1.9)).toFixed(1)} ${(ar*Math.sin(-1.9)).toFixed(1)}" fill="none" stroke="${t.flag}" stroke-width="${u*.13}" stroke-linecap="round" opacity=".95"/>
+    <path d="M${ar-u*.3} ${-u*.05}L${ar} ${u*.42}L${ar+u*.3} ${-u*.05}Z" fill="${t.flag}"/></g></svg></div>`);
+  const [mx,my]=px(L.motor.x,L.motor.y);top+=`<text x="${mx}" y="${my+GSIZES[L.motor.s].r*u+u*.75}" text-anchor="middle" font-size="${Math.max(11,u*.42)}" font-weight="800" fill="${t.label}" font-family="Montserrat,Arial,sans-serif">${MOTOR_RPM} rpm</text>`;
+  const sideR=fx<$('stage').clientWidth/2,lx=fx+(sideR?1:-1)*(GSIZES[S.g[L.out]||'S'].r+.45)*u;
+  if(ost0)top+=`<text x="${lx}" y="${fy}" dominant-baseline="central" text-anchor="${sideR?'start':'end'}" paint-order="stroke" stroke="rgba(0,0,0,.55)" stroke-width="3" font-size="${Math.max(11,u*.42)}" font-weight="800" fill="${ost0.ok?t.flag:'#ff6a5f'}" font-family="Montserrat,Arial,sans-serif">${rpm(ost0.w)} rpm ${ost0.dir>0?'↻':'↺'}</text>`;
+  $('svg').innerHTML=bg;$('top').innerHTML=top;
+  $('need').innerHTML=`${rpm(need.w)}<i> rpm</i>`;$('motorRpm').innerHTML=`${MOTOR_RPM}<i> rpm</i>`;
+  // ¿cumple la salida?
+  const k=G.findIndex(g=>g.peg===L.out),ost=k>=0?sim.st[k]:null;
+  S._ok=!!(ost&&!sim.jam.size&&ost.dir===need.dir&&Math.abs(ost.w-need.w)<1e-9);
+  if(curPeg>=0&&L.pegs[curPeg]){const [cx,cy]=px(L.pegs[curPeg].x,L.pegs[curPeg].y);$('top').insertAdjacentHTML('beforeend',`<circle cx="${cx}" cy="${cy}" r="${u*.55}" fill="none" stroke="${t.flag}" stroke-width="${u*.08}" stroke-dasharray="${u*.15} ${u*.1}"/>`);}
+  paintInv();paintCommon();
+}
+// velocidades en vueltas por minuto: el motor gira a 24 rpm, así todas las combinaciones de dientes dan números enteros
+const MOTOR_RPM=24,rpm=w=>Math.round(MOTOR_RPM*w);
+// ángulo inicial de cada engranaje para que los dientes de uno caigan en los huecos del otro
+function phases(G,sim){
+  const ph=G.map(()=>0),done=G.map(()=>false);done[0]=true;const q=[0],R=i=>GSIZES[G[i].s].r,N=i=>GSIZES[G[i].s].t;
+  while(q.length){const i=q.shift();for(let j=0;j<G.length;j++){if(done[j]||!sim.st[j])continue;const d=Math.hypot(G[j].x-G[i].x,G[j].y-G[i].y);if(Math.abs(d-(R(i)+R(j)))>.05)continue;
+    const th=Math.atan2(G[j].y-G[i].y,G[j].x-G[i].x),pi=ph[i]*Math.PI/180;let f=((th-pi)*N(i)/(2*Math.PI))%1;if(f<0)f+=1;
+    ph[j]=(th+Math.PI-(2*Math.PI/N(j))*(.5-f))*180/Math.PI;done[j]=true;q.push(j);}}
+  return ph;
+}
+function left(s){return S.L.inv[s]-S.g.filter(x=>x===s).length;}
+function paintInv(){const t0=THEMES[themeKey],t=t0.outline?{...t0,fill:()=>'#cfe2ff',stroke:'#1f4e8c',hub:'#1f4e8c',holes:'#1f4e8c'}:t0;
+  $('inv').innerHTML=['S','M','L'].filter(s=>S.L.inv[s]>0||S.g.includes(s)).map(s=>{const {svg}=gearSVG(s,9,t,false);return `<button data-s="${s}" aria-pressed="${pen===s}" aria-label="${GL[s]}: quedan ${left(s)}">${svg}<span>${left(s)}<small>${GL[s]}</small></span></button>`;}).join('')+
+    `<button data-s="x" aria-pressed="${pen==='x'}" aria-label="Sacar" style="max-width:64px"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round"><path d="m7 21-4-4L14 6l7 7-8 8z"/><path d="M7 21h14M10 10l7 7"/></svg></button>`;}
+$('inv').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;pen=b.dataset.s;Sfx.play('tap');paintInv();});
+
+/* ---------- poner y sacar ---------- */
+$('stage').addEventListener('click',e=>{
+  if(!S||S.won||S.timeup)return;const r=$('stage').getBoundingClientRect(),x=(e.clientX-r.left-ox)/u,y=(e.clientY-r.top-oy)/u;
+  let bi=-1,bd=1.1;S.L.pegs.forEach((p,i)=>{const d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;bi=i;}});
+  // tocar dentro de un engranaje puesto también sirve
+  if(bi<0)S.L.pegs.forEach((p,i)=>{if(S.g[i]&&Math.hypot(p.x-x,p.y-y)<GSIZES[S.g[i]].r)bi=i;});
+  if(bi<0){if(Math.hypot(S.L.motor.x-x,S.L.motor.y-y)<GSIZES[S.L.motor.s].r)toast('El motor no se mueve');return;}
+  curPeg=-1;usePeg(bi);
+});
+function usePeg(bi){const cur=S.g[bi];let nv;
+  if(pen==='x'||cur===pen)nv=null;else{if(left(pen)<=0){toast(`No quedan engranajes ${GL[pen].toLowerCase()}s`);Sfx.play('bad');return;}nv=pen;}
+  setGear(bi,nv);}
+function setGear(i,v){if(S.g[i]===v)return;pushUndo([i,S.g[i]]);S.g[i]=v;draw();
+  const jam=gSim(placed()).jam.size;Sfx.play(v==null?'undo':jam?'bad':'place');if(jam)vibe(40);save();if(S._ok)win();}
+/* ---------- pista y teclado ---------- */
+function hint(){const L=S.L;
+  // primero sacar lo que está de más o mal, después poner el que sigue del camino
+  let i=S.g.findIndex((v,k)=>v&&L.sol[k]!==v);if(i>=0){setGear(i,L.sol[i]);toast(L.sol[i]?`Acá va uno ${GL[L.sol[i]].toLowerCase()}`:'Este eje no hace falta');return;}
+  const G=placed(),sim=gSim(G);let best=-1,bd=1e9;
+  L.pegs.forEach((p,k)=>{if(S.g[k]||!L.sol[k])return;// el que esté más cerca de algo que ya gira
+    G.forEach((g,j)=>{if(!sim.st[j])return;const d=Math.hypot(g.x-p.x,g.y-p.y);if(d<bd){bd=d;best=k;}});});
+  if(best>=0){setGear(best,L.sol[best]);toast(`Acá va uno ${GL[L.sol[best]].toLowerCase()}`);}}
+// flechas: pasar al eje más cercano en esa dirección; espacio: poner o sacar el engranaje elegido
+function movePeg(dx,dy){const P=S.L.pegs;if(curPeg<0){curPeg=0;draw();return;}const a=P[curPeg];let best=-1,bd=1e9;
+  P.forEach((q,i)=>{if(i===curPeg)return;const vx=q.x-a.x,vy=q.y-a.y,along=vx*dx+vy*dy;if(along<=0)return;const d=along+2*Math.abs(vx*dy-vy*dx);if(d<bd){bd=d;best=i;}});
+  if(best>=0){curPeg=best;draw();}}
+const pickPen=s=>()=>{if(s==='x'||S.L.inv[s]>0||S.g.includes(s)){pen=s;paintInv();}};
+kitStart({
+  id:'engranajes',diffs:GDIFFS,themes:THEMES,theme:'taller',
+  help:`<p>El <b>motor</b> ya gira. Poné engranajes en los ejes para llevar el giro hasta la <b>salida</b> (el eje con bandera), que tiene que girar en el <b>sentido</b> y a la <b>velocidad</b> que pide.</p>
+<p>Elegí un tamaño abajo y tocá un eje vacío. Tocá un engranaje con el mismo tamaño elegido para sacarlo, o con la goma.</p>
+<p><b>Cómo se mueven:</b> dos engranajes se tocan si sus dientes llegan justo; cada contacto <b>invierte el sentido</b>. La velocidad depende de los dientes: uno chico gira más rápido que uno grande. Si dos engranajes se pisan o se pelean por el sentido, se <b>traban</b>.</p>
+<p>La velocidad se mide en <b>rpm</b> (vueltas por minuto). El motor gira a 24 rpm. Al pasar a un engranaje con menos dientes, gira más rápido: de 12 dientes a 8 dientes, 24 rpm pasan a ser 36 rpm.</p>
+<p>Alrededor de la bandera, una flecha gira en el <b>sentido</b> y a la <b>velocidad</b> que tiene que tener la salida. Cuando la salida ya gira, abajo se ve a cuántas rpm va.</p>
+<p>Dato: en una cadena, la velocidad de la salida solo depende del motor y del engranaje que pongas en la salida; los del medio cambian el sentido y el camino.</p>
+<p><b>Dificultad:</b> cadenas más largas, más ejes señuelo y engranajes de sobra, y en Difícil y Experto también contactos en diagonal.</p>
+<p><b>Libre:</b> sin reloj y con pistas. <b>Desafío:</b> con cronómetro y de 1 a 3 estrellas.</p>`,
+  keysHelp:'<b>1</b>, <b>2</b> y <b>3</b> eligen el tamaño y <b>0</b> la goma; las flechas recorren los ejes y <b>Espacio</b> pone o saca',
+  create(d,lvl){const L=genGears(d,lvl);pen=L.inv.M?'M':L.inv.S?'S':'L';curPeg=-1;return {L,g:L.pegs.map(()=>null)};},
+  reset(S){S.g=S.L.pegs.map(()=>null);curPeg=-1;},
+  valid:s=>s.L&&s.g&&s.g.length===s.L.pegs.length,
+  build:()=>{if(S.L.inv[pen]===0&&!S.g.includes(pen))pen=S.L.inv.M?'M':S.L.inv.S?'S':'L';draw();},draw,busy:s=>s.g&&s.g.some(Boolean),
+  undo(u){S.g[u[0]]=u[1];},hint,
+  applyTheme(k){$('stage').className='stage '+THEMES[k].cls;},
+  preview:(k,t)=>{const a=gearSVG('L',12,t,true),b=gearSVG('S',12,t,false);return `<div class="pv ${t.cls}" style="background:var(--bgk);position:relative;overflow:hidden">
+  <div style="position:absolute;left:14px;top:${29-a.h}px;width:${2*a.h}px;height:${2*a.h}px">${a.svg}</div><div style="position:absolute;left:${14+a.h+36-b.h}px;top:${29-b.h}px;width:${2*b.h}px;height:${2*b.h}px">${b.svg}</div></div>`;},
+  info:d=>`cadenas de ${GDIFFS[d].chain[0]}–${GDIFFS[d].chain[1]} · ${GDIFFS[d].decoys} ejes de más`,
+  end:S=>({title:'¡La máquina funciona!',big:'⚙️',note:`${S.g.filter(Boolean).length} engranajes en marcha.`}),
+  keys:{1:pickPen('S'),2:pickPen('M'),3:pickPen('L'),0:pickPen('x'),ArrowLeft:()=>movePeg(-1,0),ArrowRight:()=>movePeg(1,0),ArrowUp:()=>movePeg(0,-1),ArrowDown:()=>movePeg(0,1),
+    ' ':()=>{if(curPeg>=0&&!S.won)usePeg(curPeg);}}
+});
+</script>

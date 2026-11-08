@@ -1,0 +1,303 @@
+<title>Buscaminas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
+<style>
+/* Layout: app de una pantalla — barra con modo, marcador (minas, vidas o reloj), campo centrado que se ajusta, botonera abajo */
+:root{
+  --bg:#f1f1f2; --fg:#18181a; --muted:#6c6c72; --panel:#fafafa; --chip:#e2e2e6;
+  --field:#767b83; --hid:#b0b4ba; --hid-hi:#c4c7cc; --open:#eceef0; --open-bd:#d8dadd; --boom:#e05a4f;
+  --n1:#2f6fd0; --n2:#2e8b45; --n3:#d23a2c; --n4:#5b3aa8; --n5:#9b3b1d; --n6:#1f8a8a; --n7:#222; --n8:#666;
+  --font:'Montserrat',Arial,Helvetica,sans-serif; --ease:cubic-bezier(.22,.61,.36,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141416;--fg:#ececee;--muted:#9a9aa1;--panel:#1e1e22;--chip:#2b2b30;--field:#1c1e22;--hid:#555a63;--hid-hi:#676c75;--open:#26282d;--open-bd:#31343a;--boom:#b8463d;--n1:#7fb2ff;--n2:#6fd99a;--n3:#ff7a70;--n4:#c4a3ff;--n5:#ffb070;--n6:#5fe0e0;--n7:#e8e8ea;--n8:#a8a8b0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141416;--fg:#ececee;--muted:#9a9aa1;--panel:#1e1e22;--chip:#2b2b30;--field:#1c1e22;--hid:#555a63;--hid-hi:#676c75;--open:#26282d;--open-bd:#31343a;--boom:#b8463d;--n1:#7fb2ff;--n2:#6fd99a;--n3:#ff7a70;--n4:#c4a3ff;--n5:#ffb070;--n6:#5fe0e0;--n7:#e8e8ea;--n8:#a8a8b0;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);margin:0;box-sizing:border-box;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:8px}
+.app{height:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.bar{display:flex;align-items:center;gap:4px}
+.ib{width:42px;height:42px;display:grid;place-items:center;border-radius:10px;border:0;background:transparent;color:var(--fg);cursor:pointer;padding:0;text-decoration:none;flex:none}
+.ib svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.ib:active{background:var(--chip)}
+.mid{flex:1;display:flex;justify-content:center}
+.seg{display:flex;gap:3px;background:var(--chip);padding:3px;border-radius:11px}
+.seg button{border:0;background:transparent;color:var(--muted);font:700 .8rem var(--font);height:34px;padding:0 14px;border-radius:8px;cursor:pointer}
+.seg button[aria-selected="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+button:focus-visible,a:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.hud{display:flex;gap:8px;justify-content:center;align-items:center}
+.sc{background:var(--chip);border-radius:10px;padding:6px 12px;text-align:center;min-width:66px}
+.sc small{display:block;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700}
+.sc b{font-size:1.2rem;font-weight:800;font-variant-numeric:tabular-nums}
+.lives{letter-spacing:2px}
+.szrow{display:flex;justify-content:center;flex:none}
+.sizes button{height:30px;font-size:.74rem;padding:0 12px}
+.stage{flex:1;min-height:0;display:grid;place-items:center}
+.field{--c:30px;display:grid;grid-template-columns:repeat(var(--w),var(--c));gap:2px;padding:4px;background:var(--field);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);touch-action:manipulation}
+.cell{width:var(--c);height:var(--c);border-radius:calc(var(--c)*.16);display:grid;place-items:center;font-weight:800;font-size:calc(var(--c)*.56);line-height:1;
+  background:var(--hid);box-shadow:inset 0 2px 0 var(--hid-hi),inset 0 -2px 0 rgba(0,0,0,.15);cursor:pointer;color:var(--fg);box-sizing:border-box}
+.cell.open{background:var(--open);box-shadow:inset 0 0 0 1px var(--open-bd);cursor:default}
+.cell.boom{background:var(--boom)}
+.cell .e{font-size:calc(var(--c)*.62);filter:drop-shadow(0 0 1px rgba(0,0,0,.55))}
+.n1{color:var(--n1)}.n2{color:var(--n2)}.n3{color:var(--n3)}.n4{color:var(--n4)}.n5{color:var(--n5)}.n6{color:var(--n6)}.n7{color:var(--n7)}.n8{color:var(--n8)}
+.bottom{display:flex;gap:8px}
+.bb{flex:1 1 0;min-width:0;height:52px;border-radius:12px;border:1px solid var(--chip);background:var(--panel);color:var(--fg);font:700 .9rem var(--font);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.bb .e{font-size:1.3rem}
+.bb[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+#tool{flex:7 1 0}#restart{flex:3 1 0}
+.bb svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;left:50%;top:calc(110px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);font-weight:700;font-size:.9rem;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50;white-space:nowrap}
+.toast.on{opacity:1}
+.sheet{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.panel{position:relative;width:100%;max-width:520px;max-height:88%;overflow-y:auto;background:var(--panel);color:var(--fg);border-radius:16px 16px 0 0;box-sizing:border-box;
+  padding:16px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:14px}
+.ph{display:flex;align-items:center;justify-content:space-between}
+.ph h2{margin:0;font-size:1.15rem;font-weight:800}
+.big{text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.big h2{margin:0;font-size:1.5rem;font-weight:800}
+.big .pts{font-size:2.4rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.big p{margin:0;font-size:.88rem;color:var(--muted);line-height:1.45}
+.btns{display:flex;gap:8px}
+.btn{flex:1;height:46px;border-radius:10px;border:1px solid var(--fg);background:transparent;color:var(--fg);font:700 .85rem var(--font);cursor:pointer}
+.btn.primary{background:var(--fg);color:var(--bg)}
+.help p{margin:0;font-size:.88rem;line-height:1.5}
+.pals{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.pal{display:flex;flex-direction:column;gap:8px;align-items:flex-start;padding:10px;border-radius:12px;border:2px solid transparent;cursor:pointer;font:700 .8rem var(--font)}
+.pal span{display:flex;gap:6px;font-size:1.3rem}
+.pal[aria-pressed="true"]{border-color:var(--fg);outline:2px solid var(--panel);outline-offset:-5px}
+.recs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.recs div{background:var(--bg);border-radius:12px;padding:10px 4px}
+.recs b{display:block;font-size:1.2rem;font-variant-numeric:tabular-nums}
+.recs small{font-size:.66rem;color:var(--muted);font-weight:600}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+
+<div class="app">
+  <header class="bar">
+    <a class="ib" id="homeBtn" href="../../index.html" aria-label="Volver a la sala de juegos" hidden><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg></a>
+    <button class="ib" id="helpBtn" aria-label="Cómo se juega"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 1c0 1.8-2.5 2.2-2.5 3.8"/><path d="M12 17.2v.1"/></svg></button>
+    <div class="mid"><div class="seg" role="tablist" aria-label="Modo"><button role="tab" data-mode="libre">Libre</button><button role="tab" data-mode="desafio">Desafío</button></div></div>
+    <button class="ib" id="palBtn" aria-label="Temas"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.9 1.2-1.8-.5-1-.1-2.2 1.1-2.2H17a4 4 0 0 0 4-4c0-5.5-4-10-9-10z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg></button>
+    <button class="ib" id="recBtn" aria-label="Récords"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></button>
+  </header>
+  <div class="szrow"><div class="seg sizes" role="tablist" aria-label="Tamaño"><button role="tab" data-size="0">Fácil</button><button role="tab" data-size="1">Media</button><button role="tab" data-size="2">Difícil</button></div></div>
+  <div class="hud">
+    <div class="sc"><small id="leftLbl">minas</small><b id="left">10</b></div>
+    <div class="sc" id="livesBox"><small>vidas</small><b class="lives" id="lives"></b></div>
+    <div class="sc" id="timeBox"><small>tiempo</small><b id="time">0:00</b></div>
+  </div>
+  <div class="stage" id="stage"><div class="field" id="field" aria-label="Campo"></div></div>
+  <nav class="bottom">
+    <button class="bb" id="tool" aria-pressed="false"><span class="e" id="toolIcon">⛏️</span><span id="toolTxt">Cavar</span></button>
+    <button class="bb" id="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>Nueva</button>
+  </nav>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="backdrop" data-close></div>
+  <div class="panel" role="dialog" aria-modal="true">
+    <section data-pane="help" class="help" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div class="ph"><h2>Cómo se juega</h2><button class="ib" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <p>Destapá todas las casillas que no esconden una mina. Cada número dice cuántas minas hay en las 8 casillas que lo rodean. El primer toque nunca es una mina.</p>
+      <p><b>Marcar:</b> mantené apretada una casilla, o cambiá el botón de abajo a modo bandera. Tocar un número que ya tiene todas sus banderas destapa sus vecinas.</p>
+      <p><b>Libre:</b> sin reloj y con 3 vidas: si pisás una mina, perdés una vida y seguís.</p>
+      <p><b>Desafío:</b> una sola vida y cronómetro. Se guarda tu mejor tiempo en cada tamaño.</p>
+    </section>
+    <section data-pane="colors" hidden style="display:flex;flex-direction:column;gap:14px">
+      <div class="ph"><h2>Temas</h2><button class="ib" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="pals" id="palList"></div>
+    </section>
+    <section data-pane="recs" hidden style="display:flex;flex-direction:column;gap:14px">
+      <div class="ph"><h2>Mejores tiempos · Desafío</h2><button class="ib" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="recs" id="recList"></div>
+    </section>
+    <section data-pane="end" hidden style="display:flex;flex-direction:column;gap:14px">
+      <div class="big"><h2 id="endTitle"></h2><div class="pts" id="endBig"></div><p id="endNote"></p></div>
+      <div class="btns"><button class="btn" id="endSee">Ver el campo</button><button class="btn primary" id="endNew">Otra partida</button></div>
+    </section>
+    <section data-pane="confirm" hidden style="display:flex;flex-direction:column;gap:14px">
+      <div class="big"><h2>¿Partida nueva?</h2><p>Se pierde el campo actual.</p></div>
+      <div class="btns"><button class="btn" data-close>Seguir jugando</button><button class="btn primary" id="confirmOk">Nueva</button></div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const EASE='cubic-bezier(.22,.61,.36,1)';
+const store={get(k,d){try{const v=localStorage.getItem('minas.'+k);return v?JSON.parse(v):d;}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem('minas.'+k,JSON.stringify(v));}catch(e){}},del(k){try{localStorage.removeItem('minas.'+k);}catch(e){}}};
+const SIZES=[{name:'Fácil',w:9,h:9,m:10},{name:'Media',w:10,h:14,m:24},{name:'Difícil',w:12,h:18,m:45}];
+const LIVES={libre:3,desafio:1};
+
+/* ---------- temas: casillas, números, mina, bandera y herramienta ---------- */
+const THEMES={
+  clasico:{name:'Clásico',mine:'💣',flag:'🚩',dig:'⛏️',v:{}},
+  jardin:{name:'Jardín',mine:'🐞',flag:'🌹',dig:'🧤',v:{field:'#4e7d3a',hid:'#7fb85f','hid-hi':'#9bd17a',open:'#d9c3a0','open-bd':'#c4ab84',boom:'#f2c14e',n1:'#2457a8',n2:'#1f6b33',n3:'#b0281e',n4:'#5b2a8a',n5:'#7a2a10',n6:'#0e5e5e'}},
+  playa:{name:'Playa',mine:'🦀',flag:'🏴‍☠️',dig:'🪣',v:{field:'#3a9cc0',hid:'#f0d9a4','hid-hi':'#f8e8c4',open:'#fdf6e3','open-bd':'#ecdcb6',boom:'#ffd166'}},
+  espacio:{name:'Espacio',mine:'☄️',flag:'🛸',dig:'🔭',v:{field:'#0f1530',hid:'#3e4c8f','hid-hi':'#5566b0',open:'#0c1128','open-bd':'#1c2448',boom:'#7a2a5a',n1:'#7fb2ff',n2:'#6fe0a0',n3:'#ff7a85',n4:'#c9a7ff',n5:'#ffb86b',n6:'#6ff0f0',n7:'#fff',n8:'#aab'}},
+  nieve:{name:'Nieve',mine:'🕳️',flag:'🧣',dig:'🧹',v:{field:'#7aa3c4',hid:'#f7fbff','hid-hi':'#ffffff',open:'#b9d0e3','open-bd':'#a3bfd6',boom:'#ffd1dc',n2:'#1d6b33',n6:'#0f5f6a'}}
+};
+let themeKey='clasico';
+function applyTheme(){
+  const t=THEMES[themeKey],r=document.documentElement.style;
+  ['field','hid','hid-hi','open','open-bd','boom','n1','n2','n3','n4','n5','n6','n7','n8'].forEach(k=>r.removeProperty('--'+k));
+  Object.entries(t.v).forEach(([k,v])=>r.setProperty('--'+k,v));
+  paintTool();if(G)paint();
+}
+
+/* ---------- estado ---------- */
+let mode='libre',sz=0,G=null,flagTool=false,timerId=null;
+// G: {w,h,m,mines:null|[bool],open:[bool],flag:[bool],boom:[idx],lives,secs,started,done,won}
+function fresh(){const s=SIZES[sz],n=s.w*s.h;return {w:s.w,h:s.h,m:s.m,mines:null,open:Array(n).fill(false),flag:Array(n).fill(false),boom:[],lives:LIVES[mode],secs:0,done:false,won:false};}
+const nb=(i,w,h)=>{const x=i%w,y=(i-x)/w,o=[];for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=x+dx,ny=y+dy;if(nx>=0&&ny>=0&&nx<w&&ny<h)o.push(ny*w+nx);}return o;};
+// minas al azar evitando el primer toque y sus vecinas (así el primer toque abre una zona)
+function plant(first){
+  const n=G.w*G.h,ban=new Set([first,...nb(first,G.w,G.h)]),pool=[];for(let i=0;i<n;i++)if(!ban.has(i))pool.push(i);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  G.mines=Array(n).fill(false);pool.slice(0,G.m).forEach(i=>G.mines[i]=true);
+}
+const count=i=>nb(i,G.w,G.h).filter(j=>G.mines[j]).length;
+function reveal(i){
+  if(G.done||G.open[i]||G.flag[i])return;
+  if(!G.mines){plant(i);startTimer();}
+  if(G.mines[i]){hitMine(i);return;}
+  // destapado en cascada de las zonas sin minas alrededor
+  const stack=[i];
+  while(stack.length){const k=stack.pop();if(G.open[k]||G.flag[k])continue;G.open[k]=true;if(count(k)===0)nb(k,G.w,G.h).forEach(j=>{if(!G.open[j]&&!G.mines[j])stack.push(j);});}
+  checkWin();
+}
+function chord(i){
+  const around=nb(i,G.w,G.h),flags=around.filter(j=>G.flag[j]||G.boom.includes(j)).length;
+  if(flags!==count(i)){pulse(i);return;}
+  around.forEach(j=>{if(!G.open[j]&&!G.flag[j]&&!G.done)reveal(j);});
+}
+function hitMine(i){
+  G.boom.push(i);G.open[i]=true;G.lives--;buzz();
+  if(G.lives<=0){G.done=true;G.won=false;stopTimer();paint();save();setTimeout(()=>showEnd(),reduceMotion?200:700);return;}
+  toast(`¡Mina! Te ${G.lives===1?'queda 1 vida':'quedan '+G.lives+' vidas'}`);
+}
+function toggleFlag(i){if(G.done||G.open[i])return;G.flag[i]=!G.flag[i];if(navigator.vibrate)try{navigator.vibrate(15);}catch(e){}}
+function checkWin(){
+  const n=G.w*G.h;for(let i=0;i<n;i++)if(!G.mines[i]&&!G.open[i])return;
+  G.done=true;G.won=true;stopTimer();
+  for(let i=0;i<n;i++)if(G.mines[i]&&!G.boom.includes(i))G.flag[i]=true;
+  let rec=false;if(mode==='desafio'){const r=store.get('recs',{});if(!r[sz]||G.secs<r[sz]){r[sz]=G.secs;store.set('recs',r);rec=true;}}
+  G.newRec=rec;setTimeout(()=>showEnd(),reduceMotion?200:500);
+}
+
+/* ---------- dibujo ---------- */
+let cells=[];
+function build(){
+  const f=$('field');f.innerHTML='';f.style.setProperty('--w',G.w);cells=[];
+  for(let i=0;i<G.w*G.h;i++){const c=document.createElement('div');c.className='cell';c.dataset.i=i;c.setAttribute('role','button');f.appendChild(c);cells.push(c);}
+  fit();paint();
+}
+function fit(){
+  if(!G)return;const st=$('stage'),gap=2,pad=8;
+  const c=Math.floor(Math.min((st.clientWidth-pad-(G.w-1)*gap)/G.w,(st.clientHeight-pad-(G.h-1)*gap)/G.h,46));
+  $('field').style.setProperty('--c',Math.max(18,c)+'px');
+}
+function paint(){
+  const t=THEMES[themeKey],n=G.w*G.h;
+  for(let i=0;i<n;i++){
+    const c=cells[i];let cls='cell',html='';
+    if(G.open[i]){cls+=' open';
+      if(G.mines&&G.mines[i]){html=`<span class="e">${t.mine}</span>`;if(G.boom.includes(i))cls+=' boom';}
+      else{const k=count(i);if(k){html=k;cls+=' n'+k;}}}
+    else if(G.flag[i]){html=`<span class="e">${t.flag}</span>`;}
+    else if(G.done&&!G.won&&G.mines&&G.mines[i]){cls+=' open';html=`<span class="e">${t.mine}</span>`;}
+    if(c.className!==cls)c.className=cls;if(c._h!==html){c.innerHTML=html;c._h=html;}
+    c.setAttribute('aria-label',G.open[i]?(html===''?'vacía':String(html).replace(/<[^>]+>/g,'')||'mina'):G.flag[i]?'bandera':'tapada');
+  }
+  const flags=G.flag.filter(Boolean).length+G.boom.length;
+  $('left').textContent=G.m-flags;
+  $('lives').textContent='❤️'.repeat(Math.max(0,G.lives))+'🖤'.repeat(LIVES[mode]-Math.max(0,G.lives));
+  $('livesBox').hidden=mode!=='libre';$('timeBox').hidden=mode!=='desafio';
+  const m=Math.floor(G.secs/60);$('time').textContent=`${m}:${String(G.secs%60).padStart(2,'0')}`;
+}
+function paintTool(){const t=THEMES[themeKey];$('toolIcon').textContent=flagTool?t.flag:t.dig;$('toolTxt').textContent=flagTool?'Bandera':'Cavar';$('tool').setAttribute('aria-pressed',flagTool);}
+function pulse(i){if(!reduceMotion)cells[i].animate([{transform:'scale(1)'},{transform:'scale(.86)'},{transform:'scale(1)'}],{duration:180,easing:EASE});}
+function buzz(){if(!reduceMotion)$('field').animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(-3px)'},{transform:'translateX(0)'}],{duration:320,easing:EASE});if(navigator.vibrate)try{navigator.vibrate([60,40,60]);}catch(e){}}
+let toastT;function toast(t,ms=1800){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),ms);}
+
+/* ---------- toque corto, toque largo ---------- */
+let press=null;
+$('field').addEventListener('pointerdown',e=>{
+  const c=e.target.closest('.cell');if(!c||G.done)return;const i=+c.dataset.i;
+  press={i,x:e.clientX,y:e.clientY,long:false,t:setTimeout(()=>{press.long=true;if(!G.open[i]){toggleFlag(i);paint();save();pulse(i);}},420)};
+});
+const cancel=()=>{if(press){clearTimeout(press.t);press=null;}};
+$('field').addEventListener('pointermove',e=>{if(press&&Math.hypot(e.clientX-press.x,e.clientY-press.y)>12)cancel();});
+$('field').addEventListener('pointercancel',cancel);
+$('field').addEventListener('pointerup',e=>{
+  if(!press)return;clearTimeout(press.t);const {i,long}=press;press=null;if(long||G.done)return;
+  if(G.open[i])chord(i);else if(flagTool)toggleFlag(i);else reveal(i);
+  paint();save();
+});
+$('field').addEventListener('contextmenu',e=>{e.preventDefault();const c=e.target.closest('.cell');if(c&&!G.done&&press===null){toggleFlag(+c.dataset.i);paint();save();}});
+
+/* ---------- reloj (solo cuenta en Desafío, con la app a la vista) ---------- */
+function startTimer(){stopTimer();if(mode!=='desafio')return;timerId=setInterval(()=>{if(document.hidden||G.done)return;G.secs++;paint();if(G.secs%5===0)save();},1000);}
+function stopTimer(){clearInterval(timerId);timerId=null;}
+
+/* ---------- fin ---------- */
+const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+function showEnd(){
+  $('endTitle').textContent=G.won?'¡Campo despejado!':'Explotó una mina';
+  $('endBig').textContent=G.won?(mode==='desafio'?fmt(G.secs):'🏆'):THEMES[themeKey].mine;
+  $('endNote').textContent=G.won?(mode==='desafio'?(G.newRec?'¡Nuevo récord en '+SIZES[sz].name+'!':'Récord: '+fmt(store.get('recs',{})[sz])):`Te sobraron ${G.lives} ${G.lives===1?'vida':'vidas'}.`):
+    (mode==='libre'?'Se terminaron las vidas.':'En Desafío alcanza con una mina. Probá de nuevo.');
+  open('end');
+}
+$('endSee').onclick=close;
+$('endNew').onclick=()=>{close();newGame();};
+
+/* ---------- guardado ---------- */
+function save(){
+  if(G.done)store.del('state.'+mode);else store.set('state.'+mode,{sz,G});
+  const busy=['libre','desafio'].some(m=>{const s=store.get('state.'+m,null);return s&&s.G&&s.G.mines;});
+  try{busy?localStorage.setItem('minas.enCurso','1'):localStorage.removeItem('minas.enCurso');}catch(e){}
+}
+function load(){
+  const s=store.get('state.'+mode,null);stopTimer();
+  if(s&&s.G&&SIZES[s.sz]&&s.G.open&&s.G.open.length===SIZES[s.sz].w*SIZES[s.sz].h){sz=s.sz;G=s.G;if(G.mines&&!G.done)startTimer();}
+  else{sz=store.get('size',0);G=fresh();}
+  setTabs();build();
+}
+function newGame(){stopTimer();G=fresh();save();build();}
+
+/* ---------- hojas y botones ---------- */
+function open(p){$('sheet').hidden=false;document.querySelectorAll('[data-pane]').forEach(s=>s.hidden=s.dataset.pane!==p);if(p==='colors')renderThemes();if(p==='recs')renderRecs();}
+function close(){$('sheet').hidden=true;}
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',close));
+addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+$('helpBtn').onclick=()=>open('help');
+$('palBtn').onclick=()=>open('colors');
+$('recBtn').onclick=()=>open('recs');
+$('tool').onclick=()=>{flagTool=!flagTool;paintTool();};
+$('restart').onclick=()=>{if(G.mines&&!G.done)open('confirm');else newGame();};
+$('confirmOk').onclick=()=>{close();newGame();};
+function renderThemes(){
+  $('palList').innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="pal" data-pal="${k}" aria-pressed="${k===themeKey}" style="background:${t.v.hid||'#b0b4ba'};color:#18181a;box-shadow:inset 0 -6px 0 ${t.v.open||'#eceef0'}"><span>${t.mine}${t.flag}${t.dig}</span>${t.name}</button>`).join('');
+}
+$('palList').addEventListener('click',e=>{const b=e.target.closest('[data-pal]');if(!b)return;themeKey=b.dataset.pal;store.set('theme',themeKey);applyTheme();renderThemes();});
+function renderRecs(){const r=store.get('recs',{});$('recList').innerHTML=SIZES.map((s,k)=>`<div><b>${r[k]?fmt(r[k]):'—'}</b><small>${s.name} · ${s.m} minas</small></div>`).join('');}
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{b.blur();if(b.dataset.mode===mode)return;save();mode=b.dataset.mode;store.set('mode',mode);load();}));
+document.querySelectorAll('[data-size]').forEach(b=>b.addEventListener('click',()=>{b.blur();const k=+b.dataset.size;if(k===sz)return;
+  if(G.mines&&!G.done){pendingSize=k;open('confirm');return;}sz=k;store.set('size',sz);setTabs();newGame();}));
+let pendingSize=null;
+$('confirmOk').onclick=()=>{close();if(pendingSize!==null){sz=pendingSize;pendingSize=null;store.set('size',sz);setTabs();}newGame();};
+document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>{pendingSize=null;}));
+function setTabs(){document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-selected',b.dataset.mode===mode));document.querySelectorAll('[data-size]').forEach(b=>b.setAttribute('aria-selected',+b.dataset.size===sz));}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
+addEventListener('pagehide',()=>save());
+let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(fit,60);});
+if(/\/games\/[^/]+\/(index\.html)?$/.test(location.pathname))$('homeBtn').hidden=false;
+themeKey=THEMES[store.get('theme','clasico')]?store.get('theme','clasico'):'clasico';
+mode=store.get('mode','libre')==='desafio'?'desafio':'libre';
+load();applyTheme();paintTool();
+if(!store.get('seenHelp',false)){store.set('seenHelp',true);open('help');}
+</script>

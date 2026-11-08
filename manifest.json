@@ -24,6 +24,66 @@
   ],
   "shortcuts": [
     {
+      "name": "Engranajes",
+      "url": "games/engranajes/index.html",
+      "icons": [
+        {
+          "src": "games/engranajes/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Cartógrafo",
+      "url": "games/mapa/index.html",
+      "icons": [
+        {
+          "src": "games/mapa/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Puentes",
+      "url": "games/puentes/index.html",
+      "icons": [
+        {
+          "src": "games/puentes/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Pirámide",
+      "url": "games/piramide/index.html",
+      "icons": [
+        {
+          "src": "games/piramide/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Encastre",
+      "url": "games/encastre/index.html",
+      "icons": [
+        {
+          "src": "games/encastre/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Desenredo",
+      "url": "games/desenredo/index.html",
+      "icons": [
+        {
+          "src": "games/desenredo/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "Bloques",
       "url": "games/bloques/index.html",
       "icons": [

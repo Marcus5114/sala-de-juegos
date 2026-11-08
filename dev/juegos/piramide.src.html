@@ -1,0 +1,148 @@
+<title>Pirámide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
+<style>
+/*KIT_CSS*/
+/* Layout: barra, dificultad, marcador, pirámide centrada que se ajusta, teclado numérico, botonera (Deshacer 70 % · Reiniciar 30 %) */
+.stage{border-radius:16px;overflow:hidden;background:var(--sky);touch-action:manipulation}
+.pyr{position:absolute;inset:0}
+.br{position:absolute;display:grid;place-items:center;box-sizing:border-box;font-weight:800;font-variant-numeric:tabular-nums;cursor:pointer;
+  background:var(--b);color:var(--bf);border-radius:var(--brr,6px);box-shadow:var(--bs,inset 0 -3px 0 rgba(0,0,0,.18));transition:background .15s,color .15s}
+.br.g{background:var(--g);color:var(--gf)}
+.br.u{color:var(--uf)}
+.br.sel{outline:3px solid var(--sel);outline-offset:-3px;z-index:2}
+.br.bad{color:#fff;background:var(--bad)}
+.br.hint{animation:hintB .5s ease-in-out 3 alternate}
+@keyframes hintB{to{transform:scale(1.08)}}
+.solved .br{animation:pop .5s var(--d,0s) ease-out}
+@keyframes pop{50%{transform:translateY(-6px)}}
+.pad{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pad button{height:46px;border-radius:10px;border:1px solid var(--chip);background:var(--panel);color:var(--fg);font:800 1.15rem var(--font);cursor:pointer}
+.pad button:active{background:var(--chip)}
+.pad button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+/* temas: cielo de fondo y forma de los ladrillos */
+.t-piedra{--sky:linear-gradient(#9fd0ee,#f3dfb6 70%,#e2c48b);--b:#e9cf98;--bf:#5a3d16;--g:#c99a4e;--gf:#3a2508;--uf:#7a4a10;--sel:#2f6fd0;--bs:inset 0 -3px 0 rgba(90,60,20,.35),inset 0 2px 0 rgba(255,255,255,.35);--brr:3px}
+.t-hielo{--sky:linear-gradient(#cfe9fb,#f4fbff);--b:rgba(255,255,255,.75);--bf:#1d4f7a;--g:#9fd3f2;--gf:#0d3557;--uf:#2a6fb0;--sel:#0d3557;--bs:inset 0 0 0 1.5px rgba(120,180,220,.9),inset 0 -4px 0 rgba(120,180,220,.35);--brr:8px}
+.t-juguete{--sky:linear-gradient(#fff6e0,#ffe7c2);--b:#ffffff;--bf:#333;--g:#e8483f;--gf:#fff;--uf:#2b5fb4;--sel:#1b1b1b;--bs:inset 0 -4px 0 rgba(0,0,0,.15),0 1px 0 rgba(0,0,0,.1);--brr:5px}
+.t-juguete .br::before{content:'';position:absolute;top:-5px;left:22%;width:18%;height:6px;border-radius:3px 3px 0 0;background:inherit;box-shadow:calc(var(--w)*.38) 0 0 0 var(--stud,currentColor)}
+.t-juguete .br{--stud:var(--b)}.t-juguete .br.g{--stud:var(--g)}
+.t-choco{--sky:linear-gradient(#fbe3e8,#f6cfd8);--b:#8a5332;--bf:#fbe8d2;--g:#4e2a14;--gf:#ffd9a8;--uf:#ffe9c9;--sel:#fff;--bs:inset 2px 2px 0 rgba(255,255,255,.18),inset -3px -3px 0 rgba(0,0,0,.28);--brr:4px}
+.t-pizarra{--sky:radial-gradient(ellipse at 50% 30%,#3c5a4a,#22352b);--b:transparent;--bf:#f2f2ea;--g:rgba(255,255,255,.12);--gf:#ffe08a;--uf:#f2f2ea;--sel:#ffe08a;--bs:inset 0 0 0 2px rgba(255,255,255,.75);--brr:2px}
+.pal .pv{display:grid;place-items:center}
+@media (prefers-reduced-motion:reduce){.br{transition:none}.br.hint,.solved .br{animation:none}}
+</style>
+
+<div class="app">
+<!--KIT_BAR-->
+  <div class="hud">
+    <div class="sc"><small>nivel</small><b id="lvl">1</b></div>
+    <div class="sc"><small>faltan</small><b id="left">0</b></div>
+    <div class="sc" id="timeBox"><small>tiempo</small><b id="time">0:00</b></div>
+    <button class="sc" id="hintBtn" aria-label="Pista"><small>pista</small><b>💡</b></button>
+  </div>
+  <div class="stage t-piedra" id="stage"><div class="pyr" id="pyr" aria-label="Pirámide"></div></div>
+  <div class="pad" id="pad">
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button data-k="0">0</button>
+    <button data-k="del" aria-label="Borrar"><svg viewBox="0 0 24 24"><path d="M21 5H9l-6 7 6 7h12z"/><path d="m12 9 6 6M18 9l-6 6"/></svg></button>
+    <button data-k="next" aria-label="Siguiente vacío"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </div>
+  <nav class="bottom">
+    <button class="bb" id="act"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span id="actTxt">Deshacer</span></button>
+    <button class="bb" id="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>Reiniciar</button>
+  </nav>
+</div>
+<!--KIT_SHEETS-->
+
+<script>
+/*KIT_JS*/
+/*GEN*/
+/*END_GEN*/
+/* Pirámide de sumas — usa kitStart (dev/kit/kit.js): modos, dificultades, guardado, reloj, fin y temas vienen del kit. */
+const THEMES={piedra:{name:'Piedra',cls:'t-piedra'},hielo:{name:'Hielo',cls:'t-hielo'},juguete:{name:'Bloques de juguete',cls:'t-juguete'},choco:{name:'Chocolate',cls:'t-choco'},pizarra:{name:'Pizarra',cls:'t-pizarra'}};
+const PAR=[45,120,240,420];
+let sel=-1,els=[];
+// S (del kit): {lvl,n,v (solución),g (dados),u (lo que escribe el jugador),undo,secs,won}
+
+/* ---------- dibujo ---------- */
+function build(){
+  const st=$('stage'),W=st.clientWidth,H=st.clientHeight,n=S.n,gap=Math.max(3,Math.round(W*.012));
+  let w=Math.floor(Math.min((W-16-(n-1)*gap)/n,((H-16-(n-1)*gap)/n)/.62)),h=Math.round(Math.min(w*.8,(H-24-(n-1)*gap)/n));
+  const top=(H-(n*h+(n-1)*gap))/2;
+  $('pyr').innerHTML='';els=[];
+  for(let f=0;f<n;f++)for(let c=0;c<=f;c++){const i=pIdx(f,c),b=document.createElement('div');b.className='br';b.dataset.i=i;
+    const left=(W-((f+1)*w+f*gap))/2+c*(w+gap);
+    b.style.cssText=`left:${left}px;top:${top+f*(h+gap)}px;width:${w}px;height:${h}px;--w:${w}px;--d:${(i*.03).toFixed(2)}s`;
+    b._fs=Math.min(h*.5,w*.34);$('pyr').appendChild(b);els[i]=b;}
+  draw();
+}
+function conflicts(){
+  const u=S.u,bad=new Set();
+  for(const [t,a,b] of pRules(S.n)){const T=u[t],A=u[a],B=u[b];
+    if(T!=null&&A!=null&&B!=null&&T!==A+B){[t,a,b].forEach(i=>{if(!S.g[i])bad.add(i);});}
+    else if(T!=null&&A!=null&&B==null&&A>=T){[t,a].forEach(i=>{if(!S.g[i])bad.add(i);});}
+    else if(T!=null&&B!=null&&A==null&&B>=T){[t,b].forEach(i=>{if(!S.g[i])bad.add(i);});}}
+  return bad;
+}
+function draw(){
+  const bad=conflicts();
+  els.forEach((b,i)=>{const val=S.u[i];const cls='br'+(S.g[i]?' g':val!=null?' u':'')+(i===sel?' sel':'')+(bad.has(i)?' bad':'');
+    if(b.className.replace(' is-hint','')!==cls)b.className=cls;const txt=val==null?'':String(val);if(b.textContent!==txt)b.textContent=txt;
+    const digits=Math.max(1,txt.length);b.style.fontSize=Math.min(b._fs,(parseFloat(b.style.width)*.9)/(digits*.62))+'px';
+    b.setAttribute('aria-label',(S.g[i]?'dado ':'')+(txt||'vacío'));});
+  $('left').textContent=S.u.filter(x=>x==null).length;
+  $('stage').classList.toggle('solved',S.won);paintCommon();
+}
+
+/* ---------- escribir ---------- */
+$('pyr').addEventListener('click',e=>{const b=e.target.closest('.br');if(!b||S.won)return;const i=+b.dataset.i;if(S.g[i])return;sel=i;Sfx.play('tap');draw();});
+function setVal(i,val){if(S.u[i]===val)return;pushUndo([i,S.u[i]]);S.u[i]=val;draw();save();check();}
+function key(k){
+  if(S.won||S.timeup)return;
+  if(k==='next'){nextEmpty();return;}
+  if(sel<0){nextEmpty();if(sel<0)return;}
+  const cur=S.u[sel];
+  if(k==='del'){setVal(sel,cur==null||cur<10?null:Math.floor(cur/10));return;}
+  const nv=cur==null?+k:(String(cur).length>=4?cur:cur*10+ +k);setVal(sel,nv);
+}
+function nextEmpty(){const N=S.u.length;for(let s=1;s<=N;s++){const i=(sel+s+N)%N;if(S.u[i]==null){sel=i;draw();return;}}sel=-1;draw();}
+// mover la selección con las flechas: izquierda y derecha en la fila, arriba y abajo entre filas
+function moveSel(d){if(sel<0){nextEmpty();return;}let f=0;while(pIdx(f+1,0)<=sel)f++;let c=sel-pIdx(f,0);
+  if(d==='left')c=Math.max(0,c-1);if(d==='right')c=Math.min(f,c+1);if(d==='up'&&f>0){f--;c=Math.min(c,f);}if(d==='down'&&f<S.n-1)f++;
+  const i=pIdx(f,c);if(!S.g[i]){sel=i;draw();}else{sel=i;draw();}}
+$('pad').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b){Sfx.play('tap');key(b.dataset.k);}});
+function check(){
+  if(S.u.some(x=>x==null)||!S.u.every((x,i)=>x===S.v[i]))return;
+  sel=-1;win();
+}
+function hint(){
+  // primero avisar si hay un número equivocado
+  const wrong=S.u.findIndex((x,i)=>x!=null&&!S.g[i]&&x!==S.v[i]);
+  if(wrong>=0){sel=wrong;draw();els[wrong].classList.add('is-hint');setTimeout(()=>els[wrong].classList.remove('is-hint'),1600);toast('Este ladrillo no va');return;}
+  // si no, completar uno que ya se puede deducir
+  for(const [t,a,b] of pRules(S.n)){const miss=[t,a,b].filter(i=>S.u[i]==null);
+    if(miss.length===1){const i=miss[0];sel=i;setVal(i,S.v[i]);els[i].classList.add('is-hint');setTimeout(()=>els[i].classList.remove('is-hint'),1600);toast('Este se podía deducir');return;}}
+}
+const digits={};for(let d=0;d<10;d++)digits[String(d)]=()=>key(String(d));
+kitStart({
+  id:'piramide',diffs:PDIFFS.map((d,i)=>({...d,par:PAR[i]})),themes:THEMES,theme:'piedra',
+  help:`<p>Cada ladrillo vale la <b>suma de los dos que tiene debajo</b>. Con los números que ya están, completá los que faltan.</p>
+<p>Tocá un ladrillo vacío y escribí con el teclado. Si una suma no da, los ladrillos se marcan en rojo.</p>
+<p>A veces hay que restar: si sabés el de arriba y uno de abajo, el otro es la diferencia.</p>
+<p><b>Dificultad:</b> más filas, números más grandes y menos ladrillos dados en la base, así que hay que deducir más pasos.</p>
+<p><b>Libre:</b> sin reloj y con pistas. <b>Desafío:</b> con cronómetro; ganás de 1 a 3 estrellas según lo rápido que termines.</p>`,
+  keysHelp:'Los números se escriben con el teclado, las flechas mueven la selección y <b>Tab</b> va al siguiente vacío',
+  create(d,lvl){const P=genPyramid(d,lvl);sel=-1;return {n:P.n,v:P.v,g:P.g,u:P.v.map((x,i)=>P.g[i]?x:null)};},
+  reset(S){S.u=S.v.map((x,i)=>S.g[i]?x:null);sel=-1;},
+  valid:s=>s.v&&s.u&&s.u.length===s.v.length,
+  build,draw,busy:s=>s.undo&&s.undo.length>0,
+  undo(u){S.u[u[0]]=u[1];sel=u[0];},hint,
+  applyTheme(k){$('stage').className='stage '+THEMES[k].cls+(S&&S.won?' solved':'');},
+  preview:(k,t)=>`<div class="pv ${t.cls}" style="background:var(--sky);position:relative">${[[0,0,'18'],[-1,1,'7'],[1,1,'11']].map(([x,y,n],j)=>`<div class="br${j===0?' g':''}" style="position:absolute;left:calc(50% + ${x*24-22}px);top:${8+y*22}px;width:44px;height:20px;font-size:12px;--w:44px">${n}</div>`).join('')}</div>`,
+  info:d=>`${PDIFFS[d].rows} filas · base del ${PDIFFS[d].base[0]} al ${PDIFFS[d].base[1]}`,
+  end:S=>({title:'¡Pirámide completa!',big:'▲',note:`Cima: ${S.v[0]}`}),
+  keys:{...digits,Backspace:()=>key('del'),Delete:()=>key('del'),Tab:()=>key('next'),
+    Enter:()=>{if(S.won||S.timeup)$('act').click();else key('next');},
+    ArrowLeft:()=>moveSel('left'),ArrowRight:()=>moveSel('right'),ArrowUp:()=>moveSel('up'),ArrowDown:()=>moveSel('down')}
+});
+</script>
