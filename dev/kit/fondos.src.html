@@ -1,0 +1,29 @@
+<title>Galería de fondos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*KIT_CSS*/
+/* Galería de los fondos del kit (no se publica): cada uno sobre un color oscuro y uno claro, para elegir colores y opacidad. */
+body{overflow:auto}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:12px}
+.gal figure{margin:0}
+.gal .t{position:relative;height:150px;border-radius:14px;overflow:hidden}
+.gal .t.osc{background:radial-gradient(ellipse at 50% 30%,#22305f,#0d1330)}
+.gal .t.cla{background:#f4f1ea}
+.gal figcaption{font:700 .78rem var(--font);margin:4px 2px 0;color:var(--fg)}
+.top{display:flex;gap:8px;align-items:center;padding:12px 12px 0}
+</style>
+<div class="top"><b>Fondos del kit</b><button class="sw" id="sw" role="switch"></button></div>
+<div hidden><!--KIT_BAR--></div><div class="gal" id="gal"></div>
+<!--KIT_SHEETS-->
+<script>
+/*KIT_JS*/
+const OSC={polvo:['#ffe9a8'],estrellas:['#ffffff','#c9b6ff'],burbujas:['#bfe9ff'],hojas:['#e08a2e','#c8442c','#e9b83a'],nieve:['#ffffff','#cfe9fb'],garabatos:['#ffffff'],
+  destellos:['#ffe08a','#7fe7ff'],ondas:['#ffffff','#d6f6ff'],nubes:['#ffffff'],engranajes:['#ffffff'],chispas:['#ffb35c','#ffd28a'],luz:['rgba(255,255,255,.14)'],grilla:['rgba(255,255,255,.16)','#7fe7ff']};
+const CLA={polvo:['#8a6a3a'],estrellas:['#3b3b3e'],burbujas:['#4fb3d9'],hojas:['#5aa469','#e08a2e'],nieve:['#9fd3f2'],garabatos:['#2f5bb8'],destellos:['#e8483f','#2b6fd0'],
+  ondas:['#3b6ea8','#3b6ea8'],nubes:['#9aa0a6'],engranajes:['#3b3b3e'],chispas:['#e8483f'],luz:['rgba(0,0,0,.06)'],grilla:['rgba(0,0,0,.12)','#2b6fd0']};
+const OP={garabatos:.22,engranajes:.08};
+$('gal').innerHTML=Fondo.presets.map(p=>`<figure><div class="t osc" data-p="${p}" data-c="osc"></div><figcaption>${p}</figcaption></figure><figure><div class="t cla" data-p="${p}" data-c="cla"></div><figcaption>${p} · claro</figcaption></figure>`).join('');
+function pintar(){document.querySelectorAll('.t').forEach((t,k)=>{const p=t.dataset.p;Fondo.pintar(t,[[p,(t.dataset.c==='osc'?OSC:CLA)[p],OP[p]]],{semilla:k+1});});
+  $('sw').textContent=Fondo.activo?'Animados':'Quietos';$('sw').setAttribute('aria-checked',Fondo.activo);}
+$('sw').onclick=()=>{Fondo.activo=!Fondo.activo;pintar();};pintar();
+</script>

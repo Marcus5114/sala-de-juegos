@@ -1,7 +1,9 @@
 // Sala de Juegos: funciona sin conexión.
 // Al cambiar cualquier archivo, subí la versión para que los celulares tomen lo nuevo.
-const CACHE='sala-v3.4.0';
+const CACHE='sala-v3.6.0';
 const FILES=['./','index.html','manifest.json','icon-192.png','icon-512.png',
+  'games/blackjack/index.html','games/blackjack/icon-192.png',
+  'games/crucigrama/index.html','games/crucigrama/icon-192.png',
   'games/engranajes/index.html','games/engranajes/icon-192.png',
   'games/mapa/index.html','games/mapa/icon-192.png',
   'games/puentes/index.html','games/puentes/icon-192.png',

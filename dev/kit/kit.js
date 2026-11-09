@@ -16,6 +16,17 @@
 const $=id=>document.getElementById(id);
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE='cubic-bezier(.22,.61,.36,1)';
+// resorte: una curva física (masa, rigidez, freno) convertida a linear() de CSS. La sigue moviendo la placa de video,
+// como cualquier curva, pero se siente más natural (pasa un poquito y vuelve). Sin soporte de linear(), una curva parecida.
+function springEasing({stiffness=210,damping=19,mass=1}={}){
+  let x=0,v=0;const dt=1/240,pts=[];let t=0,still=0;
+  while(t<3&&still<40){const a=(-stiffness*(x-1)-damping*v)/mass;v+=a*dt;x+=v*dt;t+=dt;pts.push(x);still=Math.abs(x-1)<.002&&Math.abs(v)<.01?still+1:0;}
+  const n=Math.min(48,pts.length),out=[];for(let k=0;k<n;k++)out.push(+pts[Math.round(k*(pts.length-1)/(n-1))].toFixed(4));out[n-1]=1;
+  const lin=`linear(0,${out.join(',')})`;
+  try{if(window.CSS&&CSS.supports('transition-timing-function',lin))return lin;}catch(e){}
+  return 'cubic-bezier(.3,1.35,.5,1)';}
+const SPRING=springEasing();
+document.documentElement.style.setProperty('--spring',SPRING);
 const mkStore=pre=>({get(k,d){try{const v=localStorage.getItem(pre+'.'+k);return v?JSON.parse(v):d;}catch(e){return d;}},
   set(k,v){try{localStorage.setItem(pre+'.'+k,JSON.stringify(v));}catch(e){}},del(k){try{localStorage.removeItem(pre+'.'+k);}catch(e){}}});
 const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
@@ -146,7 +157,7 @@ function vibe(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}
    cfg = {
      id:'piramide',                       // prefijo de guardado y marca "en curso" de la sala
      diffs:[{name:'Fácil',par:45,…}],     // dificultades (par: segundos para 3 estrellas en Desafío)
-     themes:{clave:{name,…}}, theme:'clave por defecto',
+     themes:{clave:{name,fondo:{p:'estrellas',c:['#fff']},…}}, theme:'clave por defecto',   (fondo: ver kit/fondo.js)
      help:'<p>…</p>',
      create(diff,lvl) → estado nuevo del nivel (el kit agrega lvl, undo, secs, won)
      reset(S)          → vuelve el nivel al comienzo (para Reiniciar y Reintentar)
@@ -161,13 +172,21 @@ function vibe(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}
      end(S,stars)      → {title,big,note} del cartel de fin (opcional)
      limit(diff)       → segundos máximos en Desafío (opcional; si se pasa: "Se acabó el tiempo")
      keys:{tecla:fn}   → atajos de teclado del juego (opcional)
+     letras:true       → el juego usa las letras para escribir: Z, R y H dejan de ser atajos (deshacer pasa a Ctrl+Z)
+     stars(S)          → estrellas propias en Desafío (1 a 3), en vez de contar el tiempo (opcional)
+   Para perder un nivel por algo que no es el tiempo (quedarse sin fichas, sin vidas): lose('título','nota').
    }
-   Quedan como variables globales: S (estado), mode, diff, themeKey; y las funciones newLevel, retry, win,
+   Quedan como variables globales: S (estado), mode, diff, themeKey; y las funciones newLevel, retry, win, lose,
    save, load, applyTheme, pushUndo, paintCommon. */
 let S=null,mode='libre',diff=0,themeKey='',GAME=null,store=null,timer=null,paintTabs=null;
 function kitStart(cfg){
   GAME=cfg;store=mkStore(cfg.id);
-  $('helpBody').innerHTML=cfg.help+`<p class="kbd">Con teclado: <b>Z</b> deshace, <b>R</b> reinicia${cfg.hint?', <b>H</b> da una pista':''} y <b>Enter</b> pasa al siguiente nivel${cfg.keysHelp?'. '+cfg.keysHelp:''}.</p>`;
+  // fondo animado de cada tema: se arma solo cuando cambia el tema o el tamaño
+  const ap=cfg.applyTheme;cfg.applyTheme=k=>{ap(k);Fondo.tema(k);};
+  Fondo.iniciar({host:$('stage'),temas:Object.fromEntries(Object.entries(cfg.themes).map(([k,t])=>[k,t.fondo||null]))});
+  kitHud();
+  $('helpBody').innerHTML=cfg.help+(cfg.letras?`<p class="kbd">Con teclado: ${cfg.keysHelp}; <b>Ctrl+Z</b> deshace y <b>Enter</b> pasa al siguiente nivel.</p>`
+    :`<p class="kbd">Con teclado: <b>Z</b> deshace, <b>R</b> reinicia${cfg.hint?', <b>H</b> da una pista':''} y <b>Enter</b> pasa al siguiente nivel${cfg.keysHelp?'. '+cfg.keysHelp:''}.</p>`);
   timer=kitTimer(()=>{if(!S||S.won||S.timeup)return;S.secs++;
     const lim=cfg.limit&&mode==='desafio'?cfg.limit(diff):0;if(lim&&S.secs>=lim){S.secs=lim;S.timeup=true;timer.stop();save();cfg.draw();showEnd();return;}
     const t=$('time');if(t)t.textContent=fmt(lim?lim-S.secs:S.secs);if(S.secs%5===0)save();});
@@ -178,7 +197,10 @@ function kitStart(cfg){
   $('endSee').onclick=close;$('endNext').onclick=()=>{close();if(S.timeup)retry();else newLevel(S.lvl+1);};
   const hb=$('hintBtn');if(hb)hb.onclick=()=>{if(S&&!S.won&&!S.timeup&&cfg.hint){cfg.hint();Sfx.play('tap');}};
   paintTabs=kitTabs(cfg.diffs.map(d=>d.name),()=>mode,()=>diff,m=>{save();mode=m;store.set('mode',m);load();},d=>{save();diff=d;store.set('diff',d);load();});
-  Input.keys({z:kitUndo,r:()=>$('restart').click(),h:()=>{if(mode==='libre'&&hb&&!hb.hidden)hb.click();},Enter:()=>{if(S&&(S.won||S.timeup))$('act').click();},...(cfg.keys||{})},{repeat:false});
+  const short=cfg.letras?{}:{z:kitUndo,r:()=>$('restart').click(),h:()=>{if(mode==='libre'&&hb&&!hb.hidden)hb.click();}};
+  Input.keys({...short,Enter:()=>{if(S&&(S.won||S.timeup))$('act').click();},...(cfg.keys||{})},{repeat:false});
+  // Ctrl/Cmd+Z deshace siempre (Input.keys no mira teclas con Ctrl)
+  addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&!e.altKey&&e.key.toLowerCase()==='z'&&!panelOpen()&&!/^(INPUT|TEXTAREA|SELECT)$/.test((e.target&&e.target.tagName)||'')){e.preventDefault();kitUndo();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});addEventListener('pagehide',()=>save());
   let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>{if(S)cfg.build();},80);});
   themeKey=cfg.themes[store.get('theme',cfg.theme)]?store.get('theme',cfg.theme):cfg.theme;
@@ -187,8 +209,18 @@ function kitStart(cfg){
   if(!store.get('seen',false)){store.set('seen',true);open('help');}
 }
 const SK=()=>mode+'.'+diff;
-function newLevel(lvl){S=Object.assign(GAME.create(diff,lvl),{lvl,undo:[],secs:0,won:false,timeup:false});save();GAME.build();timer.start();}
-function retry(){GAME.reset(S);Object.assign(S,{undo:[],secs:0,won:false,timeup:false,rec:false});GAME.applyTheme(themeKey);GAME.build();save();timer.start();}
+function newLevel(lvl){kitHud.calma&&kitHud.calma();S=Object.assign(GAME.create(diff,lvl),{lvl,undo:[],secs:0,won:false,timeup:false});save();GAME.build();timer.start();entrada();}
+// entrada de cada nivel: el tablero aparece con un resorte corto (el fondo no se mueve)
+function entrada(){if(reduceMotion)return;const st=$('stage');if(!st)return;
+  [...st.children].filter(e=>!e.classList.contains('fondo')).forEach(e=>e.animate([{opacity:0,transform:'scale(.965)'},{opacity:1,transform:'none'}],{duration:380,easing:SPRING}));}
+// el marcador reacciona cuando cambia un número (salvo el reloj)
+function kitHud(){const hud=document.querySelector('.hud');if(!hud||!window.MutationObserver)return;const last=new WeakMap();let quiet=0;
+  hud.querySelectorAll('b').forEach(b=>last.set(b,b.textContent));
+  new MutationObserver(ms=>{const now=performance.now();const seen=new Set();ms.forEach(m=>{const b=m.target.nodeType===3?m.target.parentElement:m.target.closest&&m.target.closest('b');
+      if(!b||b.tagName!=='B'||b.id==='time'||seen.has(b))return;seen.add(b);const t=b.textContent;if(last.get(b)!==t){last.set(b,t);if(now>quiet&&!document.hidden)Anim.pop(b);}});})
+    .observe(hud,{subtree:true,childList:true,characterData:true});
+  kitHud.calma=()=>{quiet=performance.now()+500;};}
+function retry(){kitHud.calma&&kitHud.calma();GAME.reset(S);Object.assign(S,{undo:[],secs:0,won:false,timeup:false,rec:false,lost:null});GAME.applyTheme(themeKey);GAME.build();save();timer.start();}
 function pushUndo(entry){S.undo.push(entry);if(S.undo.length>300)S.undo.shift();}
 function kitUndo(){if(!S||S.won||S.timeup)return;const u=S.undo.pop();if(u===undefined)return;GAME.undo(u);Sfx.play('undo');GAME.draw();save();}
 function applyTheme(){GAME.applyTheme(themeKey);if(S)GAME.draw();}
@@ -203,7 +235,7 @@ function paintCommon(){
 }
 function win(){
   if(S.won)return;S.won=true;timer.stop();let stars=0;
-  if(mode==='desafio'){const par=GAME.diffs[diff].par||120;stars=S.secs<=par?3:S.secs<=par*2?2:1;
+  if(mode==='desafio'){const par=GAME.diffs[diff].par||120;stars=GAME.stars?clamp(GAME.stars(S)|0,1,3):S.secs<=par?3:S.secs<=par*2?2:1;
     const st=store.get('stars.'+diff,{});if(!st[S.lvl]||stars>st[S.lvl])st[S.lvl]=stars;store.set('stars.'+diff,st);
     const bt=store.get('best',{});if(!bt[diff]||S.secs<bt[diff]){bt[diff]=S.secs;store.set('best',bt);S.rec=true;}}
   S.stars=stars;const pk='prog.'+SK();store.set(pk,Math.max(store.get(pk,0),S.lvl+1));
@@ -211,8 +243,9 @@ function win(){
   save();GAME.draw();Sfx.play('win');vibe([20,40,30]);Anim.celebrate($('stage'));
   setTimeout(showEnd,reduceMotion?150:900);
 }
+function lose(title,note){if(!S||S.won||S.timeup)return;S.timeup=true;S.lost={title,note};timer.stop();save();GAME.draw();Sfx.play('bad');vibe(60);setTimeout(showEnd,reduceMotion?150:700);}
 function showEnd(){
-  if(S.timeup){$('endTitle').textContent='Se acabó el tiempo';$('endBig').textContent='⏱';$('endNote').textContent='Probá de nuevo: el nivel empieza igual.';$('endNext').textContent='Reintentar';open('end');return;}
+  if(S.timeup){const L=S.lost||{};$('endTitle').textContent=L.title||'Se acabó el tiempo';$('endBig').textContent=L.title?'✗':'⏱';$('endNote').textContent=L.note||'Probá de nuevo: el nivel empieza igual.';$('endNext').textContent='Reintentar';open('end');return;}
   const e=GAME.end?GAME.end(S,S.stars):{};
   $('endTitle').textContent=e.title||'¡Nivel resuelto!';
   $('endBig').textContent=mode==='desafio'?'★'.repeat(S.stars)+'☆'.repeat(3-S.stars):(e.big||'✓');
@@ -222,13 +255,50 @@ function showEnd(){
 function save(){if(!S)return;const o={};for(const k in S)if(k[0]!=='_')o[k]=S[k];store.set('state.'+SK(),o);
   let busy=false;for(const m of ['libre','desafio'])for(let d=0;d<GAME.diffs.length;d++){const s=store.get('state.'+m+'.'+d,null);if(s&&!s.won&&!s.timeup&&GAME.busy(s))busy=true;}
   try{busy?localStorage.setItem(GAME.id+'.enCurso','1'):localStorage.removeItem(GAME.id+'.enCurso');}catch(e){}}
-function load(){timer.stop();const s=store.get('state.'+SK(),null);
+function load(){kitHud.calma&&kitHud.calma();timer.stop();const s=store.get('state.'+SK(),null);
   if(s&&(!GAME.valid||GAME.valid(s))){S=s;S.undo=S.undo||[];GAME.applyTheme(themeKey);GAME.build();if(!S.won&&!S.timeup)timer.start();}
   else newLevel(store.get('prog.'+SK(),0));
   paintTabs();}
 function renderThemes(){$('palList').innerHTML=Object.entries(GAME.themes).map(([k,t])=>`<button class="pal" data-pal="${k}" aria-pressed="${k===themeKey}">${GAME.preview(k,t)}${t.name}</button>`).join('')+
-  `<div class="sndrow"><b>Sonido</b><button class="sw" id="sndBtn" role="switch" aria-checked="${Sfx.on}">${Sfx.on?'Sí':'No'}</button></div>`;
-  $('sndBtn').onclick=()=>{Sfx.on=!Sfx.on;Sfx.play('ok');renderThemes();};}
+  `<div class="sndrow"><b>Sonido</b><button class="sw" id="sndBtn" role="switch" aria-checked="${Sfx.on}">${Sfx.on?'Sí':'No'}</button></div>`+
+  `<div class="sndrow"><b>Fondo animado</b><button class="sw" id="fxBtn" role="switch" aria-checked="${Fondo.activo}">${Fondo.activo?'Sí':'No'}</button></div>`;
+  $('sndBtn').onclick=()=>{Sfx.on=!Sfx.on;Sfx.play('ok');renderThemes();};
+  $('fxBtn').onclick=()=>{Fondo.activo=!Fondo.activo;Sfx.play('tap');renderThemes();};}
 function renderRecs(){const sv=store.get('solved',{}),bt=store.get('best',{});
   $('recList').innerHTML=GAME.diffs.map((d,k)=>{const st=Object.values(store.get('stars.'+k,{})).reduce((a,b)=>a+b,0);
     return `<div><b>${d.name}</b><small>${GAME.info?GAME.info(k):''}</small><small>Libre: ${sv['libre.'+k]||0} resueltos</small><small>Desafío: ${st} ★ · mejor ${bt[k]?fmt(bt[k]):'—'}</small></div>`;}).join('');}
+
+/* ---------- 7. Segundo plano e IA ----------
+   kitWorker(fábrica) corre cálculos pesados (IA, búsquedas, verificaciones) en otro hilo, así la pantalla nunca se traba.
+   La fábrica es una función SIN nada de afuera que devuelve un objeto con funciones: function MiIA(){ … return {pensar,…}; }
+   El mismo código se usa en la página (MiIA()), en segundo plano (kitWorker(MiIA)) y en node para las pruebas.
+     const ia=kitWorker(MiIA,{timeout:4000});
+     ia.call('pensar',estado).then(jugada=>…)    // los datos viajan copiados (objetos simples, sin funciones ni elementos)
+     ia.cancel()                                // corta lo que esté pensando (por ejemplo, al reiniciar)
+     ia.enSegundoPlano, ia.ultimo               // si de verdad usa otro hilo, y cuántos ms tardó la última respuesta
+   Si el navegador no puede crear el hilo, hace lo mismo en el principal (más lento, pero funciona).
+   IA.elegir(opciones,{temp,error},rnd) da dificultad creíble: [{v:'pedir',score:-.1},…] → v.
+     temp 0 = siempre la mejor; temp .2–.5 = a veces elige una parecida; error .1 = una de cada diez, cualquiera.
+   IA.pensar(promesa,ms) espera al menos ms para que se vea que el rival "piensa", aunque la cuenta sea instantánea. */
+function kitWorker(factory,{timeout=4000}={}){
+  const src=`const API=(${factory.toString()})();onmessage=e=>{const {id,m,a}=e.data;let r,err;const t0=performance.now();try{r=API[m](...a);}catch(x){err=String(x&&x.message||x);}postMessage({id,r,err,ms:performance.now()-t0});};`;
+  let w=null,seq=0,api=null,ok=typeof Worker!=='undefined';const pend=new Map();
+  function start(){if(w||!ok)return;try{const url=URL.createObjectURL(new Blob([src],{type:'text/javascript'}));w=new Worker(url);URL.revokeObjectURL(url);
+      w.onmessage=e=>{const d=e.data,p=pend.get(d.id);if(!p)return;pend.delete(d.id);clearTimeout(p.to);K.ultimo=d.ms;d.err?p.rej(new Error(d.err)):p.res(d.r);};
+      w.onerror=e=>{e.preventDefault&&e.preventDefault();reset('falló el cálculo en segundo plano');ok=false;};}
+    catch(e){ok=false;w=null;}}
+  function reset(msg){if(w){w.terminate();w=null;}pend.forEach(p=>{clearTimeout(p.to);p.rej(new Error(msg));});pend.clear();}
+  const K={ultimo:0,
+    call(m,...a){start();
+      if(!w){api=api||factory();return new Promise((res,rej)=>setTimeout(()=>{const t0=performance.now();try{res(api[m](...a));K.ultimo=performance.now()-t0;}catch(e){rej(e);}},0));}
+      const id=++seq;return new Promise((res,rej)=>{const to=setTimeout(()=>{if(pend.has(id))reset('tardó demasiado');},timeout);pend.set(id,{res,rej,to});w.postMessage({id,m,a});});},
+    cancel(){reset('cancelado');},
+    get enSegundoPlano(){start();return !!w;}};
+  return K;}
+const IA={
+  elegir(ops,{temp=0,error=0}={},rnd=Math.random){if(!ops.length)return null;const o=ops.slice().sort((a,b)=>b.score-a.score);
+    if(error&&rnd()<error)return o[Math.floor(rnd()*o.length)].v;if(!temp)return o[0].v;
+    const m=o[0].score,w=o.map(x=>Math.exp((x.score-m)/temp)),tot=w.reduce((a,b)=>a+b,0);let x=rnd()*tot;
+    for(let k=0;k<w.length;k++){x-=w[k];if(x<=0)return o[k].v;}return o[0].v;},
+  pensar(p,ms=450){return Promise.all([p,new Promise(r=>setTimeout(r,reduceMotion?0:ms))]).then(([v])=>v);}
+};

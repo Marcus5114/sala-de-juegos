@@ -18,6 +18,7 @@ require('./_base.js')(out,8862,async({p,ok})=>{
     tr('ruido',()=>{const n=SimplexNoise.createNoise2D(()=>.5);const v=n(.3,.7);return v>=-1&&v<=1;});
     tr('confeti',()=>typeof confetti==='function');
     tr('caminos',()=>{const g=new PF.Grid(5,5);g.setWalkableAt(2,0,false);g.setWalkableAt(2,1,false);return new PF.AStarFinder().findPath(0,0,4,0,g).length>5;});
+    tr('motion',()=>{const e=document.createElement('i');document.body.appendChild(e);const a=Motion.animate(e,{opacity:[0,1]},{duration:.2});return typeof Motion.animate==='function'&&!!a;});
     tr('semilla',()=>{const a=new Math.seedrandom('sala'),b=new Math.seedrandom('sala');return a()===b();});
     tr('el kit sigue funcionando',()=>typeof Input.drag==='function'&&typeof $==='function');
     return t;});

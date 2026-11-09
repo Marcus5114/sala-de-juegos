@@ -2,6 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
 <style>
+/*KIT_FONDO_CSS*/
 /* Layout: app de una pantalla — barra con modo, marcadores, tablero 4x4 cuadrado centrado, botonera abajo */
 :root{
   --bg:#f1f1f2; --fg:#18181a; --muted:#6c6c72; --panel:#fafafa; --chip:#e2e2e6;
@@ -112,6 +113,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--fg);outline-offset:
 </div>
 
 <script>
+/*KIT_FONDO_JS*/
+// fondo animado de cada tema (kit/fondo.js)
+const FONDOS={"numeros":{"p":[["polvo",["#c9a26b","#e0b47a"],0.55]],"bg":"radial-gradient(ellipse at 50% 40%,#c9a26b2e,#c9a26b0a 75%)"},"frutas":{"p":[["hojas",["#7bc96f","#e85d5d","#f2a33a"],0.75]],"bg":"radial-gradient(ellipse at 50% 40%,#7bc96f2e,#7bc96f0a 75%)"},"espacio":{"p":[["estrellas",["#ffffff","#c9b6ff","#8fd3ff"]]],"bg":"radial-gradient(ellipse at 50% 30%,#2b1f5a,#0b0a1c 75%)"},"animales":{"p":[["nubes",["#ffffff"]],["polvo",["#9ccc65"],0.5]],"bg":"linear-gradient(rgba(120,190,255,.38),rgba(156,204,101,.22))"}};
 const $=id=>document.getElementById(id);
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE='cubic-bezier(.22,.61,.36,1)',CHALLENGE_SECS=180;
@@ -297,7 +301,7 @@ function renderThemes(){
   $('palList').innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="pal" data-pal="${k}" aria-pressed="${k===themeKey}" style="background:${t.board};color:${t.em?'#fff':'#4a423a'}"><span>${t.em?t.em.slice(0,4).join(''):'<b style="font-size:1rem">2 4 8 16</b>'}</span>${t.name}</button>`).join('');
 }
 $('palList').addEventListener('click',e=>{const b=e.target.closest('[data-pal]');if(!b)return;themeKey=b.dataset.pal;store.set('theme',themeKey);applyTheme();renderThemes();});
-function applyTheme(){const t=THEMES[themeKey],b=$('board').style;if(t.auto){b.removeProperty('--board');b.removeProperty('--cell');}else{b.setProperty('--board',t.board);b.setProperty('--cell',t.cell);}els.forEach(el=>{el._v=null;});render(true);}
+function applyTheme(){Fondo.tema(themeKey);const t=THEMES[themeKey],b=$('board').style;if(t.auto){b.removeProperty('--board');b.removeProperty('--cell');}else{b.setProperty('--board',t.board);b.setProperty('--cell',t.cell);}els.forEach(el=>{el._v=null;});render(true);}
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{b.blur();if(b.dataset.mode===mode)return;save();stopTimer();mode=b.dataset.mode;store.set('mode',mode);setTabs();load();}));
 function setTabs(){document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-selected',b.dataset.mode===mode));}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
@@ -306,6 +310,7 @@ let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(fit,60);});
 if(/\/games\/[^/]+\/(index\.html)?$/.test(location.pathname))$('homeBtn').hidden=false;
 themeKey=THEMES[store.get('theme','numeros')]?store.get('theme','numeros'):'numeros';
 mode=store.get('mode','libre')==='desafio'?'desafio':'libre';
+Fondo.iniciar({host:document.getElementById('stage'),temas:FONDOS});Fondo.tema(themeKey);
 setTabs();fit();load();applyTheme();
 if(!store.get('seenHelp',false)){store.set('seenHelp',true);open('help');}
 </script>

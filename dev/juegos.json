@@ -1,6 +1,8 @@
 {
   "_ayuda": "Registro de juegos de la sala. armar.py construye cada juego, el manifest (atajos) y la lista de archivos sin conexión a partir de esta lista. El orden es el de los atajos (Android muestra los primeros).",
   "juegos": [
+    {"id":"blackjack","nombre":"Blackjack","fuente":"blackjack.src.html","color":"#0d5233"},
+    {"id":"crucigrama","nombre":"Crucigrama","fuente":"crucigrama.src.html","color":"#2b2b2e","datos":"crucigrama"},
     {"id":"engranajes","nombre":"Engranajes","fuente":"engranajes.src.html","color":"#2b2f36"},
     {"id":"mapa","nombre":"Cartógrafo","fuente":"mapa.src.html","color":"#bfe3f2"},
     {"id":"puentes","nombre":"Puentes","fuente":"puentes.src.html","color":"#1f78ad"},

@@ -51,6 +51,34 @@ require('./_base.js')(out,8861,async({p,ok,fits,cpuIdle})=>{
   ok('Loop se detiene cuando step devuelve false',await p.evaluate(async()=>{let n=0;const L=Loop(()=>++n<5);L.start();await new Promise(r=>setTimeout(r,300));return n===5&&!L.on;}));
   ok('Redraw junta varias pedidas en un solo dibujo',await p.evaluate(async()=>{let n=0;const R=Redraw(()=>n++);R();R();R();await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));return n===1;}));
   ok('azar con semilla: mismo número, misma secuencia',await p.evaluate(()=>{const a=rngOf(7),b=rngOf(7);return [a(),a(),a()].join()===[b(),b(),b()].join();}));
+  // segundo plano: la pantalla sigue fluida mientras otro hilo hace una cuenta larga
+  const wk=await p.evaluate(async()=>{
+    function Pesada(){function fib(n){return n<2?n:fib(n-1)+fib(n-2);}return {fib,eco:x=>x,falla:()=>{throw new Error('a propósito');},lento:()=>{const t=Date.now();while(Date.now()-t<3000);return 1;}};}
+    const w=kitWorker(Pesada,{timeout:1500});const r={hilo:w.enSegundoPlano};
+    let frames=0,run=true;(function f(){frames++;if(run)requestAnimationFrame(f);})();
+    const t0=performance.now();r.fib=await w.call('fib',38);r.ms=performance.now()-t0;run=false;r.fps=frames/(r.ms/1000);
+    r.eco=JSON.stringify(await w.call('eco',{a:[1,2],b:'x'}));
+    try{await w.call('falla');r.err='no';}catch(e){r.err=e.message;}
+    try{await w.call('lento');r.to='no';}catch(e){r.to=e.message;}
+    r.despues=await w.call('fib',10);
+    const p2=w.call('lento');w.cancel();try{await p2;r.cancel='no';}catch(e){r.cancel=e.message;}
+    // sin Worker: mismo resultado en el hilo principal
+    const W0=window.Worker;window.Worker=undefined;const w2=kitWorker(Pesada);r.sin=w2.enSegundoPlano;r.sinFib=await w2.call('fib',15);window.Worker=W0;
+    return r;});
+  ok('kitWorker usa otro hilo',wk.hilo);
+  ok(`la pantalla sigue fluida mientras calcula (${wk.fps.toFixed(0)} cuadros/s durante ${wk.ms.toFixed(0)} ms)`,wk.fib===39088169&&wk.ms>150&&wk.fps>40);
+  ok('los datos van y vuelven copiados',wk.eco==='{"a":[1,2],"b":"x"}');
+  ok('un error del cálculo llega como error',wk.err==='a propósito');
+  ok('si tarda demasiado, se corta',wk.to==='tardó demasiado');
+  ok('después de cortar, vuelve a funcionar',wk.despues===55);
+  ok('cancelar corta lo que está pensando',wk.cancel==='cancelado');
+  ok('sin Worker, calcula igual en el hilo principal',wk.sin===false&&wk.sinFib===610);
+  const ia=await p.evaluate(()=>{const ops=[{v:'a',score:0},{v:'b',score:-.1},{v:'c',score:-1}];const cnt=t=>{const r=rngOf(3),c={a:0,b:0,c:0};for(let i=0;i<2000;i++)c[IA.elegir(ops,t,r)]++;return c;};
+    return {cero:cnt({temp:0}),tibia:cnt({temp:.3}),error:cnt({temp:0,error:.3})};});
+  ok('IA.elegir sin temperatura: siempre la mejor',ia.cero.a===2000);
+  ok(`IA.elegir con temperatura: casi siempre una buena, rara vez la mala (${ia.tibia.a}/${ia.tibia.b}/${ia.tibia.c})`,ia.tibia.a>ia.tibia.b&&ia.tibia.b>ia.tibia.c&&ia.tibia.b>400&&ia.tibia.c<300);
+  ok(`IA.elegir con error: a veces cualquiera (${ia.error.c} malas de 2000)`,ia.error.c>100&&ia.error.c<300);
+  ok('IA.pensar espera al menos lo pedido',await p.evaluate(async()=>{const t=performance.now();await IA.pensar(Promise.resolve(1),300);return performance.now()-t>=290;}));
   ok('sin desborde en pantalla de celular',await fits());
   const idle=await cpuIdle();ok(`en reposo no consume (${idle.toFixed(2)} %)`,idle<0.5);
 });

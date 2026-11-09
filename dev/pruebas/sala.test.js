@@ -12,7 +12,7 @@ const ok=(n,c)=>{console.log((c?'OK  ':'FAIL')+' '+n);if(!c)process.exitCode=1;}
  await p.goto('http://localhost:8801/');await p.evaluate(()=>navigator.serviceWorker.ready);await p.waitForTimeout(500);
  ok(N+' juegos',await p.locator('.tile').count()===N);
  ok('6 chips de categoría',await p.locator('.cat').count()===6);
- await p.click('[data-cat="cartas"]');ok('Cartas filtra a Spider',(await p.textContent('.tile .name'))==='Spider Solitario');
+ await p.click('[data-cat="cartas"]');{const n=await p.$$eval('.tile .name',e=>e.map(x=>x.textContent).sort().join('|'));ok('Cartas filtra los juegos de cartas: '+n,n==='Blackjack|Spider Solitario');}
  await p.click('[data-cat="arcade"]');ok('Arcade muestra Bloques',(await p.textContent('.tile .name'))==='Bloques');
  await p.click('[data-cat="puzzle"]');ok('Puzzle filtra sus 6 juegos',await p.locator('.tile').count()===6);
  await p.click('[data-cat="all"]');await p.click('[data-star="spider"]');

@@ -44,5 +44,6 @@ run(process.argv[2]||require('path').join(__dirname,'..','..','games','puentes',
   await p.mouse.move(...a);await p.mouse.down();for(let k=0;k<40;k++)await p.mouse.move(a[0]+(k%20)*4,a[1],{steps:1});await p.mouse.up();
   const fps=await p.evaluate(t=>{cancelAnimationFrame(window._raf);return window._f/((Date.now()-t)/1000);},t0);await cdp.send('Emulation.setCPUThrottlingRate',{rate:1});
   ok(`arrastre fluido en Experto con CPU 4× más lenta (${fps.toFixed(0)} cuadros/s)`,fps>=30);
+  await p.waitForTimeout(800);/* que terminen las respuestas al último arrastre */
   const idle=await cpuIdle();ok(`en reposo no consume (${idle.toFixed(2)} %)`,idle<0.5);
 });

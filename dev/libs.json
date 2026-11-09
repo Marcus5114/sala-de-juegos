@@ -1,15 +1,81 @@
 {
   "_ayuda": "Librerías probadas para la sala. En la fuente de un juego, /*LIB:nombre*/ dentro de un <script> se reemplaza al armar por el archivo indicado (instalado con npm en dev/). Ver dev/kit/LIBRERIAS.md.",
   "libs": {
-    "gsap":        {"paquete":"gsap@3.15.1","archivo":"gsap/dist/gsap.min.js","global":"gsap","licencia":"licencia estándar sin cargo de GSAP"},
-    "matter":      {"paquete":"matter-js@0.20.0","archivo":"matter-js/build/matter.min.js","global":"Matter","licencia":"MIT"},
-    "planck":      {"paquete":"planck@1.5.1","archivo":"planck/dist/planck.min.js","global":"planck","licencia":"MIT"},
-    "pixi":        {"paquete":"pixi.js@8.22.0","archivo":"pixi.js/dist/pixi.min.js","global":"PIXI","licencia":"MIT"},
-    "howler":      {"paquete":"howler@2.2.4","archivo":"howler/dist/howler.core.min.js","global":"Howl","licencia":"MIT"},
-    "zzfx":        {"paquete":"zzfx@1.4.0","archivo":"zzfx/ZzFXMicro.min.js","global":"zzfx","licencia":"MIT","envolver":["zzfx","zzfxV"]},
-    "ruido":       {"paquete":"simplex-noise@4.0.3","archivo":"simplex-noise/dist/esm/simplex-noise.js","global":"SimplexNoise","licencia":"MIT","esm":true,"envolver":["createNoise2D","createNoise3D","createNoise4D"]},
-    "confeti":     {"paquete":"canvas-confetti@1.9.4","archivo":"canvas-confetti/dist/confetti.browser.js","global":"confetti","licencia":"ISC"},
-    "caminos":     {"paquete":"pathfinding@0.4.18","archivo":"pathfinding/visual/lib/pathfinding-browser.min.js","global":"PF","licencia":"MIT"},
-    "semilla":     {"paquete":"seedrandom@3.0.5","archivo":"seedrandom/seedrandom.min.js","global":"Math.seedrandom","licencia":"MIT"}
+    "gsap": {
+      "paquete": "gsap@3.15.1",
+      "archivo": "gsap/dist/gsap.min.js",
+      "global": "gsap",
+      "licencia": "licencia estándar sin cargo de GSAP"
+    },
+    "matter": {
+      "paquete": "matter-js@0.20.0",
+      "archivo": "matter-js/build/matter.min.js",
+      "global": "Matter",
+      "licencia": "MIT"
+    },
+    "planck": {
+      "paquete": "planck@1.5.1",
+      "archivo": "planck/dist/planck.min.js",
+      "global": "planck",
+      "licencia": "MIT"
+    },
+    "pixi": {
+      "paquete": "pixi.js@8.22.0",
+      "archivo": "pixi.js/dist/pixi.min.js",
+      "global": "PIXI",
+      "licencia": "MIT"
+    },
+    "howler": {
+      "paquete": "howler@2.2.4",
+      "archivo": "howler/dist/howler.core.min.js",
+      "global": "Howl",
+      "licencia": "MIT"
+    },
+    "zzfx": {
+      "paquete": "zzfx@1.4.0",
+      "archivo": "zzfx/ZzFXMicro.min.js",
+      "global": "zzfx",
+      "licencia": "MIT",
+      "envolver": [
+        "zzfx",
+        "zzfxV"
+      ]
+    },
+    "ruido": {
+      "paquete": "simplex-noise@4.0.3",
+      "archivo": "simplex-noise/dist/esm/simplex-noise.js",
+      "global": "SimplexNoise",
+      "licencia": "MIT",
+      "esm": true,
+      "envolver": [
+        "createNoise2D",
+        "createNoise3D",
+        "createNoise4D"
+      ]
+    },
+    "confeti": {
+      "paquete": "canvas-confetti@1.9.4",
+      "archivo": "canvas-confetti/dist/confetti.browser.js",
+      "global": "confetti",
+      "licencia": "ISC"
+    },
+    "caminos": {
+      "paquete": "pathfinding@0.4.18",
+      "archivo": "pathfinding/visual/lib/pathfinding-browser.min.js",
+      "global": "PF",
+      "licencia": "MIT"
+    },
+    "semilla": {
+      "paquete": "seedrandom@3.0.5",
+      "archivo": "seedrandom/seedrandom.min.js",
+      "global": "Math.seedrandom",
+      "licencia": "MIT"
+    },
+    "motion": {
+      "paquete": "motion@14.6.0",
+      "archivo": "motion/dist/motion.js",
+      "global": "Motion",
+      "licencia": "MIT"
+    }
   }
 }

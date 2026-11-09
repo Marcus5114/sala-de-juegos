@@ -27,9 +27,29 @@
 | `ruido` | simplex-noise 4.0.3 | 20 KB | MIT | `SimplexNoise.createNoise2D` … | ruido suave: terrenos, fondos orgánicos, movimientos naturales |
 | `confeti` | canvas-confetti 1.9.4 | 28 KB | ISC | `confetti` | festejos grandes con lienzo (más partículas que `Anim.celebrate`) |
 | `caminos` | pathfinding 0.4.18 | 20 KB | MIT | `PF` | rutas en grillas (A*, Dijkstra, salto de puntos): laberintos, enemigos |
+| `motion` | motion 14.6.0 | 172 KB | MIT | `Motion` | secuencias, escalonados, resortes y gestos complejos; anima con la placa de video, igual que el kit |
 | `semilla` | seedrandom 3.0.5 | 4 KB | MIT | `Math.seedrandom` | azar con semilla de texto (para niveles por fecha, “el desafío del día”) |
 
 Pesos sin comprimir (el sitio los envía comprimidos, más o menos a un tercio).
+
+## Animación: qué conviene (medido)
+
+La misma escena (20 motas que suben y titilan) hecha de cuatro formas, midiendo el procesador principal durante 5 segundos (`node dev/herramientas/medir_animacion.js`):
+
+| Cómo | Procesador | Por qué |
+| --- | --- | --- |
+| CSS / WAAPI (`Fondo`, `Anim`, `SPRING` del kit) | 0,04 % | `transform` y `opacity` los mueve la placa de video |
+| Motion | 0,04 % | usa WAAPI por debajo: mismo costo, más herramientas |
+| GSAP | 2,8 % | calcula cada cuadro en el procesador |
+| Lienzo `<canvas>` cuadro a cuadro (como tsParticles) | 5,6 % | dibuja todo de nuevo 60 veces por segundo |
+
+Por eso:
+
+- **Fondos y animaciones que duran**: siempre CSS/WAAPI (el kit). Nunca un bucle que dibuje cuadro a cuadro.
+- **Efectos de una vez** (festejos, entradas, cartas que vuelan): `Anim` del kit con `SPRING`. Si hace falta una secuencia larga con muchos pasos o gestos con inercia, **Motion** (mismo costo).
+- **GSAP**: solo para una intro o un festejo largo que termina; nunca para algo que queda andando.
+- **Lienzo** (`pixi`, `canvas-confetti`): solo cuando hay cientos de cosas moviéndose a la vez (un arcade) y siempre pausado cuando nada se mueve.
+- **Descartados**: Lottie (dibuja SVG en el procesador en cada cuadro y pide animaciones hechas en otro programa) y tsParticles (lienzo cuadro a cuadro, ~100 KB): más peso y más batería que el kit para lo mismo.
 
 ## Cuidados
 

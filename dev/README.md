@@ -15,7 +15,9 @@ dev/
 │   ├── kit.css          tokens de color, barra, marcador, botonera, paneles, estados
 │   ├── bar.html         barra de arriba (sala, ayuda, Libre/Desafío, temas, progreso) y dificultades
 │   ├── sheets.html      paneles: ayuda, temas, progreso, fin de nivel, confirmar
-│   ├── kit.js           entrada, animación, bucle, sonido y kitStart (el juego base)
+│   ├── kit.js           entrada, animación (SPRING), bucle, sonido, kitStart (el juego base), kitWorker e IA
+│   ├── fondo.js/.css    fondos animados por tema (también para los juegos sin kitStart)
+│   ├── fondos.src.html  galería de fondos
 │   ├── demo.src.html    laboratorio: un juego mínimo y una zona por cada tipo de entrada
 │   ├── plantilla.*      juego de ejemplo completo que copia nuevo_juego.py
 │   ├── ESTILO.md        colores, temas, animación, accesibilidad, batería
@@ -24,6 +26,9 @@ dev/
 │   ├── armar.py         arma la sala
 │   ├── nuevo_juego.py   crea un juego nuevo desde la plantilla
 │   ├── contraste.js     contraste y distancia entre colores
+│   ├── medir_animacion.js  cuánto procesador gasta cada forma de animar
+│   ├── crucigrama/      banco de palabras y verificación de niveles
+│   ├── blackjack/       estrategia, tiempos de la IA y dificultad de cada mesa
 │   └── palabras/        generador y verificación de niveles de Rueda de Palabras
 └── pruebas/             pruebas con un celular simulado (Playwright); todas.js corre todo
 ```
@@ -55,6 +60,14 @@ Después se reemplaza, en este orden:
 ### Lo que hace el kit solo
 
 Modos Libre y Desafío, cuatro dificultades, niveles sin fin con progreso por modo y dificultad, guardado automático (al cambiar de pestaña también), marca “en curso” para el menú, reloj que se detiene con la app oculta o con un panel abierto, límite de tiempo opcional, deshacer, reiniciar con confirmación, pista (solo en Libre), cartel de fin con estrellas y mejor tiempo, panel de temas con muestras e interruptor de sonido, panel de progreso, ayuda con las teclas y atajos de teclado (Z, R, H, Enter).
+
+### Rivales y cálculos pesados (`kitWorker`, `IA`)
+
+La IA de un juego vive en una función sin nada de afuera (`function MiIA(){ … return {pensar}; }`). La misma función se usa en la página, en segundo plano con `kitWorker(MiIA)` y en node para las pruebas. `IA.elegir(opciones,{temp,error})` da errores creíbles según la dificultad y `IA.pensar(promesa,ms)` hace que el rival "piense" un momento. Ejemplo completo: Blackjack (`juegos/blackjack.gen.js`).
+
+### Fondos animados
+
+Cada tema elige su fondo (`fondo:{p:[['estrellas',['#fff']]]}`); ver `kit/ESTILO.md`.
 
 ### Entradas disponibles (`Input`)
 
@@ -90,7 +103,7 @@ node dev/pruebas/_generico.js /tmp/sala/games/puentes/index.html
 - `<id>.test.js`: reglas del juego, arrastres reales con el dedo, deshacer, ganar, guardado, temas, teclado, pantallas por dificultad, fluidez con el procesador 4× más lento y consumo en reposo.
 - `_generico.js`: el contrato de kitStart, igual para todos los juegos que lo usan.
 - `_humo.js`: para los juegos sin pruebas propias.
-- `kit.test.js`, `libs.test.js`, `sala.test.js`, `sinconexion.test.js`.
+- `kit.test.js` (incluye segundo plano e IA), `fondos.test.js`, `libs.test.js`, `sala.test.js`, `sinconexion.test.js`.
 
 Las capturas quedan en `pruebas/capturas/` (no se suben).
 
@@ -103,6 +116,8 @@ Las capturas quedan en `pruebas/capturas/` (no se suben).
 - [ ] Teclado: todo lo que se hace con el dedo se puede hacer con teclas.
 - [ ] En reposo usa menos de 0,5 % de CPU; arrastrar va a 30 cuadros/s o más con el procesador 4× más lento.
 - [ ] Respeta “reducir movimiento”.
+- [ ] Cada tema tiene su fondo animado, sutil y acorde.
+- [ ] Si hay IA o cálculos largos: en segundo plano, sin tareas de más de 200 ms con el procesador 4× más lento.
 - [ ] Sin marcas registradas en nombres, dibujos ni textos.
 - [ ] Ícono y logo definitivos; entrada en `CHANGELOG`.
 - [ ] `node dev/pruebas/todas.js` sin fallas.

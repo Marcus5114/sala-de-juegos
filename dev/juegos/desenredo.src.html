@@ -75,12 +75,12 @@
 /* ---------- temas: cambian el fondo, las líneas y la forma de los puntos ---------- */
 // cada punto es un símbolo de 20×20 centrado en 0,0; "currentColor" toma el color de cada punto
 const THEMES={
-  clasico:{name:'Clásico',cls:'',sym:'<circle r="7.5" fill="var(--nd)" stroke="var(--nd-bd)" stroke-width="2.5"/>',cols:null},
-  cielo:{name:'Constelación',cls:'t-cielo',sym:'<circle r="8" fill="rgba(255,236,170,.22)"/><path d="M0-9Q1.2-1.2 9 0Q1.2 1.2 0 9Q-1.2 1.2-9 0Q-1.2-1.2 0-9z" fill="#fff4cf"/><circle r="2.2" fill="#fff"/>',cols:null},
-  costura:{name:'Botones',cls:'t-costura',sym:'<circle r="8.6" fill="currentColor" stroke="rgba(0,0,0,.35)" stroke-width="1"/><circle r="6" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="1"/><g fill="rgba(0,0,0,.45)"><circle cx="-2.1" cy="-2.1" r="1.25"/><circle cx="2.1" cy="-2.1" r="1.25"/><circle cx="-2.1" cy="2.1" r="1.25"/><circle cx="2.1" cy="2.1" r="1.25"/></g>',
+  clasico:{fondo:{"p":[["polvo",["#5a5d66"],0.3]]},name:'Clásico',cls:'',sym:'<circle r="7.5" fill="var(--nd)" stroke="var(--nd-bd)" stroke-width="2.5"/>',cols:null},
+  cielo:{fondo:{"p":[["estrellas",["#fff4cf","#ffffff"]]]},name:'Constelación',cls:'t-cielo',sym:'<circle r="8" fill="rgba(255,236,170,.22)"/><path d="M0-9Q1.2-1.2 9 0Q1.2 1.2 0 9Q-1.2 1.2-9 0Q-1.2-1.2 0-9z" fill="#fff4cf"/><circle r="2.2" fill="#fff"/>',cols:null},
+  costura:{fondo:{"p":[["polvo",["#e85d75","#4aa3df","#f2a33a"],0.45]]},name:'Botones',cls:'t-costura',sym:'<circle r="8.6" fill="currentColor" stroke="rgba(0,0,0,.35)" stroke-width="1"/><circle r="6" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="1"/><g fill="rgba(0,0,0,.45)"><circle cx="-2.1" cy="-2.1" r="1.25"/><circle cx="2.1" cy="-2.1" r="1.25"/><circle cx="-2.1" cy="2.1" r="1.25"/><circle cx="2.1" cy="2.1" r="1.25"/></g>',
     cols:['#e85d75','#f2a33a','#4aa3df','#7bc96f','#a77bd6','#f06ab0','#3fbfb0','#e0c341']},
-  circuito:{name:'Circuito',cls:'t-circuito',sym:'<rect x="-8" y="-8" width="16" height="16" rx="3" fill="#c98f2e" stroke="#ffe0a0" stroke-width="1.2"/><circle r="3.4" fill="#0a2e1b"/><circle r="5.6" fill="none" stroke="#f3c56a" stroke-width="1"/>',cols:null},
-  metro:{name:'Metro',cls:'t-metro',sym:'<circle r="7.6" fill="#fff" stroke="#1d1d1f" stroke-width="3.2"/>',cols:null,lineCols:['#e53935','#1e88e5','#43a047','#fb8c00','#8e24aa','#00897b','#d81b60','#6d4c41']}
+  circuito:{fondo:{"p":[["grilla",["rgba(217,164,65,.22)","#ffe08a"]]]},name:'Circuito',cls:'t-circuito',sym:'<rect x="-8" y="-8" width="16" height="16" rx="3" fill="#c98f2e" stroke="#ffe0a0" stroke-width="1.2"/><circle r="3.4" fill="#0a2e1b"/><circle r="5.6" fill="none" stroke="#f3c56a" stroke-width="1"/>',cols:null},
+  metro:{fondo:{"p":[["luz",["rgba(0,0,0,.04)"]],["polvo",["#8a8a8a"],0.3]]},name:'Metro',cls:'t-metro',sym:'<circle r="7.6" fill="#fff" stroke="#1d1d1f" stroke-width="3.2"/>',cols:null,lineCols:['#e53935','#1e88e5','#43a047','#fb8c00','#8e24aa','#00897b','#d81b60','#6d4c41']}
 };
 // S: {lvl, n, E, P (posiciones 0..1), start, moves, secs, undo:[[i,x,y]], won, timeup}
 

@@ -39,7 +39,9 @@
 /*KIT_JS*/
 /* ---------- 1. Datos del juego ---------- */
 const DIFFS=[{name:'Fácil',n:3,taps:3,par:20},{name:'Media',n:4,taps:5,par:45},{name:'Difícil',n:5,taps:8,par:90},{name:'Experto',n:6,taps:12,par:150}];
-const THEMES={lampara:{name:'Lámparas',cls:'t-lampara'},hoja:{name:'Hojas',cls:'t-hoja'}};
+// cada tema elige su fondo animado (ver kit/ESTILO.md): [fondo, colores, opacidad]
+const THEMES={lampara:{name:'Lámparas',cls:'t-lampara',fondo:{p:[['polvo',['#f6c445'],.6],['luz',['rgba(246,196,69,.08)']]]}},
+  hoja:{name:'Hojas',cls:'t-hoja',fondo:{p:[['hojas',['#24733c','#7bc96f'],.5]]}}};
 
 /* ---------- 2. Generador: siempre con solución ----------
    Se parte del tablero apagado y se tocan casillas al azar con semilla (mismo nivel = mismo tablero).

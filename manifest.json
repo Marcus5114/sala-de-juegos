@@ -24,6 +24,26 @@
   ],
   "shortcuts": [
     {
+      "name": "Blackjack",
+      "url": "games/blackjack/index.html",
+      "icons": [
+        {
+          "src": "games/blackjack/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Crucigrama",
+      "url": "games/crucigrama/index.html",
+      "icons": [
+        {
+          "src": "games/crucigrama/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "Engranajes",
       "url": "games/engranajes/index.html",
       "icons": [

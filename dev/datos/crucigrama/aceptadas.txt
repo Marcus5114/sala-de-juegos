@@ -1,0 +1,4 @@
+# Palabras correctas que no están en el diccionario ortográfico de LibreOffice (regionalismos o faltantes).
+# Revisadas a mano: figuran en el diccionario de la lengua española o son de uso corriente en Argentina.
+bandoneón ceibo pingüino yaguareté carpincho subte haiku monzón mulita tucán alevín potrillo palta chipá tereré
+boleadoras payador malambo chacarera candombe

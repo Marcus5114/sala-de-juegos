@@ -189,7 +189,8 @@ $('endSee').onclick=close;$('endNext').onclick=()=>{close();newGame();};
 
 /* ---------- temas, progreso, guardado ---------- */
 KIT.onPane=p=>{if(p==='colors')renderThemes();if(p==='recs')renderRecs();};
-function applyTheme(){const c=THEMES[themeKey].cls;$('stage').className='stage '+c;$('tray').className='tray '+c;if(S)render();}
+const FONDOS={"madera":{"p":[["polvo",["#c08a52","#e0b47a"],0.55]],"bg":"radial-gradient(ellipse at 50% 40%,#c08a522e,#c08a520a 75%)"},"caramelo":{"p":[["destellos",["#ff8fb3","#ffd166","#7fd1ff"],0.7]],"bg":"radial-gradient(ellipse at 50% 40%,#ff8fb32e,#ff8fb30a 75%)"},"gema":{"p":[["destellos",["#7fe7ff","#c58cff","#ffffff"],0.85]],"bg":"radial-gradient(ellipse at 50% 40%,#2b2842,#14121f 75%)"},"neon":{"p":[["grilla",["rgba(255,61,242,.16)","#ff3df2"]]],"bg":"radial-gradient(ellipse at 50% 40%,#1a1030,#0b0c14 75%)"},"ladrillo":{"p":[["polvo",["#b35a3a","#8d8a84"],0.45]],"bg":"radial-gradient(ellipse at 50% 40%,#b35a3a1e,#b35a3a08 75%)"}};
+function applyTheme(){const c=THEMES[themeKey].cls;$('stage').className='stage '+c;Fondo.tema(themeKey);$('tray').className='tray '+c;if(S)render();}
 function renderThemes(){$('palList').innerHTML=Object.entries(THEMES).map(([k,t])=>`<button class="pal" data-pal="${k}" aria-pressed="${k===themeKey}"><div class="pv ${t.cls}" style="background:var(--bd);display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:5px;box-sizing:border-box">
   ${[0,1,2,-1,3,4,5,6,-1,7,0,2].map(i=>`<div class="cell${i>=0?' f':''}" style="--c:100%;width:auto;height:auto;--k:${i>=0?t.cols[i]:''}"></div>`).join('')}</div>${t.name}</button>`).join('')+
   `<div class="sndrow"><b>Sonido</b><button class="sw" id="sndBtn" role="switch" aria-checked="${Sfx.on}">${Sfx.on?'Sí':'No'}</button></div>`;
@@ -203,7 +204,7 @@ function load(){const s=store.get('state.'+SK(),null);if(s&&s.b&&s.b.length===N*
 paintTabs=kitTabs(EDIFFS.map(d=>d.name),()=>mode,()=>diff,m=>{save();mode=m;store.set('mode',m);load();},d=>{save();diff=d;store.set('diff',d);load();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});addEventListener('pagehide',()=>save());
 let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>{if(S)render();},80);});
-themeKey=THEMES[store.get('theme','madera')]?store.get('theme','madera'):'madera';mode=store.get('mode','libre')==='desafio'?'desafio':'libre';diff=Math.min(3,Math.max(0,+store.get('diff',0)||0));
+Fondo.iniciar({host:$('stage'),temas:FONDOS});themeKey=THEMES[store.get('theme','madera')]?store.get('theme','madera'):'madera';mode=store.get('mode','libre')==='desafio'?'desafio':'libre';diff=Math.min(3,Math.max(0,+store.get('diff',0)||0));
 buildBoard();applyTheme();load();
 if(!store.get('seen',false)){store.set('seen',true);open('help');}
 </script>

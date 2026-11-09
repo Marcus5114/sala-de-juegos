@@ -1,0 +1,287 @@
+# Crucigrama · nivel 1 (palabras cotidianas, pistas directas). Formato: palabra|pista
+sol|Astro que nos da luz y calor
+mar|Gran masa de agua salada
+pan|Se hace con harina, agua y levadura
+luz|Lo contrario de la oscuridad
+mes|Cada una de las doce partes del año
+pie|Extremidad sobre la que caminamos
+ojo|Órgano de la vista
+oso|Mamífero grande que hiberna
+año|Doce meses
+día|Lo contrario de la noche
+río|Corriente de agua que desemboca en el mar
+sal|Condimento blanco que se extrae del mar
+red|Malla para pescar
+tos|La provoca un resfrío
+uva|Fruto de la vid
+ola|Ondulación del mar
+oro|Metal amarillo y precioso
+ajo|Bulbo de olor fuerte que se usa en la cocina
+ave|Animal con plumas y pico
+gol|Lo que se grita cuando la pelota entra al arco
+paz|Lo contrario de la guerra
+voz|Sonido que sale de la garganta al hablar
+rey|Monarca
+ley|Norma dictada por el Congreso
+fin|Término, conclusión
+eco|Sonido que vuelve rebotado
+asa|Parte de la taza por donde se agarra
+ala|Le permite volar al pájaro
+gas|Estado de la materia como el del vapor
+mago|Hace trucos con una varita
+mesa|Mueble con patas y tablero para comer
+casa|Vivienda, hogar
+gato|Felino doméstico que maúlla
+perro|Mejor amigo del hombre, ladra
+vaca|Nos da leche
+toro|Macho de la vaca
+pato|Ave que hace cua cua
+loro|Ave que puede imitar palabras
+león|Rey de la selva
+lobo|Aúlla a la luna
+ratón|Roedor pequeño que le teme al gato
+cebra|Caballo a rayas de África
+mono|Primate que trepa a los árboles
+pez|Vive en el agua y respira por branquias
+rana|Anfibio que salta y croa
+abeja|Insecto que hace miel
+hormiga|Insecto que vive en colonias y trabaja sin parar
+araña|Teje su tela con ocho patas
+mosca|Insecto molesto que zumba en verano
+árbol|Planta de tronco leñoso
+flor|Parte colorida de la planta
+hoja|Parte verde de la planta
+rosa|Flor con espinas
+pasto|Hierba que cubre el jardín
+nube|Masa de vapor que flota en el cielo
+lluvia|Agua que cae de las nubes
+nieve|Agua helada que cae en copos
+viento|Aire en movimiento
+luna|Satélite de la Tierra
+estrella|Brilla en el cielo de noche
+cielo|Lo vemos celeste de día
+tierra|Nuestro planeta
+fuego|Llamas que queman
+agua|Líquido que bebemos para vivir
+hielo|Agua congelada
+piedra|Roca pequeña
+arena|La hay en la playa y en el desierto
+playa|Orilla de arena junto al mar
+monte|Elevación del terreno
+lago|Masa de agua rodeada de tierra
+isla|Tierra rodeada de agua
+barco|Navega por el mar
+tren|Viaja sobre rieles
+auto|Coche, vehículo de cuatro ruedas
+avión|Vuela llevando pasajeros
+moto|Vehículo de dos ruedas con caño de escape
+bici|Se pedalea, de forma abreviada
+rueda|Pieza redonda que gira
+puerta|Se abre para entrar
+ventana|Abertura en la pared para mirar afuera
+techo|Cubre la casa por arriba
+piso|Suelo de una habitación
+pared|Muro de una habitación
+silla|Asiento con respaldo
+cama|Mueble para dormir
+mano|Tiene cinco dedos
+dedo|Hay cinco en cada mano
+boca|Por ahí comemos
+nariz|Órgano del olfato
+oreja|Órgano externo del oído
+pelo|Crece en la cabeza
+diente|Sirve para masticar
+brazo|Va del hombro a la mano
+pierna|Va de la cadera al pie
+cabeza|Parte del cuerpo donde está el cerebro
+cara|Rostro
+leche|Bebida blanca de la vaca
+queso|Se hace con leche cuajada
+huevo|Lo pone la gallina
+carne|Alimento que da la vaca
+arroz|Cereal de grano blanco
+fideo|Pasta larga y fina
+sopa|Plato caliente con caldo
+torta|Pastel de cumpleaños
+miel|La hacen las abejas
+azúcar|Endulza el café
+pera|Fruta con forma de campana
+manzana|Fruta roja o verde que cayó sobre Newton
+limón|Fruta amarilla y ácida
+naranja|Fruta cítrica de su mismo color
+banana|Fruta amarilla y alargada
+frutilla|Fruta roja con semillas por fuera
+papa|Tubérculo para hacer puré
+tomate|Fruto rojo de la ensalada
+cebolla|Hace llorar al cortarla
+café|Infusión oscura que despierta
+mate|Infusión rioplatense con bombilla
+vaso|Recipiente para beber
+taza|Recipiente con asa para el té
+plato|Sobre él se sirve la comida
+cuchara|Cubierto para la sopa
+olla|Recipiente para cocinar
+libro|Tiene tapas y páginas
+lápiz|Sirve para escribir y se puede borrar
+papel|Hoja para escribir
+hoyo|Agujero en la tierra
+escuela|Lugar donde se aprende
+clase|Lección en la escuela
+nota|Calificación de un examen
+juego|Actividad para divertirse
+pelota|Se patea en el fútbol
+muñeca|Juguete con forma de persona
+globo|Se infla con aire
+regalo|Se da en un cumpleaños
+fiesta|Celebración con música
+baile|Danza
+canto|Acción de cantar
+música|Arte de los sonidos
+radio|Aparato para escuchar emisoras
+reloj|Marca la hora
+hora|Sesenta minutos
+semana|Siete días
+lunes|Primer día hábil de la semana
+verano|Estación más calurosa
+otoño|Estación en que caen las hojas
+invierno|Estación más fría
+mañana|Parte del día antes del mediodía
+tarde|Parte del día después del mediodía
+noche|Cuando sale la luna
+rojo|Color de la sangre
+azul|Color del cielo despejado
+verde|Color del pasto
+gris|Color de la ceniza
+blanco|Color de la nieve
+negro|Color del carbón
+alto|Lo contrario de bajo
+bajo|Lo contrario de alto
+gordo|Lo contrario de flaco
+nuevo|Lo contrario de viejo
+viejo|Lo contrario de nuevo
+frío|Lo contrario de caliente
+lindo|Bonito
+feliz|Contento, alegre
+triste|Lo contrario de alegre
+rico|Sabroso
+malo|Lo contrario de bueno
+lleno|Lo contrario de vacío
+mojado|Lo contrario de seco
+uno|Primer número
+dos|Uno más uno
+tres|Número de los lados de un triángulo
+seis|Media docena
+ocho|Patas de una araña
+diez|Dedos de las dos manos
+cien|Diez veces diez
+mil|Diez veces cien
+amigo|Persona querida con la que compartimos
+mamá|Madre, con cariño
+papá|Padre, con cariño
+tío|Hermano del padre o de la madre
+abuelo|Padre del padre o de la madre
+hijo|Descendiente directo
+bebé|Niño recién nacido
+nene|Chico pequeño
+rey|Lleva corona
+reina|Esposa del rey
+hada|Personaje mágico con varita y alas
+bruja|Vuela en escoba
+dragón|Monstruo que echa fuego
+oveja|Nos da lana
+cerdo|Chancho
+caballo|Animal que se monta y relincha
+burro|Asno
+gallo|Canta al amanecer
+pollo|Cría de la gallina
+conejo|Animal de orejas largas que salta
+tigre|Felino rayado
+jirafa|Animal de cuello muy largo
+elefante|Mamífero con trompa
+ballena|Mamífero marino enorme
+tiburón|Pez de dientes filosos
+delfín|Mamífero marino muy inteligente
+pulpo|Animal marino de ocho brazos
+caracol|Lleva su casa a cuestas
+correr|Ir muy rápido a pie
+saltar|Elevarse del suelo con impulso
+nadar|Moverse en el agua
+comer|Llevarse alimento a la boca
+beber|Tomar un líquido
+dormir|Descansar con los ojos cerrados
+leer|Pasar la vista por un texto
+cantar|Hacer música con la voz
+jugar|Divertirse
+reír|Lo contrario de llorar
+llorar|Derramar lágrimas
+abrir|Lo contrario de cerrar
+cerrar|Lo contrario de abrir
+mirar|Ver con atención
+oír|Percibir sonidos
+dar|Entregar
+ver|Percibir con los ojos
+amor|Cariño profundo
+hola|Saludo
+más|Signo de la suma
+menos|Signo de la resta
+cero|Número que no vale nada
+sopa|Se toma con cuchara
+nido|Casa del pájaro
+cola|La mueve el perro cuando está contento
+pico|Boca del pájaro
+pata|Pierna de un animal
+lana|Pelo de la oveja
+seda|Tela que hacen los gusanos
+mapa|Dibujo de un territorio
+foto|Imagen tomada con una cámara
+cine|Lugar para ver películas
+tele|Aparato para ver programas, abreviado
+calle|Vía de la ciudad
+plaza|Espacio verde con hamacas
+banco|Asiento largo de la plaza
+tienda|Negocio, comercio
+precio|Lo que cuesta algo
+peso|Moneda argentina
+carta|Mensaje escrito que llega por correo
+sobre|Envoltorio de una carta
+llave|Abre la cerradura
+caja|Recipiente con tapa
+bolsa|Se usa para llevar las compras
+zapato|Calzado
+media|Prenda que cubre el pie
+gorra|Prenda con visera
+camisa|Prenda con botones y cuello
+saco|Prenda de abrigo con mangas
+botón|Se abrocha en el ojal
+anillo|Se usa en el dedo
+dado|Cubo con puntos para jugar
+naipe|Carta de la baraja
+oca|Ave parecida al ganso
+ola|Sube y baja en el mar
+pala|Herramienta para cavar
+clavo|Se golpea con el martillo
+martillo|Herramienta para clavar
+tijera|Sirve para cortar papel
+cola|Fila de gente que espera
+hilo|Se pasa por el ojo de la aguja
+aguja|Tiene un ojo y sirve para coser
+vela|Da luz con su llama
+lámpara|Aparato para iluminar
+espejo|Refleja la imagen
+peine|Sirve para ordenar el pelo
+jabón|Sirve para lavarse
+toalla|Sirve para secarse
+baño|Lugar de la ducha
+cocina|Lugar donde se preparan las comidas
+jardín|Terreno con plantas junto a la casa
+huerta|Terreno donde se cultivan verduras
+granja|Lugar con animales de campo
+campo|Terreno fuera de la ciudad
+ciudad|Población grande
+pueblo|Población pequeña
+país|Nación
+mundo|La Tierra y todo lo que hay en ella
+norte|Punto cardinal opuesto al sur
+sur|Punto cardinal opuesto al norte
+este|Punto cardinal por donde sale el sol
+oeste|Punto cardinal por donde se pone el sol

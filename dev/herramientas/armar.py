@@ -5,9 +5,9 @@ Uso:  python3 dev/herramientas/armar.py [carpeta_de_salida] [--solo id1,id2] [--
 
 Qué hace, para cada juego de dev/juegos.json:
   1. lee dev/juegos/<fuente>
-  2. inserta el kit (/*KIT_CSS*/, <!--KIT_BAR-->, <!--KIT_SHEETS-->, /*KIT_JS*/), el generador (/*GEN*/…/*END_GEN*/ ← <id>.gen.js)
+  2. inserta el kit (/*KIT_CSS*/, <!--KIT_BAR-->, <!--KIT_SHEETS-->, /*KIT_JS*/; los fondos solos: /*KIT_FONDO_CSS*/, /*KIT_FONDO_JS*/), el generador (/*GEN*/…/*END_GEN*/ ← <id>.gen.js)
      y las librerías pedidas con /*LIB:nombre*/ (dev/libs.json, instaladas con npm en dev/)
-  3. inserta datos propios (Rueda: los 10 juegos de niveles)
+  3. inserta datos propios (Rueda: los 10 juegos de niveles; Crucigrama: el banco de palabras y pistas)
   4. lo envuelve como página instalable (manifest, ícono, modo claro/oscuro, service worker) y lo minifica
   5. copia el ícono y los archivos extra
 Después arma el menú (dev/sala/sala.src.html), el manifest con atajos y el service worker con la lista sin conexión.
@@ -48,9 +48,12 @@ def lib(nombre):
 
 def con_kit(s,gid):
     """Inserta la base común y el generador del juego."""
-    rep={'/*KIT_CSS*/':'kit.css','<!--KIT_BAR-->':'bar.html','<!--KIT_SHEETS-->':'sheets.html','/*KIT_JS*/':'kit.js'}
-    for k,f in rep.items():
-        if k in s:s=s.replace(k,open(os.path.join(KIT,f)).read())
+    rd=lambda f:open(os.path.join(KIT,f)).read()
+    # el kit trae los fondos animados; los juegos sin kit los piden con sus propias marcas
+    rep={'/*KIT_CSS*/':rd('kit.css')+'\n'+rd('fondo.css'),'<!--KIT_BAR-->':rd('bar.html'),'<!--KIT_SHEETS-->':rd('sheets.html'),'/*KIT_JS*/':rd('kit.js')+'\n'+rd('fondo.js'),
+         '/*KIT_FONDO_CSS*/':rd('fondo.css'),'/*KIT_FONDO_JS*/':rd('fondo.js')}
+    for k,v in rep.items():
+        if k in s:s=s.replace(k,v)
     s=re.sub(r'/\*LIB:([\w-]+)\*/',lambda m:lib(m.group(1)),s)
     g=os.path.join(DEV,'juegos',gid+'.gen.js')
     if '/*GEN*/\n/*END_GEN*/' in s:
@@ -62,6 +65,21 @@ def datos_rueda(s):
     k='/*DATA*/const LEVELS_RAW="";/*END_DATA*/'
     assert k in s,'falta el marcador de datos de Rueda'
     return s.replace(k,'/*DATA*/const LEVELS_RAW='+json.dumps(sets,ensure_ascii=False,separators=(',',':'))+';/*END_DATA*/')
+
+def datos_crucigrama(s):
+    import unicodedata
+    def norm(w):
+        w=unicodedata.normalize('NFD',w.lower()).replace('n\u0303','ñ')
+        return ''.join(ch for ch in w if unicodedata.category(ch)!='Mn').upper()
+    out=[]
+    for n in (1,2,3):
+        for l in open(os.path.join(DEV,'datos','crucigrama',f'n{n}.txt')).read().split('\n'):
+            if not l.strip() or l.startswith('#'):continue
+            w,c=l.split('|',1);w=norm(w.strip())
+            if len(w)>=3:out.append([w,c.strip(),n])
+    k='/*BANCO*/const BANCO=[];/*END_BANCO*/'
+    assert k in s,'falta el marcador del banco del Crucigrama'
+    return s.replace(k,'/*BANCO*/const BANCO='+json.dumps(out,ensure_ascii=False,separators=(',',':'))+'.map(([w,c,n])=>({w,c,n}));/*END_BANCO*/')
 
 def pagina(s,root,title,theme,extra='',modo_ui=True):
     s=re.sub(r'<title>.*?</title>\s*','',s,count=1,flags=re.S)
@@ -101,6 +119,7 @@ def armar_juego(j):
     gid=j['id'];s=open(os.path.join(DEV,'juegos',j['fuente'])).read()
     s=con_kit(s,gid)
     if j.get('datos')=='rueda':s=datos_rueda(s)
+    if j.get('datos')=='crucigrama':s=datos_crucigrama(s)
     escribir(pagina(s,'../../',j['nombre'],j['color'],j.get('css',':root{height:100%}\n')),os.path.join(OUT,'games',gid,'index.html'))
     shutil.copy(os.path.join(DEV,'iconos',gid+'.png'),os.path.join(OUT,'games',gid,'icon-192.png'))
     for dst,src in j.get('archivos',{}).items():shutil.copy(os.path.join(DEV,src),os.path.join(OUT,'games',gid,dst))

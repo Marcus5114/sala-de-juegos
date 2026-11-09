@@ -74,3 +74,8 @@ button.sc{cursor:pointer}
 @keyframes kPulse{to{transform:scale(1.08)}}
 @keyframes kPop{50%{transform:scale(1.15)}}
 @media (prefers-reduced-motion:reduce){.is-bad,.is-hint{animation:none}}
+
+/* movimiento común: los botones se hunden un poco al tocarlos (solo transform: barato) */
+.bb,.sc,.seg button,#diffs button,.ib,.pal,.ctl button,.kb button{transition:transform .12s ease-out}
+.bb:active:not(:disabled),button.sc:active,.seg button:active,#diffs button:active,.ib:active,.pal:active,.ctl button:active:not(:disabled),.kb button:active{transform:scale(.95)}
+@media (prefers-reduced-motion:reduce){.bb,.sc,.seg button,#diffs button,.ib,.pal,.ctl button,.kb button{transition:none}}

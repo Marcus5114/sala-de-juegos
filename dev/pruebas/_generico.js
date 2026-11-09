@@ -38,7 +38,7 @@ require('./_base.js')(file,+(process.argv[3]||8899),async({p,ok,fits,cpuIdle})=>
   const lv=await p.evaluate(()=>S.lvl);await p.reload();await p.waitForTimeout(400);
   ok('al volver retoma el nivel',await p.evaluate(lv=>S.lvl===lv,lv));
   // reiniciar sin jugadas no pregunta; R hace lo mismo
-  await p.keyboard.press('r');await p.waitForTimeout(80);ok('R reinicia (sin preguntar si no hay jugadas)',!(await p.isVisible('[data-pane=confirm]'))&&await p.evaluate(()=>!S.won&&S.undo.length===0));
+  if(await p.evaluate(()=>!!GAME.letras))await p.click('#restart');else await p.keyboard.press('r');/* con letras, R escribe */await p.waitForTimeout(80);ok('R reinicia (sin preguntar si no hay jugadas)',!(await p.isVisible('[data-pane=confirm]'))&&await p.evaluate(()=>!S.won&&S.undo.length===0));
   ok('Desafío con estrellas: win() da 1 a 3',await p.evaluate(async()=>{mode='desafio';load();win();return S.stars>=1&&S.stars<=3;}));
   await p.waitForTimeout(1000);await p.evaluate(()=>{close();mode='libre';load();});
   await p.waitForTimeout(2000);// que terminen los papelitos del festejo

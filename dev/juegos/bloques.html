@@ -2,6 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
 <style>
+/*KIT_FONDO_CSS*/
 /* Layout: app de una pantalla — barra con modo, marcador con reserva y próxima pieza, tablero 10x20 que se ajusta, controles abajo */
 :root{
   --bg:#f1f1f2; --fg:#18181a; --muted:#6c6c72; --panel:#fafafa; --chip:#e2e2e6;
@@ -119,6 +120,9 @@ canvas#c{border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.22);touch-action:no
 </div>
 
 <script>
+/*KIT_FONDO_JS*/
+// fondo animado de cada tema (kit/fondo.js)
+const FONDOS={"clasico":{"p":[["polvo",["#8e8e94"],0.4]],"bg":"radial-gradient(ellipse at 50% 40%,#8e8e941c,#8e8e9406 75%)"},"caramelos":{"p":[["destellos",["#ff8fb3","#ffd166","#7fd1ff"],0.7]],"bg":"radial-gradient(ellipse at 50% 40%,#ff8fb32e,#ff8fb30a 75%)"},"madera":{"p":[["polvo",["#c08a52","#e0b47a"],0.55]],"bg":"radial-gradient(ellipse at 50% 40%,#c08a522e,#c08a520a 75%)"},"neon":{"p":[["grilla",["rgba(255,61,242,.16)","#ff3df2"]]],"bg":"radial-gradient(ellipse at 50% 40%,#1a1030,#0b0c14 75%)"},"gemas":{"p":[["destellos",["#7fe7ff","#c58cff","#ffffff"],0.85]],"bg":"radial-gradient(ellipse at 50% 40%,#2b2842,#14121f 75%)"}};
 const $=id=>document.getElementById(id);
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const store={get(k,d){try{const v=localStorage.getItem('bloques.'+k);return v?JSON.parse(v):d;}catch(e){return d;}},
@@ -361,12 +365,13 @@ function renderThemes(){
   document.querySelectorAll('[data-prev]').forEach(c=>{const t=THEMES[c.dataset.prev],x=c.getContext('2d'),s=22;x.fillStyle=t.bg;x.fillRect(0,0,c.width,c.height);
     [['I',0,3],['T',4,2],['S',7,2]].forEach(([k,ox,oy])=>cellsOf(k,0).forEach(([cx,cy])=>drawBlock(x,(ox+cx)*s+6,(oy+cy-2)*s+4,s,t.col[k],t.style)));});
 }
-$('palList').addEventListener('click',e=>{const b=e.target.closest('[data-pal]');if(!b)return;themeKey=b.dataset.pal;store.set('theme',themeKey);renderThemes();hud();draw();});
+$('palList').addEventListener('click',e=>{const b=e.target.closest('[data-pal]');if(!b)return;themeKey=b.dataset.pal;store.set('theme',themeKey);Fondo.tema(themeKey);renderThemes();hud();draw();});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{b.blur();if(b.dataset.mode===mode)return;save();stop();mode=b.dataset.mode;store.set('mode',mode);setTabs();load();}));
 function setTabs(){document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-selected',b.dataset.mode===mode));}
 let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(fit,60);});
 if(/\/games\/[^/]+\/(index\.html)?$/.test(location.pathname))$('homeBtn').hidden=false;
 themeKey=THEMES[store.get('theme','clasico')]?store.get('theme','clasico'):'clasico';
+Fondo.iniciar({host:document.getElementById('stage'),temas:FONDOS});Fondo.tema(themeKey);
 speed=[0,1,2].includes(store.get('speed',0))?store.get('speed',0):0;
 mode=store.get('mode','libre')==='desafio'?'desafio':'libre';
 setTabs();board=Array.from({length:H+HIDDEN},()=>Array(W).fill(null));fit();load();

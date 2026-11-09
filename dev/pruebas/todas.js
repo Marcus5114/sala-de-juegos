@@ -18,6 +18,6 @@ let port=8900;
 for(const j of REG){if(solo&&!solo.includes(j.id))continue;const f=path.join(out,'games',j.id,'index.html');
   const own=fs.existsSync(path.join(__dirname,j.id+'.test.js'));run(j.id,own?j.id+'.test.js':'_humo.js',f,...(own?[]:[String(port++)]));
   const src=fs.readFileSync(path.join(DEV,'juegos',j.fuente),'utf8');if(/kitStart\(\{/.test(src))run(j.id+' · kit',' _generico.js'.trim(),f,String(port++));}
-if(!solo){run('kit (laboratorio)','kit.test.js');run('librerías','libs.test.js');run('menú','sala.test.js',out);run('sin conexión','sinconexion.test.js',out);}
+if(!solo){run('kit (laboratorio)','kit.test.js');run('librerías','libs.test.js');run('fondos','fondos.test.js',path.join(out,'games','puentes','index.html'));run('menú','sala.test.js',out);run('sin conexión','sinconexion.test.js',out);}
 const mal=res.filter(r=>!r.bien);console.log(`\n${res.length-mal.length}/${res.length} grupos bien · ${res.reduce((a,r)=>a+r.oks,0)} pruebas OK`+(mal.length?` · fallan: ${mal.map(r=>r.nombre).join(', ')}`:''));
 process.exitCode=mal.length?1:0;

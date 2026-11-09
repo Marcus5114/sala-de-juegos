@@ -1,0 +1,212 @@
+<title>Crucigrama</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
+<style>
+/*KIT_CSS*/
+/* Layout: barra, dificultad, marcador, pista de la palabra elegida, tablero (lo que sobra), teclado en pantalla, botonera */
+.app{gap:7px}
+/* pista de la palabra elegida */
+.clue{display:flex;align-items:stretch;gap:6px;min-height:46px}
+.clue button.nav{width:40px;flex:none;border:0;border-radius:10px;background:var(--chip);color:var(--fg);font:800 1.1rem var(--font);cursor:pointer}
+.clue .txt{flex:1;min-width:0;border-radius:10px;background:var(--panel);border:1px solid var(--chip);display:flex;align-items:center;gap:8px;padding:4px 10px;cursor:pointer;font:700 .92rem/1.2 var(--font);color:var(--fg)}
+.clue .txt i{font-style:normal;flex:none;width:24px;height:24px;border-radius:7px;background:var(--fg);color:var(--bg);display:grid;place-items:center;font-size:.85rem}
+.clue .txt small{color:var(--muted);font-weight:700;margin-left:auto;flex:none}
+.clue .txt span{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+/* tablero */
+.stage{display:grid;place-items:center;border-radius:16px;background:var(--board);touch-action:manipulation;overflow:hidden}
+.grid{--c:36px;display:grid;gap:0;user-select:none;-webkit-user-select:none}
+.cell{width:var(--c);height:var(--c);position:relative;box-sizing:border-box}
+.cell.l{background:var(--cell);border:1px solid var(--line);margin:-.5px;display:grid;place-items:center;font:700 calc(var(--c)*.56)/1 var(--font-l);color:var(--ink);cursor:pointer;transition:background-color .12s}
+.cell.l.g{color:var(--given)}
+.cell.l.rv{color:var(--given);text-decoration:underline dotted;text-underline-offset:3px}
+.cell.l.w{background:var(--word);box-shadow:inset 0 0 0 1.5px var(--wordb)}
+.cell.l.s{background:var(--sel);box-shadow:inset 0 0 0 2px var(--selb);z-index:1}
+.cell.l.ok{color:var(--okc)}
+.cell.l.bad{color:var(--badc)}
+.cell.q{background:var(--q);border:1px solid var(--line);margin:-.5px;cursor:pointer;color:var(--qink)}
+.cell.q.on{background:var(--qon)}
+.cell.q.done{opacity:.55}
+/* flechas: → a la derecha, ↓ abajo (una casilla puede tener las dos) */
+/* la flecha va sobre el borde, apuntando a la primera letra: nunca tapa el texto de la pista */
+.cell.q{--aw:max(7px,calc(var(--c)*.09));--ah:max(6px,calc(var(--c)*.08))}
+.cell.q .ar,.cell.q .ad{position:absolute;width:0;height:0;border-style:solid;border-color:transparent;z-index:3;pointer-events:none}
+.cell.q .ar{right:calc(-1*var(--aw) - 1px);top:calc(50% - var(--ah));border-width:var(--ah) 0 var(--ah) var(--aw);border-left-color:var(--qar)}
+.cell.q .ad{bottom:calc(-1*var(--aw) - 1px);left:calc(50% - var(--ah));border-width:var(--aw) var(--ah) 0 var(--ah);border-top-color:var(--qar)}
+/* con dos pistas, la → queda a la altura de su texto (la de arriba) */
+.grid.big .cell.q .ar:not(.solo){top:calc(25% - var(--ah))}
+/* con casillas grandes (tablet, escritorio) la pista se lee en el tablero */
+.cell.q .qt{display:none;overflow:hidden}
+.grid.big .cell.q .qt{display:flex;flex-direction:column;justify-content:space-around;height:100%;padding:2px 3px;font:600 calc(var(--c)*.12)/1.12 var(--font);text-align:center;color:var(--qink)}
+.grid.big .cell.q .qt span+span{border-top:1px solid var(--line);padding-top:2px}
+.cell.e{background:transparent}
+/* teclado en pantalla */
+.kb{display:flex;flex-direction:column;gap:5px}
+.kb div{display:flex;gap:4px;justify-content:center}
+.kb button{flex:1;max-width:44px;height:42px;border:0;border-radius:8px;background:var(--panel);box-shadow:0 1px 0 var(--chip),inset 0 0 0 1px var(--chip);color:var(--fg);font:700 1rem var(--font);padding:0;cursor:pointer;touch-action:manipulation}
+.kb button:active{background:var(--chip)}
+.kb button.wide{max-width:66px;flex:1.5;font-size:.8rem}
+.kb button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@media (min-height:900px){.kb button{height:48px}}
+/* en pantallas apaisadas bajas, el teclado se achica */
+@media (max-height:640px){.kb button{height:34px}.clue{min-height:40px}}
+.pv .pc{display:inline-grid;place-items:center;width:20px;height:20px;border:1px solid var(--line);margin:-.5px;background:var(--cell);color:var(--ink);font:700 12px var(--font-l)}
+.pv .pq{background:var(--q);color:var(--qink);font-size:9px}
+/* ---------- temas ---------- */
+.t-diario{--board:#f4f4f2;--cell:#ffffff;--line:#3b3b3e;--ink:#18181a;--given:#6c6c72;--q:#a9a9ae;--qon:#7d7d84;--qink:#18181a;--qar:#18181a;--word:#f3f3f4;--wordb:#8e8e94;--sel:#d6d6da;--selb:#18181a;--okc:#1d6e3f;--badc:#c7372f;--font-l:Georgia,'Times New Roman',serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .t-diario{--board:#1c1c1f;--cell:#26262a;--line:#5c5c62;--ink:#ececee;--given:#9a9aa1;--q:#46464c;--qon:#62626a;--qink:#ececee;--qar:#ececee;--word:#2c2c31;--wordb:#7a7a82;--sel:#4a4a52;--selb:#ececee;--okc:#5fd08d;--badc:#ff6a5f}}
+:root[data-theme="dark"] .t-diario{--board:#1c1c1f;--cell:#26262a;--line:#5c5c62;--ink:#ececee;--given:#9a9aa1;--q:#46464c;--qon:#62626a;--qink:#ececee;--qar:#ececee;--word:#2c2c31;--wordb:#7a7a82;--sel:#4a4a52;--selb:#ececee;--okc:#5fd08d;--badc:#ff6a5f}
+.t-revista{--board:#fff7e0;--cell:#ffffff;--line:#2a2a33;--ink:#1d1d26;--given:#6a6170;--q:#ffd23f;--qon:#ffb400;--qink:#1d1d26;--qar:#1d1d26;--word:#d9ecff;--wordb:#7cb9ff;--sel:#7cb9ff;--selb:#1557b0;--okc:#1d7a46;--badc:#d3302a;--font-l:var(--font)}
+.t-cuaderno{--board:#fdfcf6 linear-gradient(#cfe0f3 1px,transparent 1px) 0 0/100% 18px;--cell:#fffef9;--line:#8fb1d8;--ink:#1d3f8f;--given:#7a8aa8;--q:#2f5bb8;--qon:#1d3f8f;--qink:#ffffff;--qar:#1d3f8f;--word:#eef4fc;--wordb:#8fb1d8;--sel:#cfe0f6;--selb:#1d3f8f;--okc:#1d7a46;--badc:#c7372f;--font-l:'Segoe Print','Bradley Hand','Comic Neue',var(--font)}
+.t-pizarra{--board:#24382e;--cell:#2d4539;--line:#5f7d6c;--ink:#f3f1e7;--given:#a9bdb1;--q:#1b2b23;--qon:#13201a;--qink:#e9e4c9;--qar:#f3f1e7;--word:#36513f;--wordb:#8fae9b;--sel:#4b6c58;--selb:#f3f1e7;--okc:#a6e6a0;--badc:#ff9b8f;--font-l:'Segoe Print','Bradley Hand',var(--font)}
+.t-noche{--board:#0f1530;--cell:#18204a;--line:#33407e;--ink:#e6ecff;--given:#8e9ad0;--q:#0b1026;--qon:#202a63;--qink:#66e0ff;--qar:#66e0ff;--word:#26347a;--wordb:#4f63c4;--sel:#33459e;--selb:#66e0ff;--okc:#7dffb2;--badc:#ff7a90;--font-l:var(--font)}
+@media (prefers-reduced-motion:reduce){.cell.l{transition:none}}
+</style>
+
+<div class="app">
+<!--KIT_BAR-->
+  <div class="hud">
+    <div class="sc"><small>nivel</small><b id="lvl">1</b></div>
+    <div class="sc" id="doneBox"><small id="doneLbl">palabras</small><b id="done">0</b></div>
+    <div class="sc" id="timeBox"><small>tiempo</small><b id="time">0:00</b></div>
+    <button class="sc" id="hintBtn" aria-label="Pista"><small>pista</small><b>💡</b></button>
+  </div>
+  <div class="clue"><button class="nav" id="prevW" aria-label="Palabra anterior">‹</button><div class="txt" id="clueTxt" role="button" aria-live="polite"></div><button class="nav" id="nextW" aria-label="Palabra siguiente">›</button></div>
+  <div class="stage t-diario" id="stage" aria-label="Crucigrama: tocá una casilla y escribí con el teclado"><div class="grid" id="grid"></div></div>
+  <div class="kb" id="kb" aria-label="Teclado"></div>
+  <nav class="bottom">
+    <button class="bb" id="act"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span id="actTxt">Deshacer</span></button>
+    <button class="bb" id="restart"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>Reiniciar</button>
+  </nav>
+</div>
+<!--KIT_SHEETS-->
+
+<script>
+/*KIT_JS*/
+/*BANCO*/const BANCO=[];/*END_BANCO*/
+/*GEN*/
+/*END_GEN*/
+const THEMES={
+  diario:{fondo:{"p":[["garabatos",["var(--line)"],0.16]]},name:'Diario',cls:'t-diario'},
+  revista:{fondo:{"p":[["destellos",["#ffb400","#1557b0","#ff5d8f"],0.6]]},name:'Revista',cls:'t-revista'},
+  cuaderno:{fondo:{"p":[["garabatos",["#2f5bb8"],0.2]]},name:'Cuaderno',cls:'t-cuaderno'},
+  pizarra:{fondo:{"p":[["garabatos",["#ffffff","#ffd678"],0.2]]},name:'Pizarra',cls:'t-pizarra'},
+  noche:{fondo:{"p":[["estrellas",["#66e0ff","#ffffff"]]]},name:'Noche',cls:'t-noche'}
+};
+// S: {lvl, L:{W,H,sol,words,give}, fill:[letra|''], rev:[índices revelados con pista], cur, dir, undo:[[i,antes]], secs, won}
+
+/* ---------- tablero ---------- */
+let els=[],wordsAt=[],qEls=new Map();
+const isL=i=>!!S.L.sol[i];
+function index(){// qué palabras pasan por cada casilla: [→, ↓]
+  const L=S.L;wordsAt=L.sol.map(()=>[-1,-1]);
+  L.words.forEach((w,k)=>{for(let j=0;j<w.ans.length;j++)wordsAt[(w.r+w.dir*j)*L.W+w.c+(1-w.dir)*j][w.dir]=k;});}
+const cellsOf=w=>[...Array(w.ans.length)].map((_,j)=>(w.r+w.dir*j)*S.L.W+w.c+(1-w.dir)*j);
+function build(){
+  const L=S.L;index();
+  const st=$('stage'),c=Math.max(22,Math.floor(Math.min((st.clientWidth-12)/L.W,(st.clientHeight-12)/L.H,92)));
+  const g=$('grid');g.style.setProperty('--c',c+'px');g.style.gridTemplateColumns=`repeat(${L.W},var(--c))`;g.classList.toggle('big',c>=72);
+  const qs=new Map();L.words.forEach((w,k)=>{const i=w.cr*L.W+w.cc;if(!qs.has(i))qs.set(i,[]);qs.get(i).push(k);});
+  g.innerHTML=L.sol.map((v,i)=>{
+    if(v)return `<div class="cell l" data-i="${i}"></div>`;
+    const q=qs.get(i);if(!q)return `<div class="cell e"></div>`;
+    const hasA=q.some(k=>!L.words[k].dir),hasD=q.some(k=>L.words[k].dir);
+    return `<div class="cell q" data-q="${i}">${hasA?`<i class="ar${hasD?'':' solo'}"></i>`:''}${hasD?'<i class="ad"></i>':''}<div class="qt">${q.map(k=>`<span>${L.words[k].clue}</span>`).join('')}</div></div>`;}).join('');
+  els=[...g.children];qEls=qs;
+  if(S.cur==null||!isL(S.cur))S.cur=cellsOf(L.words[0])[0],S.dir=L.words[0].dir;
+  draw();
+}
+const curWord=()=>{const a=wordsAt[S.cur];return a[S.dir]>=0?a[S.dir]:a[1-S.dir];};
+function wordState(k){const w=S.L.words[k];let full=true,ok=true;for(const i of cellsOf(w)){if(!S.fill[i])full=false;if(S.fill[i]!==S.L.sol[i])ok=false;}return {full,ok};}
+function draw(){
+  const L=S.L,k=curWord(),inW=new Set(cellsOf(L.words[k]));
+  const st=L.words.map((_,j)=>wordState(j)),lib=mode==='libre';
+  const okCell=new Set(),badCell=new Set();
+  if(lib)st.forEach((s,j)=>{if(s.full)cellsOf(L.words[j]).forEach(i=>(s.ok?okCell:badCell).add(i));});
+  els.forEach((el,i)=>{let cls;
+    if(L.sol[i]){cls='cell l'+(S.given[i]?' g':'')+(S.rev.includes(i)?' rv':'')+(i===S.cur&&!S.won?' s':inW.has(i)&&!S.won?' w':'')+(badCell.has(i)?' bad':okCell.has(i)||S.won?' ok':'');
+      const t=S.fill[i]||'';if(el._t!==t){el.textContent=t;el._t=t;}}
+    else if(el.dataset.q){const q=qEls.get(i);cls='cell q'+(q.includes(k)&&!S.won?' on':'')+(lib&&q.every(j=>st[j].full&&st[j].ok)?' done':'');}
+    else return;
+    if(el._c!==cls){el.className=cls;el._c=cls;}});
+  const w=L.words[k];
+  $('clueTxt').innerHTML=`<i>${w.dir?'↓':'→'}</i><span>${w.clue}</span><small>${w.ans.length}</small>`;
+  if(lib){$('doneLbl').textContent='palabras';$('done').textContent=`${st.filter(s=>s.full&&s.ok).length}/${L.words.length}`;}
+  else{const n=L.sol.filter(Boolean).length,f=L.sol.filter((v,i)=>v&&S.fill[i]).length;$('doneLbl').textContent='letras';$('done').textContent=`${f}/${n}`;}
+  paintCommon();
+}
+
+/* ---------- elegir casilla y escribir ---------- */
+function select(i,dir){if(!isL(i))return;S.cur=i;if(dir!=null&&wordsAt[i][dir]>=0)S.dir=dir;else if(wordsAt[i][S.dir]<0)S.dir=1-S.dir;draw();}
+function selectWord(k,toEmpty=true){const w=S.L.words[k],cs=cellsOf(w);S.dir=w.dir;S.cur=(toEmpty?cs.find(i=>!S.fill[i]):undefined)??cs[0];draw();}
+function stepWord(d){const n=S.L.words.length;let k=curWord();
+  // salta a la siguiente palabra que no esté completa (si quedan)
+  for(let t=0;t<n;t++){k=(k+d+n)%n;if(cellsOf(S.L.words[k]).some(i=>!S.fill[i])||t===n-1)break;}
+  selectWord(k);}
+function setCell(i,v,move){if(S.won||S.timeup||S.given[i]||S.rev.includes(i))return false;
+  const prev=S.fill[i];if(prev===v)return true;pushUndo([i,prev,S.cur,S.dir]);S.fill[i]=v;afterChange(i);return true;}
+function afterChange(i){
+  const before=S._st||{};const now={};const lib=mode==='libre';
+  [0,1].forEach(d=>{const k=wordsAt[i][d];if(k>=0){const s=wordState(k);now[k]=s;
+    if(lib&&s.full&&!(before[k]&&before[k].full&&before[k].ok===s.ok)){if(s.ok){Sfx.play('ok');Anim.stagger(cellsOf(S.L.words[k]).map(j=>els[j]),el=>Anim.pop(el),35);}else{Sfx.play('bad');vibe(30);Anim.shake($('grid'));}}}});
+  S._st=now;
+  if(S.L.sol.every((v,j)=>!v||S.fill[j]===v)){draw();save();win();return;}
+  if(!lib&&S.L.sol.every((v,j)=>!v||S.fill[j])&&!S._full){S._full=true;toast('Algo no cierra: revisá las palabras',1800);}
+  if(S.L.sol.some((v,j)=>v&&!S.fill[j]))S._full=false;
+  draw();save();}
+function type(ch){if(!S||S.won||S.timeup)return;const i=S.cur;
+  if(!setCell(i,ch)&&!(S.given[i]||S.rev.includes(i)))return;Sfx.play('tap');
+  // avanzar dentro de la palabra, saltando lo que ya viene puesto
+  const cs=cellsOf(S.L.words[curWord()]),p=cs.indexOf(i);
+  let nx=cs.slice(p+1).find(j=>!S.given[j]&&!S.rev.includes(j)&&!S.fill[j]);if(nx==null)nx=cs.slice(p+1).find(j=>!S.given[j]&&!S.rev.includes(j));
+  if(nx!=null){S.cur=nx;draw();}}
+function erase(){if(!S||S.won||S.timeup)return;const i=S.cur;
+  if(S.fill[i]&&!S.given[i]&&!S.rev.includes(i)){setCell(i,'');Sfx.play('undo');return;}
+  const cs=cellsOf(S.L.words[curWord()]),p=cs.indexOf(i);
+  for(let j=p-1;j>=0;j--){const c=cs[j];if(S.given[c]||S.rev.includes(c))continue;S.cur=c;if(S.fill[c])setCell(c,'');else draw();Sfx.play('undo');return;}}
+function moveDir(dr,dc){const L=S.L;let r=Math.floor(S.cur/L.W),c=S.cur%L.W;const dir=dr?1:0;
+  if(S.dir!==dir&&wordsAt[S.cur][dir]>=0){S.dir=dir;draw();return;}
+  for(let t=1;t<Math.max(L.W,L.H);t++){const R=r+dr*t,C=c+dc*t;if(R<0||C<0||R>=L.H||C>=L.W)break;const i=R*L.W+C;if(isL(i)){select(i,dir);return;}}}
+
+/* ---------- toques ---------- */
+$('grid').addEventListener('click',e=>{if(!S)return;const l=e.target.closest('[data-i]'),q=e.target.closest('[data-q]');
+  if(l){const i=+l.dataset.i;if(i===S.cur&&wordsAt[i][0]>=0&&wordsAt[i][1]>=0){S.dir=1-S.dir;draw();}else select(i);}
+  else if(q){const ks=qEls.get(+q.dataset.q),k=curWord(),pos=ks.indexOf(k);selectWord(ks[(pos+1)%ks.length]);}});
+$('clueTxt').addEventListener('click',()=>{if(S&&wordsAt[S.cur][1-S.dir]>=0){S.dir=1-S.dir;draw();}});
+$('prevW').onclick=()=>S&&stepWord(-1);$('nextW').onclick=()=>S&&stepWord(1);
+const ROWS=['QWERTYUIOP','ASDFGHJKLÑ','ZXCVBNM'];
+$('kb').innerHTML=ROWS.map((r,k)=>`<div>${[...r].map(ch=>`<button data-k="${ch}">${ch}</button>`).join('')}${k===2?'<button class="wide" data-k="⌫" aria-label="Borrar"><svg viewBox="0 0 24 24"><path d="M21 5H9l-6 7 6 7h12z"/><path d="m12 9 6 6m0-6-6 6"/></svg></button>':''}</div>`).join('');
+$('kb').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;const k=b.dataset.k;if(k==='⌫')erase();else type(k);});
+
+/* ---------- pista: revela una letra ---------- */
+function hint(){const L=S.L,k=curWord(),wrong=i=>L.sol[i]&&S.fill[i]!==L.sol[i];
+  let i=wrong(S.cur)?S.cur:cellsOf(L.words[k]).find(wrong);if(i==null)i=L.sol.findIndex((v,j)=>wrong(j));if(i==null||i<0)return;
+  S.fill[i]=L.sol[i];S.rev.push(i);S.undo=S.undo.filter(u=>u[0]!==i);S.cur=i;
+  Anim.pulse(els[i]);toast('Esta letra va así',1100);afterChange(i);}
+
+/* ---------- arranque ---------- */
+const kmap={};'abcdefghijklmnopqrstuvwxyzñ'.split('').forEach(ch=>kmap[ch]=()=>type(ch.toUpperCase()));
+Object.assign(kmap,{'á':kmap.a,'é':kmap.e,'í':kmap.i,'ó':kmap.o,'ú':kmap.u,'ü':kmap.u,' ':()=>{if(S&&wordsAt[S.cur][1-S.dir]>=0){S.dir=1-S.dir;draw();}},
+  Tab:e=>{e.preventDefault();if(S)stepWord(e.shiftKey?-1:1);}});
+kitStart({
+  id:'crucigrama',diffs:CDIFFS,themes:THEMES,theme:'diario',letras:true,
+  help:`<p>Cada casilla gris tiene la pista de la palabra que empieza al lado: <b>→</b> se escribe hacia la derecha y <b>↓</b> hacia abajo. Tocá una casilla (o una pista) y escribí; la pista de la palabra elegida se lee arriba del tablero. Tocar dos veces la misma casilla cambia de dirección.</p>
+<p>Las palabras van sin tildes; la Ñ cuenta como letra aparte.</p>
+<p><b>Dificultad:</b> cambia el tamaño, qué tan rebuscadas son las palabras y las pistas, y cuántas letras vienen puestas.</p>
+<p><b>Libre:</b> sin reloj; cada palabra completa se marca bien o mal, y la pista revela una letra. <b>Desafío:</b> contra reloj y sin marcas hasta el final; ganás de 1 a 3 estrellas según el tiempo.</p>`,
+  keysHelp:'las letras escriben, <b>Borrar</b> borra, las flechas mueven, <b>Espacio</b> cambia de dirección y <b>Tab</b> pasa a la palabra siguiente',
+  create(d,lvl){const L=genCross(d,lvl);const given=L.sol.map(()=>0);L.give.forEach(i=>given[i]=1);
+    return {L,given,fill:L.sol.map((v,i)=>given[i]?v:''),rev:[],cur:null,dir:0};},
+  reset(S){S.fill=S.L.sol.map((v,i)=>S.given[i]?v:'');S.rev=[];S.cur=null;S._st=null;S._full=false;},
+  valid:s=>s.L&&s.fill&&s.given&&s.fill.length===s.L.sol.length,
+  build,draw,busy:s=>s.fill.some((v,i)=>v&&!s.given[i]),
+  undo(u){S.fill[u[0]]=u[1];S.cur=u[2];S.dir=u[3];S._st=null;},
+  hint,
+  applyTheme(k){$('stage').className='stage '+THEMES[k].cls;},
+  preview:(k,t)=>`<div class="pv ${t.cls}" style="background:var(--board);display:flex;align-items:center;justify-content:center">${[['q','→'],['l','S'],['l','O'],['l','L'],['q','↓']].map(([c,v])=>`<span class="pc${c==='q'?' pq':''}">${v}</span>`).join('')}</div>`,
+  info:d=>`${CDIFFS[d].W}×${CDIFFS[d].H} · ${CDIFFS[d].words[0]}–${CDIFFS[d].words[1]} palabras`,
+  end:S=>({title:'¡Crucigrama completo!',big:'✏️',note:`${S.L.words.length} palabras${S.rev.length?` · ${S.rev.length} ${S.rev.length===1?'letra revelada':'letras reveladas'}`:''}.`}),
+  keys:kmap
+});
+// borrar y flechas se repiten al mantenerlas
+Input.keys({Backspace:()=>erase(),Delete:()=>erase(),ArrowLeft:()=>S&&moveDir(0,-1),ArrowRight:()=>S&&moveDir(0,1),ArrowUp:()=>S&&moveDir(-1,0),ArrowDown:()=>S&&moveDir(1,0)});
+</script>

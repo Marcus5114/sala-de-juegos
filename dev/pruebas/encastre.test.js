@@ -61,5 +61,6 @@ run(process.argv[2]||require('path').join(__dirname,'..','..','games','encastre'
   await p.keyboard.press('Enter');ok('teclado: Enter la apoya',await p.evaluate(()=>!kb&&S.tray[2]===null&&S.b.filter(v=>v>=0).length===4&&S.b[1*8+2]>=0));
   await p.keyboard.press('z');ok('teclado: Z deshace',await p.evaluate(()=>S.b.every(v=>v<0)&&S.tray[2]));
   await p.keyboard.press('1');await p.keyboard.press('Escape');ok('teclado: Esc suelta la pieza',await p.evaluate(()=>!kb&&!document.querySelector('.cell.pv')));
+  await p.waitForTimeout(800);/* que terminen las respuestas a los últimos toques */
   const idle=await cpuIdle();ok(`en reposo no consume (${idle.toFixed(2)} %)`,idle<0.5);
 });

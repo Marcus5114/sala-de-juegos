@@ -40,5 +40,6 @@ run(process.argv[2]||require('path').join(__dirname,'..','..','games','mapa','in
   const cdp=await ctx.newCDPSession(p);await cdp.send('Emulation.setCPUThrottlingRate',{rate:4});
   const t0=Date.now();for(let k=0;k<10;k++){await p.click('[data-c="0"]');await tapRegion(await p.evaluate(()=>S.c.findIndex(v=>v==null)));}
   const per=(Date.now()-t0)/10;await cdp.send('Emulation.setCPUThrottlingRate',{rate:1});ok(`pintar responde rápido con CPU 4× más lenta (${per.toFixed(0)} ms por toque, incluido el clic)`,per<250);
+  await p.waitForTimeout(800);/* que terminen las respuestas a los últimos toques */
   const idle=await cpuIdle();ok(`en reposo no consume (${idle.toFixed(2)} %)`,idle<0.5);
 });

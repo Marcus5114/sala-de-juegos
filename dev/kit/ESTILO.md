@@ -82,11 +82,37 @@ Medir con `node dev/herramientas/contraste.js` (ver el encabezado del archivo).
 - **Fondos animados** (hojas, olas, estrellas): sutiles, lentos (10 s o más por ciclo), pocos elementos, y que no tapen el juego.
 - **Reducir movimiento**: `reduceMotion` es `true` → saltear o acortar. `Anim.*` ya lo respeta; las animaciones CSS necesitan su `@media (prefers-reduced-motion:reduce)`.
 
+## Fondos animados
+
+Cada tema tiene un fondo que se mueve despacio por detrás del tablero (`kit/fondo.js`). Es lo que hace que la sala se sienta viva y pareja: todos los juegos lo tienen, con la misma calidad y las mismas reglas.
+
+- **Catálogo**: polvo, estrellas, burbujas, hojas, nieve, garabatos, destellos, ondas, nubes, engranajes, chispas, luz y grilla. Se ven todos en `kit/fondos.src.html` (galería, sobre fondo oscuro y claro).
+- **Se eligen por tema**, junto con el resto del tema:
+
+  ```js
+  noche:{name:'Noche',cls:'t-noche',fondo:{p:[['estrellas',['#fff','#c9b6ff']],['luz',['rgba(255,255,255,.08)'],.8]]}}
+  ```
+
+  Cada capa es `[fondo, colores, opacidad]`. Con `bg` se tiñe además el área (para juegos cuyo tablero flota sobre la página: usar colores con transparencia, así sirven en claro y en oscuro).
+- **Sutiles**: decoran, no compiten. Opacidad de 0,2 a 0,6 para lo que se repite (polvo, garabatos), y hasta 1 para lo que ya es tenue (estrellas). Si en una captura se ve más el fondo que el tablero, está fuerte.
+- **Acordes al tema**: estrellas en temas nocturnos, burbujas u ondas en el agua, garabatos en papel o pizarra, engranajes en lo mecánico, polvo o luz en los neutros.
+- **Se quedan quietos** (se ven, pero no se mueven) con "reducir movimiento", con la batería por debajo del 20 % sin cargar, o si la persona los apaga: botón **Fondos** en la sala o **Fondo animado** en el panel de temas (vale para toda la sala: `sala.fondos`).
+- En los juegos con `kitStart` alcanza con poner `fondo` en cada tema. En los demás: `/*KIT_FONDO_CSS*/` y `/*KIT_FONDO_JS*/`, una tabla `FONDOS`, `Fondo.iniciar({host,temas:FONDOS})` y `Fondo.tema(clave)` al cambiar de tema.
+
+## Movimiento común
+
+- **Resorte**: `SPRING` (en el kit) es una curva física convertida a `linear()` de CSS: se siente natural y la sigue moviendo la placa de video. Para cartas que llegan, piezas que se apoyan, globitos.
+- **Entrada de nivel**: el kit hace aparecer el tablero con un resorte corto al empezar cada nivel.
+- **Marcador**: los números se "inflan" un instante cuando cambian (menos el reloj).
+- **Botones**: se hunden un poco al tocarlos (`transform:scale(.95)`).
+- **Rivales y procesos**: lo que piensa la computadora se muestra con un globito de tres puntos (`IA.pensar` asegura que se vea al menos medio segundo).
+
 ## Batería y fluidez
 
-- **En reposo, 0 % de trabajo**: ningún `setInterval` ni `requestAnimationFrame` corriendo sin que pase nada. El reloj del kit y `Loop` se detienen solos con la app oculta. Las pruebas exigen menos de 0,5 % de CPU en reposo.
+- **En reposo, casi 0 % de trabajo**: ningún `setInterval` ni `requestAnimationFrame` corriendo sin que pase nada. Los fondos animados no cuentan porque los mueve la placa de video (medido: 0,04 % con 20 motas; GSAP haría lo mismo con 2,8 % y un lienzo dibujado cuadro a cuadro con 5,6 %; ver `herramientas/medir_animacion.js`). El reloj del kit y `Loop` se detienen solos con la app oculta. Las pruebas exigen menos de 0,5 % de CPU en reposo.
 - **Dibujar solo lo que cambia**: `build()` crea los elementos una vez; `draw()` cambia clases y atributos, y compara antes de escribir (`if(el._c!==cls)`). Al arrastrar, mover solo la pieza y lo que está unido a ella.
 - **Un dibujo por cuadro**: `Input.drag` ya agrupa los movimientos; para otros casos, `Redraw(draw)`.
+- **Cálculos pesados en segundo plano**: IA, búsquedas o verificaciones largas van con `kitWorker` (otro hilo); la pantalla nunca se traba.
 - **Sonido**: el contexto de audio se suspende 1,5 s después del último sonido.
 - **Fluidez**: arrastrar tiene que ir a 30 cuadros/s o más con el procesador 4× más lento (las pruebas lo miden).
 

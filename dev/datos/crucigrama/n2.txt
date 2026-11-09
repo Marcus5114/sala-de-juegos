@@ -1,0 +1,338 @@
+# Crucigrama · nivel 2 (vocabulario general, pistas con un poco de vuelta). Formato: palabra|pista
+ancla|Detiene al barco en el fondo
+faro|Torre que guía a los barcos de noche
+puerto|Lugar donde atracan los barcos
+remo|Pala para mover un bote
+vela|Lona que empuja el viento en un barco
+mástil|Palo vertical del barco
+brújula|Su aguja señala el norte
+mapa|Lo usa el explorador para orientarse
+cueva|Hueco natural en la roca
+volcán|Montaña que puede echar lava
+lava|Roca fundida que sale del volcán
+glaciar|Gran masa de hielo que avanza despacio
+desierto|Lugar seco con mucha arena
+selva|Bosque tropical muy denso
+pantano|Terreno con agua estancada
+valle|Llanura entre montañas
+cumbre|Punto más alto de una montaña
+costa|Orilla del mar
+bahía|Entrada del mar en la costa
+golfo|Gran entrada del mar en la tierra
+cascada|Caída de agua
+arroyo|Río pequeño
+océano|El Pacífico o el Atlántico
+planeta|Marte o Júpiter, por ejemplo
+cometa|Astro con cola luminosa
+eclipse|La Luna tapa al Sol
+órbita|Trayectoria de un planeta
+galaxia|La Vía Láctea es una
+meteoro|Estrella fugaz
+trueno|Ruido que sigue al rayo
+rayo|Descarga eléctrica de la tormenta
+niebla|Nube baja que no deja ver
+rocío|Gotas que aparecen en el pasto al amanecer
+granizo|Lluvia de bolitas de hielo
+tormenta|Lluvia fuerte con rayos
+brisa|Viento suave
+clima|Tiempo habitual de una región
+sequía|Larga falta de lluvia
+aurora|Luz del amanecer
+ocaso|Puesta del sol
+lunar|Mancha pequeña en la piel
+codo|Articulación del brazo
+rodilla|Articulación de la pierna
+tobillo|Une el pie con la pierna
+hombro|Une el brazo con el tronco
+cuello|Une la cabeza con el tronco
+espalda|Parte trasera del tronco
+pulmón|Órgano para respirar
+corazón|Bombea la sangre
+cerebro|Órgano con el que pensamos
+hueso|El esqueleto tiene más de doscientos
+músculo|Se fortalece con ejercicio
+sangre|Líquido rojo que corre por las venas
+vena|Lleva la sangre al corazón
+uña|Crece en la punta del dedo
+ceja|Pelo sobre el ojo
+labio|Borde de la boca
+lengua|Órgano del gusto
+garganta|Parte del cuello por donde pasa la comida
+médico|Atiende a los enfermos
+remedio|Medicamento
+fiebre|Temperatura alta del cuerpo
+vacuna|Protege contra enfermedades
+dentista|Cuida los dientes
+farmacia|Allí se compran remedios
+hospital|Lugar donde se interna a los enfermos
+bombero|Apaga incendios
+policía|Cuida el orden en la calle
+cartero|Reparte las cartas
+panadero|Hace el pan
+pintor|Artista de cuadros
+escritor|Autor de libros
+músico|Toca un instrumento
+actor|Trabaja en el teatro o el cine
+maestro|Enseña en la escuela
+alumno|Aprende en la escuela
+piloto|Maneja un avión
+marinero|Trabaja en un barco
+granjero|Trabaja en la granja
+juez|Dicta sentencia
+abogado|Defiende en un juicio
+cocinero|Prepara comidas
+carpintero|Trabaja la madera
+herrero|Trabaja el hierro
+sastre|Hace trajes a medida
+guitarra|Instrumento de seis cuerdas
+piano|Instrumento de teclas blancas y negras
+tambor|Instrumento que se golpea con palillos
+flauta|Instrumento de viento con agujeros
+violín|Instrumento de cuerda que se toca con arco
+trompeta|Instrumento de metal con pistones
+arpa|Instrumento de muchas cuerdas que se pulsan
+bandoneón|Instrumento típico del tango
+tango|Baile del Río de la Plata
+ritmo|Pulso de la música
+nota|Do, re o mi
+canción|Música con letra
+coro|Grupo que canta junto
+orquesta|Conjunto grande de músicos
+teatro|Lugar donde actúan los actores
+escena|Parte de una obra de teatro
+telón|Se levanta al empezar la función
+cuento|Relato breve
+novela|Relato largo
+poema|Obra en verso
+verso|Línea de un poema
+rima|Igualdad de sonidos al final del verso
+fábula|Cuento con moraleja
+leyenda|Relato tradicional de hechos fantásticos
+héroe|Protagonista valiente
+villano|El malo de la historia
+castillo|Fortaleza con torres
+torre|Construcción alta y angosta
+puente|Cruza sobre un río
+túnel|Paso bajo tierra
+camino|Vía para ir de un lugar a otro
+ruta|Carretera
+esquina|Donde se cruzan dos calles
+vereda|Acera
+semáforo|Luz roja, amarilla y verde
+museo|Guarda obras de arte
+biblioteca|Lugar con muchos libros para leer
+mercado|Lugar de compra y venta
+estadio|Cancha con tribunas
+iglesia|Templo cristiano
+cárcel|Prisión
+fábrica|Lugar donde se producen cosas
+oficina|Lugar de trabajo con escritorios
+hotel|Alojamiento para viajeros
+equipaje|Valijas de un viaje
+valija|Maleta
+pasaje|Boleto de un viaje
+viaje|Ir de un lugar a otro lejano
+turista|Visita lugares por placer
+carpa|Tienda de campaña
+mochila|Bolso que se lleva en la espalda
+linterna|Luz portátil a pilas
+fogata|Fuego al aire libre
+hacha|Herramienta para cortar leña
+leña|Madera para el fuego
+cuerda|Soga
+escalera|Tiene peldaños
+balde|Cubo para llevar agua
+regadera|Se usa para regar
+semilla|De ella nace la planta
+raíz|Parte de la planta bajo la tierra
+tallo|Sostiene las hojas de la planta
+espina|Pincha en el tallo de la rosa
+pétalo|Parte de color de la flor
+cosecha|Recolección de los frutos
+trigo|Cereal para la harina
+maíz|Cereal de granos amarillos en mazorca
+girasol|Flor que sigue al sol
+cactus|Planta con espinas del desierto
+helecho|Planta de hojas verdes sin flores
+hongo|Ser vivo como el champiñón
+musgo|Planta pequeña que crece en lugares húmedos
+pino|Árbol de hojas en aguja
+roble|Árbol de madera muy dura
+ceibo|Flor nacional argentina
+bosque|Lugar con muchos árboles
+nogal|Árbol que da nueces
+viña|Plantación de uvas
+vino|Bebida de uva fermentada
+harina|Polvo para hacer pan
+masa|Mezcla de harina y agua
+empanada|Masa rellena al horno
+asado|Carne a la parrilla
+parrilla|Rejilla para asar
+dulce|Lo contrario de salado
+salado|Con mucha sal
+amargo|Sabor del café sin azúcar
+ácido|Sabor del limón
+picante|Sabor del ají
+receta|Instrucciones para cocinar
+horno|Allí se hornea la torta
+heladera|Mantiene fría la comida
+mantel|Cubre la mesa
+servilleta|Sirve para limpiarse la boca
+tenedor|Cubierto con dientes
+cuchillo|Cubierto para cortar
+sartén|Para freír huevos
+botella|Recipiente de cuello angosto
+jarra|Recipiente con asa para servir agua
+canasta|Cesta
+helado|Postre frío
+galleta|Masita seca
+caramelo|Golosina dura de azúcar
+chocolate|Se hace con cacao
+budín|Torta alargada
+flan|Postre con caramelo
+miga|Parte blanda del pan
+corteza|Capa exterior del árbol
+pluma|Cubre el cuerpo de las aves
+escama|Cubre la piel del pez
+garra|Uña curva de un ave de presa
+cuerno|Lo tiene el toro en la cabeza
+melena|Pelo del león
+trompa|Nariz larga del elefante
+aleta|Le sirve al pez para nadar
+caparazón|Coraza de la tortuga
+tortuga|Reptil lento con caparazón
+serpiente|Reptil sin patas
+lagarto|Reptil de cuatro patas
+cocodrilo|Reptil grande de río
+águila|Ave rapaz de vista aguda
+búho|Ave nocturna de ojos grandes
+cóndor|Ave grande de los Andes
+pingüino|Ave que no vuela y vive en el frío
+gaviota|Ave del mar
+paloma|Ave símbolo de la paz
+colibrí|Ave muy pequeña que aletea rapidísimo
+hornero|Ave argentina que hace su nido de barro
+mariposa|Insecto de alas de colores
+gusano|Animal blando sin patas
+grillo|Insecto que canta de noche
+murciélago|Mamífero que vuela de noche
+ardilla|Roedor que junta nueces
+zorro|Animal astuto de cola peluda
+puma|Felino americano
+yaguareté|Felino manchado de la selva argentina
+carpincho|Roedor más grande del mundo
+llama|Animal de los Andes que da lana
+vicuña|Pariente salvaje de la llama
+camello|Tiene jorobas
+foca|Mamífero marino de bigotes
+morsa|Mamífero marino con colmillos largos
+cangrejo|Camina de costado
+medusa|Animal marino gelatinoso
+estrella|De mar, tiene cinco brazos
+coral|Forma arrecifes
+perla|Se forma dentro de una ostra
+ostra|Molusco que puede tener perla
+brújula|Instrumento de orientación
+reloj|Tiene agujas que marcan la hora
+calendario|Muestra los días del año
+fecha|Día, mes y año
+siglo|Cien años
+década|Diez años
+pasado|Lo que ya ocurrió
+futuro|Lo que vendrá
+historia|Estudio del pasado
+idioma|Lengua de un pueblo
+palabra|Conjunto de letras con significado
+letra|La A o la B
+número|El siete, por ejemplo
+suma|Operación con el signo más
+resta|Operación con el signo menos
+mitad|Cada una de dos partes iguales
+doble|Dos veces
+docena|Doce unidades
+círculo|Figura redonda
+cuadrado|Figura de cuatro lados iguales
+triángulo|Figura de tres lados
+línea|Sucesión de puntos
+punto|Signo para terminar una oración
+coma|Signo para hacer una pausa
+regla|Sirve para trazar líneas rectas
+goma|Borra el lápiz
+tiza|Se escribe con ella en el pizarrón
+pizarrón|Tablero de la clase
+cuaderno|Libreta para tomar notas
+recreo|Pausa entre clases
+examen|Prueba para evaluar
+tarea|Deber para hacer en casa
+pregunta|La responde una respuesta
+respuesta|Lo que contesta una pregunta
+idea|Pensamiento
+sueño|Lo que vemos al dormir
+deseo|Ganas de algo
+miedo|Temor
+alegría|Felicidad
+enojo|Bronca
+calma|Tranquilidad
+ruido|Sonido molesto
+silencio|Ausencia de ruido
+secreto|Lo que no se cuenta
+sorpresa|Lo inesperado
+broma|Chiste para hacer reír
+chiste|Cuento breve para reír
+risa|Sonido de la alegría
+abrazo|Se da con los brazos
+beso|Se da con los labios
+saludo|Hola o chau
+vecino|Vive al lado
+equipo|Grupo que juega junto
+partido|Encuentro deportivo
+arco|Lo defiende el arquero
+arquero|Ataja los penales
+cancha|Terreno de juego
+carrera|Competencia de velocidad
+medalla|Premio olímpico
+premio|Recompensa
+trofeo|Copa del campeón
+ajedrez|Juego de reyes, torres y alfiles
+dama|Pieza del ajedrez más poderosa
+peón|Pieza más pequeña del ajedrez
+truco|Juego de naipes con envido
+dominó|Juego de fichas con puntos
+rompecabezas|Juego de piezas que encajan
+acertijo|Adivinanza
+enigma|Misterio por resolver
+pista|Ayuda para resolver un misterio
+tesoro|Lo busca el pirata
+pirata|Ladrón del mar
+espada|Arma de filo largo
+escudo|Protege en la batalla
+casco|Protege la cabeza
+corona|La lleva el rey
+trono|Asiento del rey
+príncipe|Hijo del rey
+princesa|Hija del rey
+gigante|Persona enorme de los cuentos
+enano|Persona muy pequeña de los cuentos
+duende|Ser pequeño y travieso
+fantasma|Espíritu que asusta
+robot|Máquina que hace tareas sola
+cohete|Viaja al espacio
+astronauta|Viaja al espacio
+satélite|Gira alrededor de un planeta
+antena|Recibe señales
+pantalla|Muestra la imagen
+teclado|Tiene teclas para escribir
+cable|Conduce la electricidad
+pila|Batería pequeña
+imán|Atrae el hierro
+motor|Hace andar al auto
+nafta|Combustible del auto
+freno|Detiene el vehículo
+volante|Se gira para conducir
+bocina|Suena para avisar
+grúa|Levanta cosas pesadas
+camión|Vehículo grande de carga
+colectivo|Ómnibus urbano
+subte|Tren bajo tierra
+estación|Lugar donde para el tren
+andén|Plataforma de la estación

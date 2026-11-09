@@ -1,0 +1,312 @@
+# Crucigrama · nivel 3 (palabras menos frecuentes, pistas con vuelta). Formato: palabra|pista
+alba|Primera luz del día
+cénit|Punto del cielo sobre nuestra cabeza
+nadir|Opuesto al cénit
+solsticio|Día más largo o más corto del año
+equinoccio|Día y noche duran lo mismo
+nebulosa|Nube de gas y polvo en el espacio
+asteroide|Roca que orbita el Sol
+constelación|Grupo de estrellas con nombre
+penumbra|Sombra débil
+crepúsculo|Claridad al anochecer
+efímero|Que dura muy poco
+perenne|Que no se acaba
+ameno|Agradable y entretenido
+apacible|Tranquilo y sereno
+arduo|Muy difícil
+diáfano|Claro, transparente
+fugaz|Que pasa muy rápido
+hosco|Poco amable, huraño
+locuaz|Que habla mucho
+mustio|Marchito
+nimio|Insignificante
+osado|Atrevido
+pulcro|Muy limpio y prolijo
+sagaz|Astuto y perspicaz
+taciturno|Callado y melancólico
+tenaz|Que no se rinde
+voraz|Que come con ansia
+afable|De trato amable
+ávido|Ansioso, deseoso
+cauto|Prudente
+dócil|Fácil de manejar
+efusivo|Que expresa mucho sus afectos
+frugal|Que come poco
+gélido|Muy frío
+lúgubre|Triste y sombrío
+mordaz|Que critica con ironía
+nítido|Muy claro
+perspicaz|Que entiende enseguida
+prolijo|Ordenado
+recio|Fuerte y robusto
+sereno|Tranquilo
+sutil|Delicado, tenue
+terso|Liso y sin arrugas
+vasto|Muy extenso
+yermo|Terreno sin cultivar
+ábaco|Marco con bolitas para contar
+ánfora|Vasija antigua de dos asas
+atril|Sostiene la partitura
+baúl|Cofre grande
+cáliz|Copa sagrada
+cincel|Herramienta del escultor
+compás|Sirve para trazar circunferencias
+crisol|Recipiente para fundir metales
+dintel|Parte superior de una puerta
+yunque|Bloque de hierro donde se forja
+fanal|Farol grande de un puerto
+farol|Lámpara de la calle
+gozne|Bisagra
+lienzo|Tela para pintar
+mazo|Martillo de madera
+odre|Bolsa de cuero para vino
+pergamino|Piel preparada para escribir
+pincel|Herramienta del pintor
+polea|Rueda con soga para levantar peso
+reja|Barrotes de una ventana
+sello|Se pega en la carta
+tamiz|Colador fino
+timón|Dirige el barco
+urna|Caja donde se vota
+vasija|Recipiente de barro
+zócalo|Franja en la base de la pared
+alcázar|Fortaleza árabe
+almena|Diente de la muralla de un castillo
+foso|Zanja con agua alrededor del castillo
+muralla|Muro que rodea una ciudad
+atalaya|Torre de vigilancia
+claustro|Galería de un convento
+cúpula|Techo con forma de media esfera
+columna|Pilar que sostiene un techo
+bóveda|Techo curvo
+arcada|Serie de arcos
+pórtico|Galería con columnas en la entrada
+ágora|Plaza pública de la antigua Grecia
+anfiteatro|Teatro romano circular
+pirámide|Tumba de los faraones
+esfinge|Cuerpo de león y cabeza humana
+faraón|Rey del antiguo Egipto
+papiro|Planta con la que los egipcios hacían papel
+momia|Cadáver embalsamado
+jeroglífico|Escritura con dibujos de los egipcios
+vikingo|Guerrero nórdico navegante
+samurái|Guerrero japonés
+gladiador|Luchaba en el circo romano
+caballero|Noble con armadura
+escudero|Ayudante del caballero
+juglar|Cantor medieval que iba de pueblo en pueblo
+bufón|Hacía reír al rey
+alquimista|Buscaba convertir metales en oro
+hechicero|Mago que hace conjuros
+oráculo|Respuesta de los dioses en Grecia
+mito|Relato sobre dioses y héroes
+epopeya|Poema de hazañas heroicas
+odisea|Viaje largo lleno de aventuras
+sátira|Crítica en tono de burla
+fábula|Relato con animales y moraleja
+prólogo|Texto antes del comienzo de un libro
+epílogo|Texto final de una obra
+estrofa|Grupo de versos
+soneto|Poema de catorce versos
+haiku|Poema japonés de tres versos
+metáfora|Figura que dice algo con otra imagen
+ironía|Decir lo contrario de lo que se piensa
+paradoja|Idea que parece contradictoria
+dilema|Elección difícil entre dos opciones
+utopía|Sociedad ideal imposible
+quimera|Sueño imposible
+nostalgia|Tristeza por lo que pasó
+añoranza|Extrañar algo
+desidia|Falta de ganas de hacer las cosas
+pereza|Falta de ganas de trabajar
+codicia|Deseo exagerado de riquezas
+envidia|Pesar por el bien ajeno
+soberbia|Orgullo excesivo
+templanza|Moderación
+lealtad|Fidelidad
+osadía|Atrevimiento
+júbilo|Alegría muy grande
+ímpetu|Fuerza, impulso
+ahínco|Empeño, esfuerzo
+afán|Empeño grande
+sigilo|Silencio para no ser descubierto
+alarde|Ostentación
+dádiva|Regalo
+ardid|Trampa astuta
+embuste|Mentira
+ápice|Punta, parte mínima
+cénit|Punto más alto
+umbral|Entrada de una puerta
+vaivén|Ir y venir
+remanso|Lugar donde el agua corre lenta
+meandro|Curva de un río
+delta|Desembocadura con varios brazos
+estuario|Desembocadura ancha de un río
+acantilado|Costa cortada a pique
+arrecife|Rocas o corales bajo el mar
+atolón|Isla de coral en forma de anillo
+fiordo|Golfo angosto entre montañas
+istmo|Franja de tierra que une dos continentes
+península|Tierra rodeada de agua menos por un lado
+archipiélago|Grupo de islas
+meseta|Llanura elevada
+cordillera|Cadena de montañas
+quebrada|Paso estrecho entre montañas
+oasis|Lugar con agua en el desierto
+duna|Montaña de arena
+estepa|Llanura seca con pocos árboles
+tundra|Llanura helada sin árboles
+pampa|Llanura argentina sin árboles
+monzón|Viento estacional de Asia con lluvias
+tornado|Torbellino de viento violento
+huracán|Tormenta tropical con vientos enormes
+ciclón|Huracán
+tsunami|Ola gigante causada por un sismo
+sismo|Terremoto
+géiser|Fuente que lanza agua caliente
+magma|Roca fundida bajo la corteza
+cráter|Boca del volcán
+basalto|Roca volcánica oscura
+granito|Roca dura usada en mesadas
+cuarzo|Mineral transparente
+mármol|Piedra de las estatuas
+azabache|Piedra negra brillante
+ámbar|Resina fósil
+fósil|Resto de un ser vivo antiguo
+mamut|Elefante peludo extinguido
+dinosaurio|Reptil gigante extinguido
+ornitorrinco|Mamífero con pico de pato que pone huevos
+camaleón|Reptil que cambia de color
+iguana|Reptil grande de cresta
+armadillo|Mamífero con caparazón
+mulita|Armadillo pequeño argentino
+coatí|Mamífero de hocico largo de la selva
+tapir|Mamífero con una pequeña trompa
+ñandú|Ave grande que corre por la pampa
+tucán|Ave de pico enorme y colorido
+flamenco|Ave rosada de patas largas
+pelícano|Ave con bolsa en el pico
+albatros|Ave marina de alas enormes
+halcón|Ave rapaz muy veloz
+gavilán|Ave rapaz pequeña
+lechuza|Ave nocturna de cara blanca
+cigüeña|Según el cuento, trae a los bebés
+golondrina|Ave que migra en otoño
+calandria|Pájaro que imita cantos
+benteveo|Pájaro que parece decir su nombre
+zorzal|Pájaro de canto melodioso
+luciérnaga|Insecto que brilla de noche
+libélula|Insecto de alas transparentes que vive cerca del agua
+cigarra|Canta en verano
+mantis|Insecto que parece rezar
+escarabajo|Insecto de caparazón duro
+alacrán|Escorpión
+ciempiés|Animal con muchas patas
+crisálida|Etapa entre oruga y mariposa
+oruga|Larva de la mariposa
+renacuajo|Cría de la rana
+alevín|Cría de pez
+potrillo|Cría del caballo
+ternero|Cría de la vaca
+cordero|Cría de la oveja
+cachorro|Cría del perro
+lechón|Cría del cerdo
+madriguera|Cueva de un conejo
+colmena|Casa de las abejas
+hormiguero|Casa de las hormigas
+establo|Lugar de las vacas
+corral|Cerco para animales
+pesebre|Cajón donde comen los animales
+granero|Lugar donde se guarda el grano
+molino|Muele el trigo
+arado|Abre surcos en la tierra
+surco|Zanja que hace el arado
+espiga|Parte del trigo donde está el grano
+avena|Cereal de los copos del desayuno
+cebada|Cereal de la cerveza
+centeno|Cereal del pan negro
+lenteja|Legumbre pequeña y redonda
+garbanzo|Legumbre del hummus
+berenjena|Hortaliza violeta
+alcaucil|Alcachofa
+puerro|Pariente de la cebolla de tallo largo
+rábano|Raíz roja y picante
+zapallo|Calabaza
+batata|Tubérculo dulce
+mandioca|Raíz tropical comestible
+palta|Aguacate
+membrillo|Fruta del dulce que va con queso
+durazno|Melocotón
+ciruela|Fruta que seca es pasa
+frambuesa|Fruta roja del bosque
+arándano|Fruta azul pequeña
+pomelo|Cítrico grande y amargo
+mandarina|Cítrico pequeño fácil de pelar
+almendra|Fruto seco ovalado
+avellana|Fruto seco redondo
+nuez|Fruto seco con forma de cerebro
+canela|Especia de corteza aromática
+orégano|Hierba de la pizza
+pimienta|Especia picante en granos
+comino|Especia de las empanadas
+azafrán|Especia que tiñe de amarillo la paella
+vinagre|Condimento ácido
+mostaza|Salsa amarilla
+alfajor|Golosina de dos tapas con dulce de leche
+locro|Guiso patrio de maíz y zapallo
+chipá|Pancito de mandioca y queso
+humita|Pasta de choclo
+choclo|Mazorca de maíz tierno
+mazamorra|Postre de maíz blanco con leche
+tereré|Mate frío
+bombilla|Caño para tomar mate
+yerba|Se pone en el mate
+poncho|Abrigo con abertura para la cabeza
+boina|Gorra redonda sin visera
+alpargata|Calzado de lona y yute
+bombacha|Pantalón de campo del gaucho
+facón|Cuchillo del gaucho
+boleadoras|Arma de piedras atadas con tientos
+rastra|Cinturón del gaucho adornado
+gaucho|Hombre de campo de la pampa
+payador|Cantor que improvisa con guitarra
+malambo|Danza de zapateo
+chacarera|Danza folclórica en pareja
+zamba|Danza con pañuelo
+milonga|Lugar donde se baila tango
+candombe|Ritmo con tambores rioplatense
+murga|Grupo de carnaval
+comparsa|Grupo disfrazado de carnaval
+pañuelo|Se agita en la zamba
+guitarrero|Toca la guitarra
+charango|Guitarra pequeña andina
+quena|Flauta andina
+bombo|Tambor grande del folclore
+partitura|Escrito de una pieza musical
+sinfonía|Obra para orquesta
+ópera|Obra de teatro cantada
+batuta|Varita del director de orquesta
+acorde|Varias notas a la vez
+melodía|Sucesión de notas
+compás|Medida del ritmo
+silencio|Pausa en la partitura
+escultor|Hace estatuas
+retrato|Pintura de una persona
+paisaje|Pintura de la naturaleza
+mosaico|Imagen hecha con piezas pequeñas
+mural|Pintura sobre una pared
+acuarela|Pintura con agua
+paleta|Tabla donde el pintor mezcla colores
+caballete|Sostiene el cuadro del pintor
+boceto|Primer dibujo de una obra
+grabado|Imagen impresa con una plancha
+caricatura|Dibujo que exagera los rasgos
+historieta|Cuento con viñetas
+viñeta|Cuadro de una historieta
+fotograma|Cuadro de una película
+guion|Texto de una película
+estreno|Primera función
+taquilla|Venta de entradas
+butaca|Asiento del cine
+aplauso|Se da con las manos
+ovación|Aplauso muy fuerte
