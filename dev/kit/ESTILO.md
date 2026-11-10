@@ -83,7 +83,9 @@ Medir con `node dev/herramientas/contraste.js` (ver el encabezado del archivo).
 - **Fondos animados** (hojas, olas, estrellas): sutiles, lentos (10 s o más por ciclo), pocos elementos, y que no tapen el juego.
 - **Reducir movimiento**: `reduceMotion` es `true` → saltear o acortar. `Anim.*` ya lo respeta; las animaciones CSS necesitan su `@media (prefers-reduced-motion:reduce)`.
 
-## Tema Píxel
+## Tema Píxel (en desarrollo, no se publica)
+
+Está fuera de lo publicado desde la 3.7.1: los temas Píxel de cada juego van entre `/*PX*/` y `/*FIN_PX*/` y `armar.py` los saca, junto con la fuente. Para verlo y seguir mejorándolo: `python3 dev/herramientas/armar.py <carpeta> --pixel` (o `SALA_PIXEL=1`). Si un juego tenía otro tema en su lugar, va después de `/*SIN_PX*/` (Cartógrafo). Lo que hay que resolver antes de volver a publicarlo: que se vea como un estilo pensado para cada juego y no como una paleta aplicada encima.
 
 Todos los juegos tienen un tema **Píxel**: misma paleta de 16 colores (`--x0` … `--x15` en `kit/pixel.css`, también `Pixel.PAL`), letra Pixelify Sans (libre, OFL, en `fuentes/`, sin conexión), esquinas rectas, sombras duras y cielo de estrellas cuadradas (`Pixel.FONDO`).
 

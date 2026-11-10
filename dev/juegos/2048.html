@@ -126,9 +126,9 @@ const store={get(k,d){try{const v=localStorage.getItem('d2048.'+k);return v?JSON
 
 /* ---------- temas: colores del tablero y objeto de cada ficha (índice = log2(valor)-1) ---------- */
 const THEMES={
-  pixel:{name:'Píxel',auto:false,board:'#1a1c2c',cell:'#333c57',
+  /*PX*/pixel:{name:'Píxel',auto:false,board:'#1a1c2c',cell:'#333c57',
     bg:['#f4f4f4','#94b0c2','#73eff7','#41a6f6','#3b5dc9','#a7f070','#38b764','#ffcd75','#ef7d57','#b13e53','#5d275d','#257179'],
-    fg:i=>[0,1,2,5,7].includes(i)?'#1a1c2c':'#f4f4f4',em:null},
+    fg:i=>[0,1,2,5,7].includes(i)?'#1a1c2c':'#f4f4f4',em:null},/*FIN_PX*/
   numeros:{name:'Números',auto:true,board:'#bbada0',cell:'#cdc1b4',
     bg:['#eee4da','#ecd29c','#d6732c','#cc5527','#b0283a','#7e2416','#f3d870','#e8bf35','#d29d16','#79b863','#2f8f84','#3c3a32'],
     fg:i=>['#6b6157','#6b6157','#fff','#fff','#fff','#fff','#3c3a32','#3c3a32','#3c3a32','#26381c','#fff','#fff'][i]||'#fff',em:null},

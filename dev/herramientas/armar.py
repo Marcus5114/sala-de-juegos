@@ -1,6 +1,7 @@
 """Arma la Sala de Juegos lista para publicar.
 
-Uso:  python3 dev/herramientas/armar.py [carpeta_de_salida] [--solo id1,id2] [--sin-minificar]
+Uso:  python3 dev/herramientas/armar.py [carpeta_de_salida] [--solo id1,id2] [--sin-minificar] [--pixel]
+      --pixel (o SALA_PIXEL=1) incluye el tema Píxel, que está en desarrollo y no se publica
       (sin carpeta, escribe en la raíz del repo: index.html, manifest.json, sw.js, games/…)
 
 Qué hace, para cada juego de dev/juegos.json:
@@ -21,6 +22,11 @@ SOLO=None
 for i,a in enumerate(sys.argv):
     if a=='--solo':SOLO=set(sys.argv[i+1].split(','))
 MINIFY='--sin-minificar' not in sys.argv
+# Tema Píxel: en desarrollo, fuera de lo publicado. Sus temas van entre /*PX*/ y /*FIN_PX*/ en cada juego
+# (con /*SIN_PX*/ lo que va en su lugar cuando está apagado); el código de kit/pixel.* queda, sin uso.
+PIXEL='--pixel' in sys.argv or os.environ.get('SALA_PIXEL')=='1'
+def temas_pixel(s):
+    return re.sub(r'/\*PX\*/(.*?)(?:/\*SIN_PX\*/(.*?))?/\*FIN_PX\*/',lambda m:m.group(1) if PIXEL else (m.group(2) or ''),s,flags=re.S)
 REG=json.load(open(os.path.join(DEV,'juegos.json')))['juegos']
 exec(open(os.path.join(DEV,'herramientas','_modo.py')).read())  # MODO_HEAD, MODO_UI
 KIT=os.path.join(DEV,'kit')
@@ -49,6 +55,7 @@ def lib(nombre):
 def con_kit(s,gid):
     """Inserta la base común y el generador del juego."""
     rd=lambda f:open(os.path.join(KIT,f)).read()
+    s=temas_pixel(s)
     # el kit trae los fondos animados; los juegos sin kit los piden con sus propias marcas
     rep={'/*KIT_CSS*/':rd('kit.css')+'\n'+rd('fondo.css')+'\n'+rd('pixel.css'),'<!--KIT_BAR-->':rd('bar.html'),'<!--KIT_SHEETS-->':rd('sheets.html'),
          '/*KIT_JS*/':rd('kit.js')+'\n'+rd('fondo.js')+'\n'+rd('pixel.js'),
@@ -134,9 +141,11 @@ def armar_sala():
     if faltan:raise SystemExit('Faltan en el menú (dev/sala/sala.src.html): '+', '.join(faltan))
     escribir(pagina(sala,'./','Sala de Juegos','#18181a',modo_ui=False),os.path.join(OUT,'index.html'))
     for f in ['icon-192.png','icon-512.png']:shutil.copy(os.path.join(DEV,'iconos',f),os.path.join(OUT,f))
-    # fuente del modo píxel: una sola copia para todos los juegos
-    os.makedirs(os.path.join(OUT,'fuentes'),exist_ok=True)
-    for f in sorted(os.listdir(os.path.join(DEV,'fuentes'))):shutil.copy(os.path.join(DEV,'fuentes',f),os.path.join(OUT,'fuentes',f))
+    # fuente del modo píxel: una sola copia para todos los juegos (solo si el tema Píxel va en esta versión)
+    if PIXEL:
+        os.makedirs(os.path.join(OUT,'fuentes'),exist_ok=True)
+        for f in sorted(os.listdir(os.path.join(DEV,'fuentes'))):shutil.copy(os.path.join(DEV,'fuentes',f),os.path.join(OUT,'fuentes',f))
+    elif os.path.isdir(os.path.join(OUT,'fuentes')):shutil.rmtree(os.path.join(OUT,'fuentes'))
     json.dump({"name":"Sala de Juegos","short_name":"Juegos","start_url":"./","scope":"./","display":"standalone",
       "orientation":"any","background_color":"#18181a","theme_color":"#18181a","lang":"es",
       "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}],
@@ -144,7 +153,7 @@ def armar_sala():
       open(os.path.join(OUT,'manifest.json'),'w'),ensure_ascii=False,indent=2)
     files=',\n'.join(f"  'games/{j['id']}/index.html','games/{j['id']}/icon-192.png'" for j in REG)
     fuentes=[f for f in sorted(os.listdir(os.path.join(DEV,'fuentes'))) if f.endswith('.woff2')]
-    files+=',\n  '+','.join(f"'fuentes/{f}'" for f in fuentes)
+    if PIXEL:files+=',\n  '+','.join(f"'fuentes/{f}'" for f in fuentes)
     sw=open(os.path.join(DEV,'herramientas','_sw.txt')).read().replace('{VERSION}',version()).replace('{FILES}',files)
     open(os.path.join(OUT,'sw.js'),'w').write(sw)
 
@@ -154,4 +163,4 @@ if __name__=='__main__':
         if SOLO and j['id'] not in SOLO:continue
         armar_juego(j)
     armar_sala()
-    print('ok',version(),'→',OUT,'·',len(REG),'juegos')
+    print('ok',version(),'→',OUT,'·',len(REG),'juegos'+(' · con tema Píxel' if PIXEL else ''))

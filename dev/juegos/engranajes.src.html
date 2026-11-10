@@ -63,8 +63,8 @@ const THEMES={
   reloj:{fondo:{"p":[["engranajes",["#e0b060"],0.09]]},name:'Relojería',cls:'t-reloj',fill:()=>'#d6a646',stroke:'#8a6420',hub:'#5a3d10',holes:'#3a2412',peg:'#c9a26a',flag:'#f6e7c1',label:'#f6e7c1',motor:'#b8452e',spokes:true},
   juguete:{fondo:{"p":[["destellos",["#e8483f","#2b6fd0","#f2b632"],0.55]]},name:'Juguete',cls:'t-juguete',fill:s=>({S:'#e8483f',M:'#2f7fe0',L:'#f2c230'})[s],stroke:'rgba(0,0,0,.25)',hub:'#fff',holes:'#fff4e0',peg:'#b9a98a',flag:'#2e9e5b',label:'#333',motor:'#7a4fd0'},
   vapor:{fondo:{"p":[["engranajes",["#d9a46a"],0.08],["chispas",["#ffb35c","#ffd28a"],0.8]]},name:'Vapor',cls:'t-vapor',fill:()=>'#c87533',stroke:'#6e3a14',hub:'#2e1d14',holes:'#2e1d14',peg:'#b08060',flag:'#ffd27a',label:'#ffe8c8',motor:'#3fa8a0',rivets:true},
-  plano:{fondo:{"p":[["grilla",["rgba(255,255,255,.16)","#cfe3ff"]]]},name:'Plano',cls:'t-plano',fill:()=>'rgba(255,255,255,.08)',stroke:'#fff',hub:'#1f4e8c',holes:'#1f4e8c',peg:'#cfe2ff',flag:'#ffd56b',label:'#fff',motor:'#ffd56b',outline:true},
-  pixel:{name:'Píxel',cls:'t-pixel',pixel:true,fondo:Pixel.FONDO,fill:s=>({S:'#ef7d57',M:'#41a6f6',L:'#a7f070'})[s],stroke:'#1a1c2c',hub:'#f4f4f4',holes:'#1a1c2c',peg:'#566c86',flag:'#ffcd75',label:'#f4f4f4',motor:'#b13e53'}
+  plano:{fondo:{"p":[["grilla",["rgba(255,255,255,.16)","#cfe3ff"]]]},name:'Plano',cls:'t-plano',fill:()=>'rgba(255,255,255,.08)',stroke:'#fff',hub:'#1f4e8c',holes:'#1f4e8c',peg:'#cfe2ff',flag:'#ffd56b',label:'#fff',motor:'#ffd56b',outline:true}/*PX*/,
+  pixel:{name:'Píxel',cls:'t-pixel',pixel:true,fondo:Pixel.FONDO,fill:s=>({S:'#ef7d57',M:'#41a6f6',L:'#a7f070'})[s],stroke:'#1a1c2c',hub:'#f4f4f4',holes:'#1a1c2c',peg:'#566c86',flag:'#ffcd75',label:'#f4f4f4',motor:'#b13e53'}/*FIN_PX*/
 };
 const GL={S:'Chico',M:'Mediano',L:'Grande'};
 let pen='M',curPeg=-1;

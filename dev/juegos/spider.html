@@ -237,7 +237,7 @@ const PALETTES={
 };
 const TRACK_NAMES={none:'Sin música',tranqui:'Tranqui',arcade:'Arcade',noche:'Noche'};
 const FELTS={
-  pixel:{name:'Píxel',f:'#1a1c2c',b:'#b13e53'},
+  /*PX*/pixel:{name:'Píxel',f:'#1a1c2c',b:'#b13e53'},/*FIN_PX*/
   verde:{name:'Verde casino',f:'#1f6b3a',b:'#8c1d2c'},
   azul:{name:'Azul',f:'#1d4f7a',b:'#a8471f'},
   bordo:{name:'Bordó',f:'#6e1c28',b:'#1d3f6b'},
@@ -248,7 +248,7 @@ const FELTS={
 };
 let cfg=Object.assign({palette:'clasica',colors:PALETTES.clasica.c.slice(),track:'tranqui',music:35,sfx:70,felt:'verde',feltColor:FELTS.verde.f,backColor:FELTS.verde.b,suits:4},store.get('cfg',{}));
 function saveCfg(){store.set('cfg',cfg);}
-function applyColors(){Pixel.modo(cfg.felt==='pixel');Fondo.tema(cfg.felt);
+function applyColors(){Pixel.modo(cfg.felt==='pixel'&&!!FELTS.pixel);Fondo.tema(cfg.felt);
   const r=document.documentElement.style;
   cfg.colors.forEach((c,i)=>r.setProperty('--c'+i,c));
   r.setProperty('--felt',cfg.feltColor);r.setProperty('--cardback',cfg.backColor);

@@ -1,6 +1,6 @@
 // Sala de Juegos: funciona sin conexión.
 // Al cambiar cualquier archivo, subí la versión para que los celulares tomen lo nuevo.
-const CACHE='sala-v3.7.0';
+const CACHE='sala-v3.7.1';
 const FILES=['./','index.html','manifest.json','icon-192.png','icon-512.png',
   'games/blackjack/index.html','games/blackjack/icon-192.png',
   'games/crucigrama/index.html','games/crucigrama/icon-192.png',
@@ -16,8 +16,7 @@ const FILES=['./','index.html','manifest.json','icon-192.png','icon-512.png',
   'games/minas/index.html','games/minas/icon-192.png',
   'games/cinco/index.html','games/cinco/icon-192.png',
   'games/atasco/index.html','games/atasco/icon-192.png',
-  'games/spider/index.html','games/spider/icon-192.png',
-  'fuentes/pixel-400.woff2','fuentes/pixel-700.woff2'];
+  'games/spider/index.html','games/spider/icon-192.png'];
 self.addEventListener('install',e=>{
   // cache:'reload' evita guardar copias viejas que el navegador tenga en su caché HTTP
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:'reload'})))).then(()=>self.skipWaiting()));
@@ -28,9 +27,16 @@ self.addEventListener('activate',e=>{
 self.addEventListener('fetch',e=>{
   const r=e.request;if(r.method!=='GET'||new URL(r.url).origin!==location.origin)return;
   const save=res=>{if(res.ok){const copy=res.clone();caches.open(CACHE).then(c=>c.put(r,copy));}return res;};
-  // páginas: primero internet (siempre la última versión); sin conexión, la copia guardada
+  // páginas: se pide a internet la última versión, pero sin hacer esperar: si en 1 s no llegó y hay copia guardada,
+  // se abre la copia y lo nuevo queda guardado para la próxima vez. Sin conexión, la copia guardada.
   if(r.mode==='navigate'){
-    e.respondWith(fetch(r,{cache:'no-cache'}).then(save).catch(()=>caches.match(r,{ignoreSearch:true}).then(hit=>hit||caches.match('index.html'))));
+    const red=fetch(r,{cache:'no-cache'}).then(save);
+    e.waitUntil(red.catch(()=>{}));
+    const guardada=caches.match(r,{ignoreSearch:true}).then(h=>h||(new URL(r.url).pathname.endsWith('/')?caches.match(new URL('index.html',r.url).href,{ignoreSearch:true}):undefined));
+    e.respondWith(guardada.then(hit=>{
+      if(!hit)return red.catch(()=>caches.match('index.html'));
+      return Promise.race([red.catch(()=>hit),new Promise(ok=>setTimeout(()=>ok(hit),1000))]);
+    }));
     return;
   }
   // íconos y demás: primero la copia guardada
