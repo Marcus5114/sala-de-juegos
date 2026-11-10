@@ -157,7 +157,7 @@ function vibe(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}
    cfg = {
      id:'piramide',                       // prefijo de guardado y marca "en curso" de la sala
      diffs:[{name:'Fácil',par:45,…}],     // dificultades (par: segundos para 3 estrellas en Desafío)
-     themes:{clave:{name,fondo:{p:'estrellas',c:['#fff']},…}}, theme:'clave por defecto',   (fondo: ver kit/fondo.js)
+     themes:{clave:{name,fondo:{p:'estrellas',c:['#fff']},pixel:true?,…}}, theme:'clave por defecto'   (fondo: kit/fondo.js; pixel: kit/pixel.js)
      help:'<p>…</p>',
      create(diff,lvl) → estado nuevo del nivel (el kit agrega lvl, undo, secs, won)
      reset(S)          → vuelve el nivel al comienzo (para Reiniciar y Reintentar)
@@ -182,8 +182,13 @@ let S=null,mode='libre',diff=0,themeKey='',GAME=null,store=null,timer=null,paint
 function kitStart(cfg){
   GAME=cfg;store=mkStore(cfg.id);
   // fondo animado de cada tema: se arma solo cuando cambia el tema o el tamaño
-  const ap=cfg.applyTheme;cfg.applyTheme=k=>{ap(k);Fondo.tema(k);};
-  Fondo.iniciar({host:$('stage'),temas:Object.fromEntries(Object.entries(cfg.themes).map(([k,t])=>[k,t.fondo||null]))});
+  // tema Píxel (pixel:true): toda la interfaz pasa a píxeles; la pista usa el foco en píxeles en vez del emoji
+  const ap=cfg.applyTheme;cfg.applyTheme=k=>{const px=!!(cfg.themes[k]&&cfg.themes[k].pixel);Pixel.modo(px);
+    const hb=document.querySelector('#hintBtn b');if(hb)hb.innerHTML=px?Pixel.svg(Pixel.SPR.foco,{'#':'var(--x4)','w':'var(--x12)','o':'var(--x14)'},{tam:20}):'💡';
+    ap(k);Pantalla.tema();Fondo.tema(k);};
+  // marcador dentro de la pantalla de juego (el fondo del tema y el animado cubren ambos)
+  const pan=Pantalla.unir(document.querySelector('.hud'),$('stage'));
+  Fondo.iniciar({host:pan||$('stage'),temas:Object.fromEntries(Object.entries(cfg.themes).map(([k,t])=>[k,t.fondo||null]))});
   kitHud();
   $('helpBody').innerHTML=cfg.help+(cfg.letras?`<p class="kbd">Con teclado: ${cfg.keysHelp}; <b>Ctrl+Z</b> deshace y <b>Enter</b> pasa al siguiente nivel.</p>`
     :`<p class="kbd">Con teclado: <b>Z</b> deshace, <b>R</b> reinicia${cfg.hint?', <b>H</b> da una pista':''} y <b>Enter</b> pasa al siguiente nivel${cfg.keysHelp?'. '+cfg.keysHelp:''}.</p>`);

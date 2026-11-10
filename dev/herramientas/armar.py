@@ -5,7 +5,7 @@ Uso:  python3 dev/herramientas/armar.py [carpeta_de_salida] [--solo id1,id2] [--
 
 Qué hace, para cada juego de dev/juegos.json:
   1. lee dev/juegos/<fuente>
-  2. inserta el kit (/*KIT_CSS*/, <!--KIT_BAR-->, <!--KIT_SHEETS-->, /*KIT_JS*/; los fondos solos: /*KIT_FONDO_CSS*/, /*KIT_FONDO_JS*/), el generador (/*GEN*/…/*END_GEN*/ ← <id>.gen.js)
+  2. inserta el kit (/*KIT_CSS*/, <!--KIT_BAR-->, <!--KIT_SHEETS-->, /*KIT_JS*/; los fondos solos: /*KIT_FONDO_CSS*/, /*KIT_FONDO_JS*/; el modo píxel solo: /*KIT_PIXEL_CSS*/, /*KIT_PIXEL_JS*/), el generador (/*GEN*/…/*END_GEN*/ ← <id>.gen.js)
      y las librerías pedidas con /*LIB:nombre*/ (dev/libs.json, instaladas con npm en dev/)
   3. inserta datos propios (Rueda: los 10 juegos de niveles; Crucigrama: el banco de palabras y pistas)
   4. lo envuelve como página instalable (manifest, ícono, modo claro/oscuro, service worker) y lo minifica
@@ -50,8 +50,9 @@ def con_kit(s,gid):
     """Inserta la base común y el generador del juego."""
     rd=lambda f:open(os.path.join(KIT,f)).read()
     # el kit trae los fondos animados; los juegos sin kit los piden con sus propias marcas
-    rep={'/*KIT_CSS*/':rd('kit.css')+'\n'+rd('fondo.css'),'<!--KIT_BAR-->':rd('bar.html'),'<!--KIT_SHEETS-->':rd('sheets.html'),'/*KIT_JS*/':rd('kit.js')+'\n'+rd('fondo.js'),
-         '/*KIT_FONDO_CSS*/':rd('fondo.css'),'/*KIT_FONDO_JS*/':rd('fondo.js')}
+    rep={'/*KIT_CSS*/':rd('kit.css')+'\n'+rd('fondo.css')+'\n'+rd('pixel.css'),'<!--KIT_BAR-->':rd('bar.html'),'<!--KIT_SHEETS-->':rd('sheets.html'),
+         '/*KIT_JS*/':rd('kit.js')+'\n'+rd('fondo.js')+'\n'+rd('pixel.js'),
+         '/*KIT_FONDO_CSS*/':rd('fondo.css'),'/*KIT_FONDO_JS*/':rd('fondo.js'),'/*KIT_PIXEL_CSS*/':rd('pixel.css'),'/*KIT_PIXEL_JS*/':rd('pixel.js')}
     for k,v in rep.items():
         if k in s:s=s.replace(k,v)
     s=re.sub(r'/\*LIB:([\w-]+)\*/',lambda m:lib(m.group(1)),s)
@@ -133,12 +134,17 @@ def armar_sala():
     if faltan:raise SystemExit('Faltan en el menú (dev/sala/sala.src.html): '+', '.join(faltan))
     escribir(pagina(sala,'./','Sala de Juegos','#18181a',modo_ui=False),os.path.join(OUT,'index.html'))
     for f in ['icon-192.png','icon-512.png']:shutil.copy(os.path.join(DEV,'iconos',f),os.path.join(OUT,f))
+    # fuente del modo píxel: una sola copia para todos los juegos
+    os.makedirs(os.path.join(OUT,'fuentes'),exist_ok=True)
+    for f in sorted(os.listdir(os.path.join(DEV,'fuentes'))):shutil.copy(os.path.join(DEV,'fuentes',f),os.path.join(OUT,'fuentes',f))
     json.dump({"name":"Sala de Juegos","short_name":"Juegos","start_url":"./","scope":"./","display":"standalone",
       "orientation":"any","background_color":"#18181a","theme_color":"#18181a","lang":"es",
       "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}],
       "shortcuts":[{"name":j['nombre'],"url":f"games/{j['id']}/index.html","icons":[{"src":f"games/{j['id']}/icon-192.png","sizes":"192x192"}]} for j in REG]},
       open(os.path.join(OUT,'manifest.json'),'w'),ensure_ascii=False,indent=2)
     files=',\n'.join(f"  'games/{j['id']}/index.html','games/{j['id']}/icon-192.png'" for j in REG)
+    fuentes=[f for f in sorted(os.listdir(os.path.join(DEV,'fuentes'))) if f.endswith('.woff2')]
+    files+=',\n  '+','.join(f"'fuentes/{f}'" for f in fuentes)
     sw=open(os.path.join(DEV,'herramientas','_sw.txt')).read().replace('{VERSION}',version()).replace('{FILES}',files)
     open(os.path.join(OUT,'sw.js'),'w').write(sw)
 

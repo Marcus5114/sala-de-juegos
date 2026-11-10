@@ -70,6 +70,6 @@ run(process.argv[2]||require('path').join(__dirname,'..','..','games','blackjack
   for(let d=0;d<4;d++){await p.click(`[data-diff="${d}"]`);await p.waitForTimeout(250);ok(`dificultad ${d+1}: sin desborde`,await fits());}
   await p.click('[data-diff="0"]');await p.waitForTimeout(200);
   for(const t of ['pano','casino','noche','bar','gris']){await p.evaluate(t=>{themeKey=t;applyTheme();},t);await p.waitForTimeout(100);await p.screenshot({path:D+'bj_t_'+t+'.png'});}
-  ok('cinco temas',await p.evaluate(()=>Object.keys(THEMES).length===5));
+  ok('seis temas (con Píxel)',await p.evaluate(()=>Object.keys(THEMES).length===6));
   await p.waitForTimeout(1500);const idle=await cpuIdle();ok(`en reposo no consume (${idle.toFixed(2)} % de CPU)`,idle<0.5);
 });

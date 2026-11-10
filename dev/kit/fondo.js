@@ -52,13 +52,18 @@ const Fondo=(()=>{
         h+=viaje('fSube',r()*W,H+sz,sz,d,r()*d,`--h:${f(H+3*sz,0)}px;--dx:${f((r()-.5)*70,0)}px`,
           `<i class="ti" style="border-radius:50%;background:radial-gradient(circle,${pick(c,k)} 0 30%,transparent 70%);--o0:${f(.1+r()*.15,2)};--o1:${f(.45+r()*.35,2)};--f:${f(2.5+r()*3)}s;--dl:-${f(r()*4)}s"></i>`);}
       return h;},
-    // estrellas que titilan, alguna grande y una fugaz de vez en cuando
-    estrellas(r,W,H,c){let h='';const N=cnt(W,H,5200,14,42);
-      for(let k=0;k<N;k++){const big=r()<.12,sz=big?8+r()*5:1.5+r()*2.2;
-        const st=`left:${f(r()*W)}px;top:${f(r()*H)}px;width:${f(sz)}px;height:${f(sz)}px;color:${pick(c,k)};--o0:${f(.1+r()*.2,2)};--o1:${f(.55+r()*.4,2)};--f:${f(1.8+r()*3.5)}s;--dl:-${f(r()*4)}s`;
-        h+=big?`<i class="ti" style="${st};position:absolute">${ESTRELLA4}</i>`:`<i class="ti" style="${st};position:absolute;border-radius:50%;background:currentColor;box-shadow:0 0 4px currentColor"></i>`;}
-      for(let k=0;k<2;k++){const d=9+r()*7,len=60+r()*50;
-        h+=`<i class="fz" style="left:${f(W*(.15+r()*.6))}px;top:${f(H*(.05+r()*.35))}px;width:${f(len)}px;height:1.5px;background:linear-gradient(90deg,transparent,${pick(c,k)});--a:${f(18+r()*20)}deg;--dx:${f(W*.35)}px;--dy:${f(H*.22)}px;--d:${f(d)}s;--dl:-${f(r()*d)}s;--o1:.85"></i>`;}
+    // cielo nocturno como en Rueda: gira alrededor de un punto bajo el área, como pasa la noche.
+    // Cada estrella recorre solo el arco que se ve y vuelve a empezar (pocas piezas, nunca queda vacío); titilan suave. Con luna.
+    estrellas(r,W,H,c){let h='';const py=H*1.18,w=.5;// grados por segundo
+      const orbita=(x,y,inner)=>{const dx=x-W/2,dy=py-y,rr=Math.hypot(dx,dy),phi=Math.atan2(dx,dy)*180/Math.PI;
+        const A=Math.min(88,Math.asin(Math.min(1,(W/2+60)/rr))*180/Math.PI),d=2*A/w,dl=(phi+A)/w;
+        return `<i class="orb" style="top:${f(py,0)}px;--r:${f(rr,0)}px;--A:${f(A)}deg;--d:${f(d,0)}s;--dl:-${f(dl)}s">${inner}</i>`;};
+      const N=cnt(W,H,5200,14,40);
+      for(let k=0;k<N;k++){const y=H*(.04+Math.pow(r(),.75)*.92),x=r()*W,big=r()<.16,sz=big?10:1.6+r()*2.4,col=pick(c,k);
+        const st=`width:${f(sz)}px;height:${f(sz)}px;color:${col};--o0:${f(.12+r()*.15,2)};--o1:${f(.55+r()*.35,2)};--f:${f(2.2+r()*3.5)}s;--dl:-${f(r()*4)}s`;
+        h+=orbita(x,y,big?`<b class="es" style="${st}">${ESTRELLA4}</b>`:`<b class="es pt" style="${st}"></b>`);}
+      // luna creciente, en el mismo giro
+      if(W*H>60000)h+=orbita(W*.74,H*.14,`<b class="luna"><svg viewBox="0 0 44 44"><path d="M30 4A19 19 0 1 0 40 32 15 15 0 1 1 30 4z" fill="#fff3d6"/><circle cx="15" cy="26" r="2.2" fill="#f1dfb8"/><circle cx="22" cy="34" r="1.5" fill="#f1dfb8"/></svg></b>`);
       return h;},
     // burbujas transparentes que suben con reflejos de colores en el borde
     burbujas(r,W,H,c){let h='';const N=cnt(W,H,14000,6,16);
@@ -130,11 +135,11 @@ const Fondo=(()=>{
     host.classList.add('fondo-host');const el=capa();el.style.background=t&&t.bg||'';
     // con tinte propio y sin esquinas redondeadas en el anfitrión, la capa las pone
     el.style.borderRadius=t&&t.bg&&getComputedStyle(host).borderTopLeftRadius==='0px'?'18px':'';
-    if(!t||!t.p){el.innerHTML='';return;}
+    if(!t||!t.p){el.innerHTML='';if(typeof Pantalla!=='undefined'&&Pantalla.el===host)Pantalla.tema();return;}
     // capas: [[fondo, colores, opacidad], …] o 'estrellas+polvo' con t.c
     const capas=Array.isArray(t.p)?t.p:t.p.split('+').map(x=>[x,t.c]);
     const r=rng(hash(clave+JSON.stringify(capas)));
-    el.innerHTML=capas.map(([p,c,o])=>P[p]?`<b style="inset:0${o!=null&&o!==1?';opacity:'+o:''}">${P[p](r,W,H,c||['rgba(255,255,255,.6)'])}</b>`:'').join('');quieto();}
+    el.innerHTML=capas.map(([p,c,o])=>P[p]?`<b style="inset:0${o!=null&&o!==1?';opacity:'+o:''}">${P[p](r,W,H,c||['rgba(255,255,255,.6)'])}</b>`:'').join('');quieto();if(typeof Pantalla!=='undefined'&&Pantalla.el===host)Pantalla.tema();}
   function quieto(){const el=host&&host.querySelector(':scope>.fondo');if(el)el.classList.toggle('quieto',!activo());}
   let rT=0;
   const api={
@@ -156,4 +161,39 @@ const Fondo=(()=>{
     get clave(){return clave;}
   };
   return api;
+})();
+
+/* ---------- Pantalla de juego: el marcador vive dentro de la pantalla, no en tarjetas aparte ----------
+   Pantalla.unir(marcador, tablero) envuelve desde el marcador hasta el tablero en un .pantalla. El color o la imagen del tema
+   pasan del tablero a la pantalla (el tablero queda transparente y no cambia de tamaño), así el marcador queda sobre el mismo
+   fondo que el juego. La letra del marcador se elige sola (clara u oscura) según el fondo. Pantalla.tema() después de cada
+   cambio de tema; el modo claro/oscuro se sigue solo. Devuelve la pantalla (para usarla de anfitrión del fondo animado). */
+const Pantalla=(()=>{
+  let pan=null,st=null;
+  const lum=c=>{const m=String(c).match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/);if(!m||(m[4]!==undefined&&+m[4]<.35))return null;
+    const [r,g,b]=[m[1],m[2],m[3]].map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});return .2126*r+.7152*g+.0722*b;};
+  function tema(){if(!pan)return;st.style.backgroundColor='';st.style.backgroundImage='';
+    const cs=getComputedStyle(st),img=cs.backgroundImage,col=cs.backgroundColor;
+    const pinta=img!=='none'||lum(col)!==null;
+    if(pinta){Object.assign(pan.style,{backgroundColor:col,backgroundImage:img,backgroundSize:cs.backgroundSize,backgroundPosition:cs.backgroundPosition,backgroundRepeat:cs.backgroundRepeat});
+      st.style.backgroundColor='transparent';st.style.backgroundImage='none';}
+    else Object.assign(pan.style,{backgroundColor:'',backgroundImage:''});
+    pan.classList.toggle('pintada',pinta);
+    // letra del marcador: según el color del fondo (o el primero del degradado); sin fondo propio, la de la página
+    // sin color propio en el tablero: el tinte sólido del fondo animado (si lo hay) decide la letra
+    if(!pinta){const fl=pan.querySelector(':scope>.fondo');if(fl){const f=getComputedStyle(fl);const ls=((f.backgroundImage||'').match(/rgba?\([^)]*\)/g)||[]).concat([f.backgroundColor]).map(lum).filter(x=>x!==null);
+      if(ls.length){const v=ls.reduce((a,b)=>a+b,0)/ls.length,osc=v<.4;pan.style.setProperty('--hudInk',osc?'#f4f4f4':'#18181a');pan.style.setProperty('--hudChip',osc?'rgba(255,255,255,.14)':'rgba(0,0,0,.08)');return;}}}
+    let L=pinta?lum(col):null;if(L===null&&pinta){const m=img.match(/rgba?\([^)]*\)/g)||[];const ls=m.map(lum).filter(x=>x!==null);if(ls.length)L=ls.reduce((a,b)=>a+b,0)/ls.length;}
+    if(L===null){pan.style.removeProperty('--hudInk');pan.style.removeProperty('--hudChip');return;}
+    const osc=L<.4;pan.style.setProperty('--hudInk',osc?'#f4f4f4':'#18181a');pan.style.setProperty('--hudChip',osc?'rgba(255,255,255,.14)':'rgba(0,0,0,.08)');}
+  function unir(hud,stage){if(!stage)return null;st=stage;
+    if(stage.parentElement&&stage.parentElement.classList.contains('pantalla')){pan=stage.parentElement;tema();return pan;}
+    pan=document.createElement('div');pan.className='pantalla';
+    const first=hud&&hud.parentElement===stage.parentElement?hud:stage;first.before(pan);
+    const mv=[];for(let n=first;n;n=n.nextElementSibling){mv.push(n);if(n===stage)break;}
+    pan.append(...mv);
+    new MutationObserver(tema).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+    try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',tema);}catch(e){}
+    tema();return pan;}
+  return {unir,tema,get el(){return pan;}};
 })();

@@ -5,6 +5,7 @@ La sala tiene que sentirse como un solo producto: misma barra, mismos paneles, m
 ## Pantalla
 
 - **Una sola pantalla, sin desplazamiento.** De arriba abajo: barra (sala · ayuda · Libre/Desafío · temas · progreso), dificultades, marcador, tablero (ocupa todo lo que sobra), botonera.
+- **Marcador dentro de la pantalla.** Marcador y tablero forman una sola superficie con el color del tema (`.pantalla`, la arma `Pantalla.unir(hud, stage)` de `kit/fondo.js`). Nivel, líneas, puntos, manos y demás contadores son texto sobre el juego, en pastillas tenues, no tarjetas aparte. El color de la letra sale solo del brillo del tablero (o del tinte del fondo animado): `--hudInk` y `--hudChip`. En los juegos con `kitStart` ya viene hecho.
 - **Botonera**: acción principal a la izquierda, 70 % del ancho (Deshacer, que pasa a *Siguiente nivel* o *Reintentar*); Reiniciar a la derecha, 30 %.
 - **Medida de referencia**: 390×800 con dedo. Revisar también 320 px de ancho y escritorio (el contenido se centra en 640 px como máximo).
 - **Zonas de toque** de 42 px o más. Las cosas chicas (puntos, ejes) se agarran con un radio cómodo alrededor, no solo sobre el dibujo.
@@ -82,6 +83,16 @@ Medir con `node dev/herramientas/contraste.js` (ver el encabezado del archivo).
 - **Fondos animados** (hojas, olas, estrellas): sutiles, lentos (10 s o más por ciclo), pocos elementos, y que no tapen el juego.
 - **Reducir movimiento**: `reduceMotion` es `true` → saltear o acortar. `Anim.*` ya lo respeta; las animaciones CSS necesitan su `@media (prefers-reduced-motion:reduce)`.
 
+## Tema Píxel
+
+Todos los juegos tienen un tema **Píxel**: misma paleta de 16 colores (`--x0` … `--x15` en `kit/pixel.css`, también `Pixel.PAL`), letra Pixelify Sans (libre, OFL, en `fuentes/`, sin conexión), esquinas rectas, sombras duras y cielo de estrellas cuadradas (`Pixel.FONDO`).
+
+- En los juegos con `kitStart`: `pixel:{name:'Píxel',cls:'t-pixel',pixel:true,fondo:Pixel.FONDO}`. El kit prende la clase `px` en `<html>` y cambia el foco de la pista por un sprite.
+- En los demás: `/*KIT_PIXEL_CSS*/` y `/*KIT_PIXEL_JS*/`, y `Pixel.modo(clave==='pixel')` al cambiar de tema.
+- **Sprites**: se escriben como texto, un carácter por píxel, y salen como SVG nítido: `Pixel.svg(Pixel.SPR.mina,{'#':'#1a1c2c','w':'#f4f4f4'})`. Hay palos, flechas, bandera, mina, pala, foco, estrella, moneda, corazón, tilde y cruz; `Pixel.circulo(n)` da un círculo pixelado.
+- La letra pixelada no trae los símbolos de los palos: en cartas, usar los sprites.
+- Lienzos (Bloques): dibujar con `fillRect` en enteros, relieve en escalón, sin degradados ni curvas.
+
 ## Fondos animados
 
 Cada tema tiene un fondo que se mueve despacio por detrás del tablero (`kit/fondo.js`). Es lo que hace que la sala se sienta viva y pareja: todos los juegos lo tienen, con la misma calidad y las mismas reglas.
@@ -95,7 +106,7 @@ Cada tema tiene un fondo que se mueve despacio por detrás del tablero (`kit/fon
 
   Cada capa es `[fondo, colores, opacidad]`. Con `bg` se tiñe además el área (para juegos cuyo tablero flota sobre la página: usar colores con transparencia, así sirven en claro y en oscuro).
 - **Sutiles**: decoran, no compiten. Opacidad de 0,2 a 0,6 para lo que se repite (polvo, garabatos), y hasta 1 para lo que ya es tenue (estrellas). Si en una captura se ve más el fondo que el tablero, está fuerte.
-- **Acordes al tema**: estrellas en temas nocturnos, burbujas u ondas en el agua, garabatos en papel o pizarra, engranajes en lo mecánico, polvo o luz en los neutros.
+- **Acordes al tema**: estrellas en temas nocturnos, burbujas u ondas en el agua, garabatos en papel o pizarra, engranajes en lo mecánico. Un tema neutro (Clásico, Grises) puede quedarse quieto: mejor sin fondo que con uno de relleno. `polvo` acompaña a otro efecto, no va solo.
 - **Se quedan quietos** (se ven, pero no se mueven) con "reducir movimiento", con la batería por debajo del 20 % sin cargar, o si la persona los apaga: botón **Fondos** en la sala o **Fondo animado** en el panel de temas (vale para toda la sala: `sala.fondos`).
 - En los juegos con `kitStart` alcanza con poner `fondo` en cada tema. En los demás: `/*KIT_FONDO_CSS*/` y `/*KIT_FONDO_JS*/`, una tabla `FONDOS`, `Fondo.iniciar({host,temas:FONDOS})` y `Fondo.tema(clave)` al cambiar de tema.
 

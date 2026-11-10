@@ -30,6 +30,8 @@
 .t-pizarra{--sky:radial-gradient(ellipse at 50% 30%,#3c5a4a,#22352b);--b:transparent;--bf:#f2f2ea;--g:rgba(255,255,255,.12);--gf:#ffe08a;--uf:#f2f2ea;--sel:#ffe08a;--bs:inset 0 0 0 2px rgba(255,255,255,.75);--brr:2px}
 .pal .pv{display:grid;place-items:center}
 @media (prefers-reduced-motion:reduce){.br{transition:none}.br.hint,.solved .br{animation:none}}
+/* Píxel: bloques con relieve en escalón, paleta común */
+.t-pixel{--sky:#1a1c2c;--b:#29366f;--bf:#f4f4f4;--g:#3b5dc9;--gf:#ffcd75;--uf:#73eff7;--sel:#ffcd75;--bs:inset -3px -3px 0 rgba(0,0,0,.4),inset 3px 3px 0 rgba(255,255,255,.2);--brr:0}
 </style>
 
 <div class="app">
@@ -59,7 +61,7 @@
 /*GEN*/
 /*END_GEN*/
 /* Pirámide de sumas — usa kitStart (dev/kit/kit.js): modos, dificultades, guardado, reloj, fin y temas vienen del kit. */
-const THEMES={piedra:{fondo:{"p":[["nubes",["#ffffff"]],["polvo",["#d9b46a"],0.6]]},name:'Piedra',cls:'t-piedra'},hielo:{fondo:{"p":[["nieve",["#9fd3f2","#ffffff"],0.9]]},name:'Hielo',cls:'t-hielo'},juguete:{fondo:{"p":[["destellos",["#e8483f","#2b5fb4","#f2b632"],0.6]]},name:'Bloques de juguete',cls:'t-juguete'},choco:{fondo:{"p":[["polvo",["#8a5332","#c98a5a"],0.5]]},name:'Chocolate',cls:'t-choco'},pizarra:{fondo:{"p":[["garabatos",["#ffffff","#ffe08a"],0.2]]},name:'Pizarra',cls:'t-pizarra'}};
+const THEMES={piedra:{fondo:{"p":[["nubes",["#ffffff"]],["polvo",["#d9b46a"],0.6]]},name:'Piedra',cls:'t-piedra'},hielo:{fondo:{"p":[["nieve",["#9fd3f2","#ffffff"],0.9]]},name:'Hielo',cls:'t-hielo'},juguete:{fondo:{"p":[["destellos",["#e8483f","#2b5fb4","#f2b632"],0.6]]},name:'Bloques de juguete',cls:'t-juguete'},choco:{name:'Chocolate',cls:'t-choco'},pizarra:{fondo:{"p":[["garabatos",["#ffffff","#ffe08a"],0.2]]},name:'Pizarra',cls:'t-pizarra'},pixel:{name:'Píxel',cls:'t-pixel',pixel:true,fondo:Pixel.FONDO}};
 const PAR=[45,120,240,420];
 let sel=-1,els=[];
 // S (del kit): {lvl,n,v (solución),g (dados),u (lo que escribe el jugador),undo,secs,won}

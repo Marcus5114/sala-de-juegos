@@ -71,6 +71,8 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--fg);outline-offset:
 .recs b{display:block;font-size:1.2rem;font-variant-numeric:tabular-nums}
 .recs small{font-size:.66rem;color:var(--muted);font-weight:600}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
+/*KIT_PIXEL_CSS*/
+.e .spr{width:.95em;height:.95em}#toolIcon .spr{width:1.2em;height:1.2em}
 </style>
 
 <div class="app">
@@ -126,8 +128,9 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--fg);outline-offset:
 
 <script>
 /*KIT_FONDO_JS*/
+/*KIT_PIXEL_JS*/
 // fondo animado de cada tema (kit/fondo.js)
-const FONDOS={"clasico":{"p":[["polvo",["#8e8e94"],0.4]],"bg":"radial-gradient(ellipse at 50% 40%,#8e8e9422,#8e8e9408 75%)"},"jardin":{"p":[["hojas",["#5aa469","#8bc34a","#c5e1a5"],0.7]],"bg":"radial-gradient(ellipse at 50% 40%,#5aa4692e,#5aa4690a 75%)"},"playa":{"p":[["ondas",["#2f8fbf","#2f8fbf"]],["burbujas",["#4fb3d9"],0.6]],"bg":"linear-gradient(rgba(79,179,217,.22),rgba(240,214,160,.25))"},"espacio":{"p":[["estrellas",["#ffffff","#c9b6ff","#8fd3ff"]]],"bg":"radial-gradient(ellipse at 50% 30%,#2b1f5a,#0b0a1c 75%)"},"nieve":{"p":[["nieve",["#9fd3f2","#ffffff"]]],"bg":"linear-gradient(rgba(159,211,242,.35),rgba(207,233,251,.18))"}};
+const FONDOS={"pixel":{"p":[["estrellas",["#f4f4f4","#73eff7","#ffcd75"]]],"bg":"#1a1c2c"},"clasico":{"bg":"radial-gradient(ellipse at 50% 40%,#8e8e9422,#8e8e9408 75%)"},"jardin":{"p":[["hojas",["#5aa469","#8bc34a","#c5e1a5"],0.7]],"bg":"radial-gradient(ellipse at 50% 40%,#5aa4692e,#5aa4690a 75%)"},"playa":{"p":[["ondas",["#2f8fbf","#2f8fbf"]],["burbujas",["#4fb3d9"],0.6]],"bg":"linear-gradient(rgba(79,179,217,.22),rgba(240,214,160,.25))"},"espacio":{"p":[["estrellas",["#ffffff","#c9b6ff","#8fd3ff"]]],"bg":"radial-gradient(ellipse at 50% 30%,#2b1f5a,#0b0a1c 75%)"},"nieve":{"p":[["nieve",["#9fd3f2","#ffffff"]]],"bg":"linear-gradient(rgba(159,211,242,.35),rgba(207,233,251,.18))"}};
 const $=id=>document.getElementById(id);
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE='cubic-bezier(.22,.61,.36,1)';
@@ -138,6 +141,8 @@ const LIVES={libre:3,desafio:1};
 
 /* ---------- temas: casillas, números, mina, bandera y herramienta ---------- */
 const THEMES={
+  pixel:{name:'Píxel',mine:Pixel.svg(Pixel.SPR.mina,{'#':'#1a1c2c','w':'#f4f4f4'}),flag:Pixel.svg(Pixel.SPR.bandera,{'#':'#b13e53'}),dig:Pixel.svg(Pixel.SPR.pala,{'#':'#ffcd75'}),
+    v:{field:'#1a1c2c',hid:'#3b5dc9','hid-hi':'#41a6f6',open:'#f4f4f4','open-bd':'#94b0c2',boom:'#ef7d57',n1:'#3b5dc9',n2:'#257179',n3:'#b13e53',n4:'#5d275d',n5:'#ef7d57',n6:'#257179',n7:'#1a1c2c',n8:'#566c86'}},
   clasico:{name:'Clásico',mine:'💣',flag:'🚩',dig:'⛏️',v:{}},
   jardin:{name:'Jardín',mine:'🐞',flag:'🌹',dig:'🧤',v:{field:'#4e7d3a',hid:'#7fb85f','hid-hi':'#9bd17a',open:'#d9c3a0','open-bd':'#c4ab84',boom:'#f2c14e',n1:'#2457a8',n2:'#1f6b33',n3:'#b0281e',n4:'#5b2a8a',n5:'#7a2a10',n6:'#0e5e5e'}},
   playa:{name:'Playa',mine:'🦀',flag:'🏴‍☠️',dig:'🪣',v:{field:'#3a9cc0',hid:'#f0d9a4','hid-hi':'#f8e8c4',open:'#fdf6e3','open-bd':'#ecdcb6',boom:'#ffd166'}},
@@ -145,7 +150,7 @@ const THEMES={
   nieve:{name:'Nieve',mine:'🕳️',flag:'🧣',dig:'🧹',v:{field:'#7aa3c4',hid:'#f7fbff','hid-hi':'#ffffff',open:'#b9d0e3','open-bd':'#a3bfd6',boom:'#ffd1dc',n2:'#1d6b33',n6:'#0f5f6a'}}
 };
 let themeKey='clasico';
-function applyTheme(){Fondo.tema(themeKey);
+function applyTheme(){Pixel.modo(themeKey==='pixel');Fondo.tema(themeKey);
   const t=THEMES[themeKey],r=document.documentElement.style;
   ['field','hid','hid-hi','open','open-bd','boom','n1','n2','n3','n4','n5','n6','n7','n8'].forEach(k=>r.removeProperty('--'+k));
   Object.entries(t.v).forEach(([k,v])=>r.setProperty('--'+k,v));
@@ -222,7 +227,7 @@ function paint(){
   $('livesBox').hidden=mode!=='libre';$('timeBox').hidden=mode!=='desafio';
   const m=Math.floor(G.secs/60);$('time').textContent=`${m}:${String(G.secs%60).padStart(2,'0')}`;
 }
-function paintTool(){const t=THEMES[themeKey];$('toolIcon').textContent=flagTool?t.flag:t.dig;$('toolTxt').textContent=flagTool?'Bandera':'Cavar';$('tool').setAttribute('aria-pressed',flagTool);}
+function paintTool(){const t=THEMES[themeKey];$('toolIcon').innerHTML=flagTool?t.flag:t.dig;$('toolTxt').textContent=flagTool?'Bandera':'Cavar';$('tool').setAttribute('aria-pressed',flagTool);}
 function pulse(i){if(!reduceMotion)cells[i].animate([{transform:'scale(1)'},{transform:'scale(.86)'},{transform:'scale(1)'}],{duration:180,easing:EASE});}
 function buzz(){if(!reduceMotion)$('field').animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(-3px)'},{transform:'translateX(0)'}],{duration:320,easing:EASE});if(navigator.vibrate)try{navigator.vibrate([60,40,60]);}catch(e){}}
 let toastT;function toast(t,ms=1800){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('on'),ms);}
@@ -302,7 +307,7 @@ let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(fit,60);});
 if(/\/games\/[^/]+\/(index\.html)?$/.test(location.pathname))$('homeBtn').hidden=false;
 themeKey=THEMES[store.get('theme','clasico')]?store.get('theme','clasico'):'clasico';
 mode=store.get('mode','libre')==='desafio'?'desafio':'libre';
-Fondo.iniciar({host:document.getElementById('stage'),temas:FONDOS});Fondo.tema(themeKey);
+Fondo.iniciar({host:Pantalla.unir(document.querySelector('.hud'),document.getElementById('stage')),temas:FONDOS});Fondo.tema(themeKey);
 load();applyTheme();paintTool();
 if(!store.get('seenHelp',false)){store.set('seenHelp',true);open('help');}
 </script>

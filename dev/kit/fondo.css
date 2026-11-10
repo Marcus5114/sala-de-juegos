@@ -14,7 +14,7 @@
 @keyframes fGira{from{transform:rotate(var(--a,0deg))}to{transform:rotate(calc(var(--a,0deg) + 360deg))}}
 @keyframes fTitila{from{opacity:var(--o0,.15)}to{opacity:var(--o1,.8)}}
 @keyframes fBrillo{0%,100%{transform:scale(0) rotate(0deg);opacity:0}45%,55%{transform:scale(1) rotate(45deg);opacity:var(--o1,.85)}}
-@keyframes fFugaz{0%,90%{transform:translate3d(0,0,0) rotate(var(--a));opacity:0}91%{opacity:var(--o1,.9)}100%{transform:translate3d(var(--dx),var(--dy),0) rotate(var(--a));opacity:0}}
+@keyframes fArco{from{transform:rotate(calc(var(--A)*-1))}to{transform:rotate(var(--A))}}
 @keyframes fBarre{0%,55%{transform:translate3d(var(--x0),0,0) rotate(18deg)}100%{transform:translate3d(var(--x1),0,0) rotate(18deg)}}
 @keyframes fHierve{0%,33.3%{opacity:1}33.4%,100%{opacity:0}}
 @keyframes fMar{from{transform:translate3d(0,0,0)}to{transform:translate3d(var(--tx),var(--ty),0)}}
@@ -23,7 +23,12 @@
 .fondo .gi{width:100%;height:100%;animation:fGira var(--f,8s) linear infinite}
 .fondo .ti{width:100%;height:100%;animation:fTitila var(--f,3s) ease-in-out var(--dl,0s) infinite alternate}
 .fondo .br{animation:fBrillo var(--d,4s) ease-in-out var(--dl,0s) infinite}
-.fondo .fz{animation:fFugaz var(--d,10s) linear var(--dl,0s) infinite;opacity:0}
+/* cielo que gira (estrellas): el contenedor gira alrededor de un punto bajo el área; adentro, la estrella titila */
+.fondo .orb{left:50%;width:0;height:0;animation:fArco var(--d) linear var(--dl) infinite;will-change:transform}
+.fondo .orb>b{position:absolute;transform:translate(-50%,-50%) translateY(calc(var(--r)*-1))}
+.fondo .es{animation:fTitila var(--f,3s) ease-in-out var(--dl,0s) infinite alternate;will-change:opacity}
+.fondo .es.pt{border-radius:50%;background:currentColor;box-shadow:0 0 6px 1px currentColor}
+.fondo .luna{width:38px;height:38px;filter:drop-shadow(0 0 9px rgba(255,240,200,.6))}
 .fondo .doodle path{opacity:0;animation:fHierve 1.05s steps(1) infinite}
 .fondo .doodle path:nth-child(2){animation-delay:-.35s}.fondo .doodle path:nth-child(3){animation-delay:-.7s}
 .fondo .mar{background-repeat:repeat;animation:fMar var(--d) linear infinite;will-change:transform}
@@ -32,3 +37,15 @@
 .fondo .barre{animation:fBarre var(--d,14s) ease-in-out var(--dl,0s) infinite}
 /* con "reducir movimiento" el fondo queda quieto (se ve, pero no se mueve) */
 @media (prefers-reduced-motion:reduce){.fondo *{animation-play-state:paused!important}}
+/* ---------- Pantalla de juego (kit/fondo.js: Pantalla) ----------
+   Marcador + tablero en una sola superficie con el color del tema; los contadores son texto sobre el juego, no tarjetas. */
+.pantalla{position:relative;display:flex;flex-direction:column;flex:1 1 auto;min-height:0;border-radius:18px;overflow:hidden;gap:4px}
+.pantalla>.stage{flex:1 1 auto;min-height:0}
+.pantalla>.hud,.pantalla>.scores{position:relative;z-index:2;padding:8px 8px 0;gap:5px;display:flex;justify-content:center;align-items:center;flex-wrap:nowrap;background:none;min-width:0}
+.pantalla .sc,.pantalla .stat{background:var(--hudChip,var(--chip));color:var(--hudInk,var(--fg));box-shadow:none;border:0;border-radius:999px;padding:4px 9px;min-width:0;display:inline-flex;flex-direction:row;align-items:baseline;gap:5px;width:auto;height:auto;flex:0 1 auto;white-space:nowrap}
+.pantalla .sc small,.pantalla .stat small{display:inline;color:inherit;opacity:.72;font-size:.56rem}
+.pantalla .sc b,.pantalla .stat b{font-size:1rem;color:inherit}
+.pantalla button.sc{cursor:pointer}
+.pantalla .mini{background:var(--hudChip,var(--chip));color:var(--hudInk,var(--fg));box-shadow:none}
+.pantalla .mini small{color:inherit;opacity:.72}
+.pantalla .sc[hidden],.pantalla .stat[hidden]{display:none}

@@ -81,6 +81,12 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .t-gris{--felt:radial-gradient(ellipse at 50% 30%,#3a3a3f,#2a2a2e 70%,#202023);--rim:#121214;--print:#d6d6da;--badge:rgba(255,255,255,.16);--badgeInk:#f1f1f2;--glow:#ececee;--back:repeating-linear-gradient(45deg,#8e8e94 0 3px,#6c6c72 3px 6px)}}
 :root[data-theme="dark"] .t-gris{--felt:radial-gradient(ellipse at 50% 30%,#3a3a3f,#2a2a2e 70%,#202023);--rim:#121214;--print:#d6d6da;--badge:rgba(255,255,255,.16);--badgeInk:#f1f1f2;--glow:#ececee;--back:repeating-linear-gradient(45deg,#8e8e94 0 3px,#6c6c72 3px 6px)}
 @media (prefers-reduced-motion:reduce){.bub{transition:none}.bub .dots i{animation:none}}
+/* Píxel */
+.t-pixel{--felt:#257179;--rim:#1a1c2c;--print:#ffcd75;--badge:rgba(26,28,44,.6);--badgeInk:#f4f4f4;--glow:#ffcd75;--back:repeating-conic-gradient(#b13e53 0 25%,#5d275d 0 50%) 0 0/8px 8px}
+.px .cd{font-family:var(--pxfont);box-shadow:0 2px 0 rgba(0,0,0,.45),0 0 0 2px #1a1c2c}
+.px .cd.red{color:#b13e53}.px .cd{color:#1a1c2c}
+.px .cd i .spr{width:calc(var(--cw)*.24);height:calc(var(--cw)*.24)}.px .cd em .spr{width:calc(var(--cw)*.5);height:calc(var(--cw)*.5)}
+.px .chip{box-shadow:inset 0 0 0 3px #f4f4f4,inset 0 0 0 5px var(--chipc,#b13e53),0 2px 0 rgba(0,0,0,.4)}
 </style>
 
 <div class="app">
@@ -118,7 +124,8 @@ const E=BJ();
 const ia=kitWorker(BJ,{timeout:6000});
 const THEMES={
   pano:{fondo:{"p":[["luz",["rgba(255,240,190,.10)"]],["polvo",["#f3e7b5"],0.7]]},name:'Paño',cls:'t-pano'},casino:{fondo:{"p":[["luz",["rgba(255,220,140,.10)"]],["destellos",["#f2cf73","#fff3c4"],0.7]]},name:'Casino',cls:'t-casino'},noche:{fondo:{"p":[["estrellas",["#7fe7ff","#ffffff","#c9b6ff"]]]},name:'Noche',cls:'t-noche'},
-  bar:{fondo:{"p":[["luz",["rgba(255,200,120,.08)"]],["polvo",["#ffc56b","#fbe8c8"],0.7]]},name:'Bodegón',cls:'t-bar'},gris:{fondo:{"p":[["luz",["rgba(255,255,255,.12)"]],["polvo",["var(--print)"],0.45]]},name:'Gris',cls:'t-gris'}
+  bar:{fondo:{"p":[["luz",["rgba(255,200,120,.08)"]],["polvo",["#ffc56b","#fbe8c8"],0.7]]},name:'Bodegón',cls:'t-bar'},gris:{fondo:{"p":[["luz",["rgba(255,255,255,.12)"]],["polvo",["var(--print)"],0.45]]},name:'Gris',cls:'t-gris'},
+  pixel:{name:'Píxel',cls:'t-pixel',pixel:true,fondo:Pixel.FONDO}
 };
 const SUIT=['♠︎','♥︎','♦︎','♣︎'],RANK=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const ACTS={pedir:'Pedir',plantarse:'Plantarse',doblar:'Doblar',dividir:'Dividir',rendirse:'Rendirse'};
@@ -127,7 +134,10 @@ const KEYS={pedir:'P',plantarse:'M',doblar:'D',dividir:'S',rendirse:'X'};
 // S: {lvl, T (mesa del motor), bet (tu apuesta), undo:[mesa en texto], secs, won}
 
 /* ---------- dibujo ---------- */
-const cardHTML=(c,down)=>down?'<div class="cd back"></div>':`<div class="cd${c.s===1||c.s===2?' red':''}"><b>${RANK[c.r]}</b><i>${SUIT[c.s]}</i><em>${SUIT[c.s]}</em></div>`;
+// en el tema Píxel, los palos son sprites (la fuente pixelada no los trae)
+const PXSUIT=[Pixel.SPR.pica,Pixel.SPR.corazon,Pixel.SPR.diamante,Pixel.SPR.trebol];
+const suitHTML=c=>document.documentElement.classList.contains('px')?Pixel.svg(PXSUIT[c.s],{'#':'currentColor'}):SUIT[c.s];
+const cardHTML=(c,down)=>down?'<div class="cd back"></div>':`<div class="cd${c.s===1||c.s===2?' red':''}"><b>${RANK[c.r]}</b><i>${suitHTML(c)}</i><em>${suitHTML(c)}</em></div>`;
 function chipsHTML(n){if(!n)return '';const out=[];let r=n;for(const v of [100,50,25,10])while(r>=v&&out.length<5){out.push(v);r-=v;}
   return `<span class="stack">${out.map(v=>`<i class="chip c${v}"></i>`).join('')}</span>${n}`;}
 const totTxt=cards=>{if(!cards.length)return '';const t=E.total(cards);return E.isBJ(cards)?'BJ':t.soft&&t.t<21?`${t.t-10}/${t.t}`:String(t.t);};
@@ -283,7 +293,7 @@ kitStart({
   build:()=>{build();setTimeout(run,0);},draw,busy:s=>s.T.hand>0||s.T.phase!=='bet',
   undo(u){runId++;ia.cancel();S.T=JSON.parse(u);document.querySelectorAll('#table .res').forEach(r=>r.remove());['dCards','h0','h1','h2'].forEach(id=>{const b=$(id);if(b)b.innerHTML='';});setTimeout(run,0);},
   hint,
-  applyTheme(k){$('stage').className='stage '+THEMES[k].cls;},
+  applyTheme(k){$('stage').className='stage '+THEMES[k].cls;if(S&&$('dCards')){['dCards','h0','h1','h2'].forEach(id=>{const b=$(id);if(b)b.innerHTML='';});}},
   preview:(k,t)=>`<div class="pv ${t.cls}" style="background:var(--felt);display:flex;align-items:center;justify-content:center"><span class="mini">A</span><span class="mini">K</span><span class="mini bk"></span><i class="chip c50" style="margin-left:6px"></i></div>`,
   info:d=>{const R=E.RULES[d];return `${R.decks} mazos · ${R.hands} manos · rivales: ${R.rivals.map(k=>E.SKILL[k].name.toLowerCase()).join(' y ')}${R.meta?` · meta ${R.meta}`:''}`;},
   stars:S=>{const T=S.T,m=T.seats[1].chips-Math.max(T.seats[0].chips,T.seats[2].chips);return m>=150?3:m>=60?2:1;},

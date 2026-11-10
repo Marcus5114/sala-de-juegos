@@ -60,6 +60,8 @@
 .t-pizarra{--board:#24382e;--cell:#2d4539;--line:#5f7d6c;--ink:#f3f1e7;--given:#a9bdb1;--q:#1b2b23;--qon:#13201a;--qink:#e9e4c9;--qar:#f3f1e7;--word:#36513f;--wordb:#8fae9b;--sel:#4b6c58;--selb:#f3f1e7;--okc:#a6e6a0;--badc:#ff9b8f;--font-l:'Segoe Print','Bradley Hand',var(--font)}
 .t-noche{--board:#0f1530;--cell:#18204a;--line:#33407e;--ink:#e6ecff;--given:#8e9ad0;--q:#0b1026;--qon:#202a63;--qink:#66e0ff;--qar:#66e0ff;--word:#26347a;--wordb:#4f63c4;--sel:#33459e;--selb:#66e0ff;--okc:#7dffb2;--badc:#ff7a90;--font-l:var(--font)}
 @media (prefers-reduced-motion:reduce){.cell.l{transition:none}}
+/* Píxel */
+.t-pixel{--board:#1a1c2c;--cell:#f4f4f4;--line:#1a1c2c;--ink:#1a1c2c;--given:#566c86;--q:#3b5dc9;--qon:#29366f;--qink:#f4f4f4;--qar:#ef7d57;--word:#ffe9b0;--wordb:#ef7d57;--sel:#ffcd75;--selb:#1a1c2c;--okc:#257179;--badc:#b13e53;--font-l:var(--pxfont)}
 </style>
 
 <div class="app">
@@ -90,7 +92,8 @@ const THEMES={
   revista:{fondo:{"p":[["destellos",["#ffb400","#1557b0","#ff5d8f"],0.6]]},name:'Revista',cls:'t-revista'},
   cuaderno:{fondo:{"p":[["garabatos",["#2f5bb8"],0.2]]},name:'Cuaderno',cls:'t-cuaderno'},
   pizarra:{fondo:{"p":[["garabatos",["#ffffff","#ffd678"],0.2]]},name:'Pizarra',cls:'t-pizarra'},
-  noche:{fondo:{"p":[["estrellas",["#66e0ff","#ffffff"]]]},name:'Noche',cls:'t-noche'}
+  noche:{fondo:{"p":[["estrellas",["#66e0ff","#ffffff"]]]},name:'Noche',cls:'t-noche'},
+  pixel:{name:'Píxel',cls:'t-pixel',pixel:true,fondo:Pixel.FONDO}
 };
 // S: {lvl, L:{W,H,sol,words,give}, fill:[letra|''], rev:[índices revelados con pista], cur, dir, undo:[[i,antes]], secs, won}
 

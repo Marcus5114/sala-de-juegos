@@ -9,6 +9,7 @@ dev/
 ├── package.json         herramientas de npm (minificador, pruebas, diccionarios, librerías)
 ├── juegos/              fuente de cada juego (<id>.src.html) y su generador de niveles (<id>.gen.js)
 ├── datos/               datos grandes que se insertan al armar (niveles de Rueda, listas de Cinco)
+├── fuentes/            letra Pixelify Sans (OFL) del tema Píxel; se copia a la sala
 ├── iconos/              ícono de cada juego (192×192) y de la sala
 ├── sala/sala.src.html   el menú: lista GAMES, CHANGELOG (de acá sale la versión) y modo claro/oscuro
 ├── kit/                 la base común de los juegos
@@ -16,7 +17,8 @@ dev/
 │   ├── bar.html         barra de arriba (sala, ayuda, Libre/Desafío, temas, progreso) y dificultades
 │   ├── sheets.html      paneles: ayuda, temas, progreso, fin de nivel, confirmar
 │   ├── kit.js           entrada, animación (SPRING), bucle, sonido, kitStart (el juego base), kitWorker e IA
-│   ├── fondo.js/.css    fondos animados por tema (también para los juegos sin kitStart)
+│   ├── fondo.js/.css    fondos animados por tema y pantalla de juego (marcador sobre el tablero)
+│   ├── pixel.js/.css    tema Píxel: paleta, sprites y modo px (también para los juegos sin kitStart)
 │   ├── fondos.src.html  galería de fondos
 │   ├── demo.src.html    laboratorio: un juego mínimo y una zona por cada tipo de entrada
 │   ├── plantilla.*      juego de ejemplo completo que copia nuevo_juego.py

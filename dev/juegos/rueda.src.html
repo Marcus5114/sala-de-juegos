@@ -143,6 +143,7 @@ button.sc{cursor:pointer}
 .opt button[aria-pressed="true"]{background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.18)}
 .opt.words button{font-size:.85rem;height:46px}
 @media (prefers-reduced-motion:reduce){.tok{transition:none}.toast{transition:none}}
+/*KIT_PIXEL_CSS*/
 </style>
 
 <div class="scene" id="scene"></div>
@@ -210,6 +211,7 @@ button.sc{cursor:pointer}
 </div>
 
 <script>
+/*KIT_PIXEL_JS*/
 /*DATA*/const LEVELS_RAW="";/*END_DATA*/
 const $=id=>document.getElementById(id);
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -226,6 +228,7 @@ const SK=()=>mode+'.'+setKey;
 
 /* ---------- temas: escenario, celdas, forma de las fichas ---------- */
 const THEMES={
+  pixel:{name:'Píxel',shape:'circulo',v:{scene:'#1a1c2c',cell:'#f4f4f4','cell-bd':'#1a1c2c','cell-fg':'#1a1c2c',wheel:'rgba(255,255,255,.06)',tok:'#29366f','tok-fg':'#f4f4f4','tok-on':'#ffcd75','tok-on-fg':'#1a1c2c',line:'#ffcd75'}},
   bosque:{name:'Bosque',shape:'flor',v:{scene:'linear-gradient(170deg,#3f7d4f,#1f4a33)',cell:'#f3e7cf','cell-bd':'#c9b48c','cell-fg':'#3b2a1a',wheel:'transparent',tok:'#fde4ee','tok-fg':'#7a2246','tok-on':'#d83a74','tok-on-fg':'#fff',line:'#d83a74'}},
   mar:{name:'Mar',shape:'burbuja',v:{scene:'linear-gradient(180deg,#2c8fc4,#0d3e6b)',cell:'#f7e9c8','cell-bd':'#d8c08f','cell-fg':'#173a5c',wheel:'rgba(255,255,255,.14)',tok:'rgba(200,236,255,.14)','tok-fg':'#ffffff','tok-on':'#ffd166','tok-on-fg':'#0d3e6b',line:'#ffd166'}},
   pizarra:{name:'Pizarra',shape:'tiza',v:{scene:'radial-gradient(circle at 30% 20%,#3d4f45,#22302a)',cell:'rgba(255,255,255,.9)','cell-bd':'rgba(255,255,255,.4)','cell-fg':'#22302a',wheel:'rgba(255,255,255,.06)',tok:'transparent','tok-fg':'#fff','tok-on':'#ffffff','tok-on-fg':'#22302a',line:'rgba(255,255,255,.85)'}},
@@ -235,7 +238,7 @@ const THEMES={
 let themeKey='bosque';
 const DEF={'on-scene':'#fff','on-scene-muted':'rgba(255,255,255,.75)','cell-empty':'rgba(255,255,255,.18)'};
 function applyTheme(){
-  const t=THEMES[themeKey],r=document.documentElement.style;
+  const t=THEMES[themeKey],r=document.documentElement.style;Pixel.modo(themeKey==='pixel');
   Object.entries({...DEF,...t.v}).forEach(([k,v])=>r.setProperty('--'+k,v));
   const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t.v.scene.match(/#[0-9a-f]{6}/i)[0];
   $('wheel').className='wheel t-'+t.shape;$('app').classList.toggle('dark-ink',themeKey==='papel');
@@ -305,7 +308,7 @@ function buildDeco(){
     const order=DOODLES.map((_,i)=>i).sort(()=>r()-.5),cols=4,rows=6;
     for(let i=0;i<cols*rows;i++){const sz=34+r()*34,cx=(i%cols)*100/cols,cy=Math.floor(i/cols)*100/rows,st=chalk?(r()<.25?'rgba(255,214,120,.2)':'rgba(255,255,255,.17)'):(r()<.3?'rgba(90,90,100,.2)':'rgba(47,95,179,.2)');
       h+=`<div class="dk doodle" style="${pos(cx+r()*(100/cols-8),cy+r()*(100/rows-6),sz,sz,`transform:rotate(${((r()-.5)*40)|0}deg)`)}">${doodleSVG(DOODLES[order[i%DOODLES.length]],r,st,chalk?3.4:2.4)}</div>`;}}
-  else if(themeKey==='atardecer'){
+  else if(themeKey==='atardecer'||themeKey==='pixel'){
     // el cielo gira alrededor de un punto bajo la pantalla, como pasa la noche.
     // Cada estrella recorre solo el arco que se ve y vuelve a empezar: pocas piezas y la pantalla nunca queda vacía.
     const py=H*1.18,w=.5;  // grados por segundo

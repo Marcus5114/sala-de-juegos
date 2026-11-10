@@ -65,7 +65,7 @@ run(process.argv[2]||require('path').join(__dirname,'..','..','games','crucigram
     ok(`dificultad ${d+1}: entra sin desborde (casillas de ${c}px)`,await fits()&&c>=26);await p.screenshot({path:D+'cru_d'+d+'.png'});}
   // temas
   for(const t of ['diario','revista','cuaderno','pizarra','noche']){await p.evaluate(t=>{themeKey=t;applyTheme();},t);await p.waitForTimeout(80);await p.screenshot({path:D+'cru_t_'+t+'.png'});}
-  ok('cinco temas',await p.evaluate(()=>Object.keys(THEMES).length===5));
+  ok('seis temas (con Píxel)',await p.evaluate(()=>Object.keys(THEMES).length===6));
   // tablet: la pista se lee dentro del tablero
   await p.setViewportSize({width:1024,height:1300});await p.click('[data-diff="0"]');await p.waitForTimeout(300);
   ok('en pantallas grandes la pista se lee en el tablero',await p.evaluate(()=>document.getElementById('grid').classList.contains('big')&&getComputedStyle(document.querySelector('.cell.q .qt')).display!=='none'));

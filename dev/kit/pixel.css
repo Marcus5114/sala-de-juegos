@@ -1,0 +1,31 @@
+/* ---------- Modo píxel (kit/pixel.css + kit/pixel.js) ----------
+   Lo prende el tema Píxel de cada juego (clase px en <html>): la interfaz entera pasa a píxeles, no solo el tablero.
+   Fuente: Pixelify Sans (licencia OFL, dev/fuentes/), servida una vez desde la raíz y guardada para jugar sin conexión;
+   solo se descarga si alguien elige el tema Píxel.
+   Paleta común de 16 colores (variables --x0 … --x15), así todos los temas Píxel se ven de la misma familia. */
+@font-face{font-family:'Pixel';src:url('../../fuentes/pixel-400.woff2') format('woff2');font-weight:100 550;font-display:swap}
+@font-face{font-family:'Pixel';src:url('../../fuentes/pixel-700.woff2') format('woff2');font-weight:551 900;font-display:swap}
+:root{
+  --x0:#1a1c2c;--x1:#5d275d;--x2:#b13e53;--x3:#ef7d57;--x4:#ffcd75;--x5:#a7f070;--x6:#38b764;--x7:#257179;
+  --x8:#29366f;--x9:#3b5dc9;--x10:#41a6f6;--x11:#73eff7;--x12:#f4f4f4;--x13:#94b0c2;--x14:#566c86;--x15:#333c57;
+  --pxfont:'Pixel',ui-monospace,'Courier New',monospace}
+/* interfaz: letra pixelada, esquinas rectas, bordes de 2 px y sombras duras (sin desenfoque) */
+.px{--font:var(--pxfont)}
+.px body,.px button,.px input{font-family:var(--pxfont)!important;letter-spacing:.02em}
+.px *,.px *::before,.px *::after{border-radius:0!important}
+.px .bb,.px .sc,.px .seg,.px #diffs button,.px .ib,.px .pal,.px .ctl button,.px .kb button,.px .clue .txt,.px .clue button.nav{box-shadow:0 3px 0 rgba(0,0,0,.28),inset 0 0 0 2px var(--chip)!important}
+.px .bb:active:not(:disabled),.px button.sc:active,.px .ctl button:active:not(:disabled),.px .kb button:active{transform:translateY(2px)!important;box-shadow:0 1px 0 rgba(0,0,0,.28),inset 0 0 0 2px var(--chip)!important}
+.px .sheet,.px .toast{box-shadow:0 4px 0 rgba(0,0,0,.35),inset 0 0 0 2px var(--fg)!important}
+.px .stage{box-shadow:0 4px 0 rgba(0,0,0,.3),inset 0 0 0 3px var(--x0)}
+.px svg{shape-rendering:crispEdges}
+.px svg text{text-rendering:optimizeSpeed}
+.px img,.px canvas{image-rendering:pixelated}
+/* los números del marcador y de los tableros, sin suavizar */
+.px .sc b{font-family:var(--pxfont);font-weight:700;-webkit-font-smoothing:none;font-smooth:never}
+/* fondos animados: piezas cuadradas y sin brillo difuso */
+.px .fondo .es.pt,.px .fondo .ti,.px .fondo .bal{box-shadow:none!important}
+.px .fondo .ti,.px .fondo .bal{background-image:none!important;background-color:currentColor}
+/* sprites del kit (Pixel.svg): siempre nítidos */
+.spr{display:inline-block;vertical-align:middle;shape-rendering:crispEdges;image-rendering:pixelated}
+/* en la pantalla de juego los contadores son texto sobre el tablero: sin marco */
+.px .pantalla .sc,.px .pantalla .stat,.px .pantalla .mini{box-shadow:none}

@@ -139,6 +139,8 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--on-felt);o
 .btn{flex:1;height:46px;border-radius:10px;border:1px solid var(--fg);background:transparent;color:var(--fg);font:700 .85rem var(--font);cursor:pointer}
 .btn.primary{background:var(--fg);color:var(--bg)}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
+/*KIT_PIXEL_CSS*/
+.card .spr{width:1em;height:1em;vertical-align:top}
 </style>
 
 <div class="feltbg" aria-hidden="true"></div>
@@ -210,8 +212,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--on-felt);o
 
 <script>
 /*KIT_FONDO_JS*/
+/*KIT_PIXEL_JS*/
 // fondo animado de cada tema (kit/fondo.js)
-const FONDOS={"verde":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"azul":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"bordo":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"violeta":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"petroleo":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"grafito":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"marron":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]}};
+const FONDOS={"pixel":{"p":[["estrellas",["#f4f4f4","#73eff7","#ffcd75"]]]},"verde":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"azul":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"bordo":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"violeta":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"petroleo":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"grafito":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]},"marron":{"p":[["luz",["rgba(255,255,255,.06)"]],["polvo",["rgba(255,255,255,.75)"],0.35]]}};
 const LABEL=['','A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const SUITS=['♠︎','♥︎','♦︎','♣︎'];
 const $=id=>document.getElementById(id);
@@ -234,6 +237,7 @@ const PALETTES={
 };
 const TRACK_NAMES={none:'Sin música',tranqui:'Tranqui',arcade:'Arcade',noche:'Noche'};
 const FELTS={
+  pixel:{name:'Píxel',f:'#1a1c2c',b:'#b13e53'},
   verde:{name:'Verde casino',f:'#1f6b3a',b:'#8c1d2c'},
   azul:{name:'Azul',f:'#1d4f7a',b:'#a8471f'},
   bordo:{name:'Bordó',f:'#6e1c28',b:'#1d3f6b'},
@@ -244,13 +248,13 @@ const FELTS={
 };
 let cfg=Object.assign({palette:'clasica',colors:PALETTES.clasica.c.slice(),track:'tranqui',music:35,sfx:70,felt:'verde',feltColor:FELTS.verde.f,backColor:FELTS.verde.b,suits:4},store.get('cfg',{}));
 function saveCfg(){store.set('cfg',cfg);}
-function applyColors(){Fondo.tema(cfg.felt);
+function applyColors(){Pixel.modo(cfg.felt==='pixel');Fondo.tema(cfg.felt);
   const r=document.documentElement.style;
   cfg.colors.forEach((c,i)=>r.setProperty('--c'+i,c));
   r.setProperty('--felt',cfg.feltColor);r.setProperty('--cardback',cfg.backColor);
   const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=cfg.feltColor;
 }
-Fondo.iniciar({host:document.body,temas:FONDOS});Fondo.tema(cfg.felt);
+Fondo.iniciar({host:document.querySelector('.feltbg')||document.body,temas:FONDOS});Fondo.tema(cfg.felt);
 applyColors();
 
 /* ---------- audio: efectos y música generada ---------- */
@@ -478,7 +482,10 @@ function sizes(){
   }
   return {cw,avail};
 }
-const cardInner=k=>'<span class="r">'+LABEL[k.r]+'</span><span class="s">'+SUITS[k.s]+'</span><span class="big">'+SUITS[k.s]+'</span>';
+// con el paño Píxel, los palos son sprites (la fuente pixelada no los trae)
+const PXS=()=>[Pixel.SPR.pica,Pixel.SPR.corazon,Pixel.SPR.diamante,Pixel.SPR.trebol];
+const suitOf=s=>document.documentElement.classList.contains('px')?Pixel.svg(PXS()[s],{'#':'currentColor'}):SUITS[s];
+const cardInner=k=>'<span class="r">'+LABEL[k.r]+'</span><span class="s">'+suitOf(k.s)+'</span><span class="big">'+suitOf(k.s)+'</span>';
 function cardEl(k){
   let el=els.get(k.id);
   if(!el){el=document.createElement('div');el.dataset.id=k.id;el._f=0;els.set(k.id,el);}
@@ -730,7 +737,7 @@ function renderColors(){
   $('custom').innerHTML=SUITS.map((s,i)=>'<label for="col'+i+'"><span class="sym" style="color:'+cfg.colors[i]+'">'+s+'</span><input type="color" id="col'+i+'" value="'+cfg.colors[i]+'" aria-label="Color del palo '+s+'"></label>').join('');
 }
 $('felts').addEventListener('click',e=>{const b=e.target.closest('[data-felt]');if(!b)return;const p=FELTS[b.dataset.felt];
-  cfg.felt=b.dataset.felt;cfg.feltColor=p.f;cfg.backColor=p.b;applyColors();saveCfg();renderColors();});
+  cfg.felt=b.dataset.felt;cfg.feltColor=p.f;cfg.backColor=p.b;applyColors();saveCfg();renderColors();document.querySelectorAll('.card').forEach(c=>{c._f=0;});try{render();}catch(e){}});
 $('felts').addEventListener('input',e=>{if(e.target.id!=='feltCustom')return;cfg.felt='custom';cfg.feltColor=e.target.value;applyColors();saveCfg();
   document.querySelectorAll('.felt').forEach(b=>b.setAttribute('aria-pressed','false'));});
 $('pals').addEventListener('click',e=>{const b=e.target.closest('[data-pal]');if(!b)return;cfg.palette=b.dataset.pal;cfg.colors=PALETTES[cfg.palette].c.slice();applyColors();saveCfg();renderColors();});
